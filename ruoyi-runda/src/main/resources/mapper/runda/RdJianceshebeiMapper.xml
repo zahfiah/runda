@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.runda.mapper.RdJianceshebeiMapper">
+    
+    <resultMap type="RdJianceshebei" id="RdJianceshebeiResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="sn"    column="sn"    />
+        <result property="longitude"    column="longitude"    />
+        <result property="latitude"    column="latitude"    />
+        <result property="createdTime"    column="created_time"    />
+        <result property="lastUpdatedTime"    column="last_updated_time"    />
+        <result property="status"    column="status"    />
+        <result property="orgId"    column="org_id"    />
+        <result property="runStatus"    column="run_status"    />
+        <result property="province"    column="province"    />
+        <result property="provinceCn"    column="province_cn"    />
+        <result property="city"    column="city"    />
+        <result property="cityCn"    column="city_cn"    />
+        <result property="county"    column="county"    />
+        <result property="countyCn"    column="county_cn"    />
+        <result property="town"    column="town"    />
+        <result property="townCn"    column="town_cn"    />
+        <result property="remark"    column="remark"    />
+        <result property="phoneNumber"    column="phone_number"    />
+        <result property="manufacturer"    column="manufacturer"    />
+        <result property="departmentId"    column="department_id"    />
+        <result property="systemUserId"    column="system_user_id"    />
+        <result property="fromResource"    column="fromResource"    />
+        <result property="type"    column="type"    />
+        <result property="ip"    column="ip"    />
+        <result property="port"    column="port"    />
+        <result property="userName"    column="user_name"    />
+        <result property="password"    column="password"    />
+        <result property="isStandard"    column="is_standard"    />
+        <result property="guid"    column="guid"    />
+        <result property="stationId"    column="station_id"    />
+        <result property="addr"    column="addr"    />
+    </resultMap>
+
+    <sql id="selectRdJianceshebeiVo">
+        select id, name, sn, longitude, latitude, created_time, last_updated_time, status, org_id, run_status, province, province_cn, city, city_cn, county, county_cn, town, town_cn, remark, phone_number, manufacturer, department_id, system_user_id, fromResource, type, ip, port, user_name, password, is_standard, guid, station_id, addr from rd_jianceshebei
+    </sql>
+
+    <select id="selectRdJianceshebeiList" parameterType="RdJianceshebei" resultMap="RdJianceshebeiResult">
+        <include refid="selectRdJianceshebeiVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="sn != null  and sn != ''"> and sn = #{sn}</if>
+            <if test="longitude != null "> and longitude = #{longitude}</if>
+            <if test="latitude != null "> and latitude = #{latitude}</if>
+            <if test="createdTime != null "> and created_time = #{createdTime}</if>
+            <if test="lastUpdatedTime != null "> and last_updated_time = #{lastUpdatedTime}</if>
+            <if test="status != null "> and status = #{status}</if>
+            <if test="orgId != null "> and org_id = #{orgId}</if>
+            <if test="runStatus != null "> and run_status = #{runStatus}</if>
+            <if test="province != null "> and province = #{province}</if>
+            <if test="provinceCn != null  and provinceCn != ''"> and province_cn = #{provinceCn}</if>
+            <if test="city != null "> and city = #{city}</if>
+            <if test="cityCn != null  and cityCn != ''"> and city_cn = #{cityCn}</if>
+            <if test="county != null "> and county = #{county}</if>
+            <if test="countyCn != null  and countyCn != ''"> and county_cn = #{countyCn}</if>
+            <if test="town != null "> and town = #{town}</if>
+            <if test="townCn != null  and townCn != ''"> and town_cn = #{townCn}</if>
+            <if test="phoneNumber != null  and phoneNumber != ''"> and phone_number = #{phoneNumber}</if>
+            <if test="manufacturer != null  and manufacturer != ''"> and manufacturer = #{manufacturer}</if>
+            <if test="departmentId != null "> and department_id = #{departmentId}</if>
+            <if test="systemUserId != null "> and system_user_id = #{systemUserId}</if>
+            <if test="fromResource != null "> and fromResource = #{fromResource}</if>
+            <if test="type != null "> and type = #{type}</if>
+            <if test="ip != null  and ip != ''"> and ip = #{ip}</if>
+            <if test="port != null  and port != ''"> and port = #{port}</if>
+            <if test="userName != null  and userName != ''"> and user_name like concat('%', #{userName}, '%')</if>
+            <if test="password != null  and password != ''"> and password = #{password}</if>
+            <if test="isStandard != null "> and is_standard = #{isStandard}</if>
+            <if test="guid != null  and guid != ''"> and guid = #{guid}</if>
+            <if test="stationId != null "> and station_id = #{stationId}</if>
+            <if test="addr != null  and addr != ''"> and addr = #{addr}</if>
+        </where>
+    </select>
+    
+    <select id="selectRdJianceshebeiById" parameterType="Long" resultMap="RdJianceshebeiResult">
+        <include refid="selectRdJianceshebeiVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertRdJianceshebei" parameterType="RdJianceshebei" useGeneratedKeys="true" keyProperty="id">
+        insert into rd_jianceshebei
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">name,</if>
+            <if test="sn != null">sn,</if>
+            <if test="longitude != null">longitude,</if>
+            <if test="latitude != null">latitude,</if>
+            <if test="createdTime != null">created_time,</if>
+            <if test="lastUpdatedTime != null">last_updated_time,</if>
+            <if test="status != null">status,</if>
+            <if test="orgId != null">org_id,</if>
+            <if test="runStatus != null">run_status,</if>
+            <if test="province != null">province,</if>
+            <if test="provinceCn != null">province_cn,</if>
+            <if test="city != null">city,</if>
+            <if test="cityCn != null">city_cn,</if>
+            <if test="county != null">county,</if>
+            <if test="countyCn != null">county_cn,</if>
+            <if test="town != null">town,</if>
+            <if test="townCn != null">town_cn,</if>
+            <if test="remark != null">remark,</if>
+            <if test="phoneNumber != null">phone_number,</if>
+            <if test="manufacturer != null">manufacturer,</if>
+            <if test="departmentId != null">department_id,</if>
+            <if test="systemUserId != null">system_user_id,</if>
+            <if test="fromResource != null">fromResource,</if>
+            <if test="type != null">type,</if>
+            <if test="ip != null">ip,</if>
+            <if test="port != null">port,</if>
+            <if test="userName != null">user_name,</if>
+            <if test="password != null">password,</if>
+            <if test="isStandard != null">is_standard,</if>
+            <if test="guid != null">guid,</if>
+            <if test="stationId != null">station_id,</if>
+            <if test="addr != null">addr,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">#{name},</if>
+            <if test="sn != null">#{sn},</if>
+            <if test="longitude != null">#{longitude},</if>
+            <if test="latitude != null">#{latitude},</if>
+            <if test="createdTime != null">#{createdTime},</if>
+            <if test="lastUpdatedTime != null">#{lastUpdatedTime},</if>
+            <if test="status != null">#{status},</if>
+            <if test="orgId != null">#{orgId},</if>
+            <if test="runStatus != null">#{runStatus},</if>
+            <if test="province != null">#{province},</if>
+            <if test="provinceCn != null">#{provinceCn},</if>
+            <if test="city != null">#{city},</if>
+            <if test="cityCn != null">#{cityCn},</if>
+            <if test="county != null">#{county},</if>
+            <if test="countyCn != null">#{countyCn},</if>
+            <if test="town != null">#{town},</if>
+            <if test="townCn != null">#{townCn},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="phoneNumber != null">#{phoneNumber},</if>
+            <if test="manufacturer != null">#{manufacturer},</if>
+            <if test="departmentId != null">#{departmentId},</if>
+            <if test="systemUserId != null">#{systemUserId},</if>
+            <if test="fromResource != null">#{fromResource},</if>
+            <if test="type != null">#{type},</if>
+            <if test="ip != null">#{ip},</if>
+            <if test="port != null">#{port},</if>
+            <if test="userName != null">#{userName},</if>
+            <if test="password != null">#{password},</if>
+            <if test="isStandard != null">#{isStandard},</if>
+            <if test="guid != null">#{guid},</if>
+            <if test="stationId != null">#{stationId},</if>
+            <if test="addr != null">#{addr},</if>
+         </trim>
+    </insert>
+
+    <update id="updateRdJianceshebei" parameterType="RdJianceshebei">
+        update rd_jianceshebei
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">name = #{name},</if>
+            <if test="sn != null">sn = #{sn},</if>
+            <if test="longitude != null">longitude = #{longitude},</if>
+            <if test="latitude != null">latitude = #{latitude},</if>
+            <if test="createdTime != null">created_time = #{createdTime},</if>
+            <if test="lastUpdatedTime != null">last_updated_time = #{lastUpdatedTime},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="orgId != null">org_id = #{orgId},</if>
+            <if test="runStatus != null">run_status = #{runStatus},</if>
+            <if test="province != null">province = #{province},</if>
+            <if test="provinceCn != null">province_cn = #{provinceCn},</if>
+            <if test="city != null">city = #{city},</if>
+            <if test="cityCn != null">city_cn = #{cityCn},</if>
+            <if test="county != null">county = #{county},</if>
+            <if test="countyCn != null">county_cn = #{countyCn},</if>
+            <if test="town != null">town = #{town},</if>
+            <if test="townCn != null">town_cn = #{townCn},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="phoneNumber != null">phone_number = #{phoneNumber},</if>
+            <if test="manufacturer != null">manufacturer = #{manufacturer},</if>
+            <if test="departmentId != null">department_id = #{departmentId},</if>
+            <if test="systemUserId != null">system_user_id = #{systemUserId},</if>
+            <if test="fromResource != null">fromResource = #{fromResource},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="ip != null">ip = #{ip},</if>
+            <if test="port != null">port = #{port},</if>
+            <if test="userName != null">user_name = #{userName},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="isStandard != null">is_standard = #{isStandard},</if>
+            <if test="guid != null">guid = #{guid},</if>
+            <if test="stationId != null">station_id = #{stationId},</if>
+            <if test="addr != null">addr = #{addr},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteRdJianceshebeiById" parameterType="Long">
+        delete from rd_jianceshebei where id = #{id}
+    </delete>
+
+    <delete id="deleteRdJianceshebeiByIds" parameterType="String">
+        delete from rd_jianceshebei where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
