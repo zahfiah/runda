@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.runda.mapper.InterfaceLogMapper">
+    
+    <resultMap type="InterfaceLog" id="InterfaceLogResult">
+        <result property="id"    column="id"    />
+        <result property="dataCount"    column="data_count"    />
+        <result property="deviceAddcount"    column="device_addcount"    />
+        <result property="msg"    column="msg"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="modifyDate"    column="modify_date"    />
+        <result property="deviceUpdatecount"    column="device_updatecount"    />
+        <result property="type"    column="type"    />
+        <result property="deptName"    column="dept_name"    />
+        <result property="userId"    column="user_id"    />
+    </resultMap>
+
+    <sql id="selectInterfaceLogVo">
+        select id, data_count, device_addcount, msg, status, create_time, modify_date, device_updatecount, type, dept_name, user_id from interface_log
+    </sql>
+
+    <select id="selectInterfaceLogList" parameterType="InterfaceLog" resultMap="InterfaceLogResult">
+        <include refid="selectInterfaceLogVo"/>
+        <where>  
+            <if test="userId != null "> and user_id = #{userId}</if>
+        </where>
+    </select>
+    
+    <select id="selectInterfaceLogById" parameterType="Long" resultMap="InterfaceLogResult">
+        <include refid="selectInterfaceLogVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertInterfaceLog" parameterType="InterfaceLog" useGeneratedKeys="true" keyProperty="id">
+        insert into interface_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="dataCount != null">data_count,</if>
+            <if test="deviceAddcount != null">device_addcount,</if>
+            <if test="msg != null and msg != ''">msg,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="modifyDate != null">modify_date,</if>
+            <if test="deviceUpdatecount != null">device_updatecount,</if>
+            <if test="type != null">type,</if>
+            <if test="deptName != null">dept_name,</if>
+            <if test="userId != null">user_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="dataCount != null">#{dataCount},</if>
+            <if test="deviceAddcount != null">#{deviceAddcount},</if>
+            <if test="msg != null and msg != ''">#{msg},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="modifyDate != null">#{modifyDate},</if>
+            <if test="deviceUpdatecount != null">#{deviceUpdatecount},</if>
+            <if test="type != null">#{type},</if>
+            <if test="deptName != null">#{deptName},</if>
+            <if test="userId != null">#{userId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateInterfaceLog" parameterType="InterfaceLog">
+        update interface_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="dataCount != null">data_count = #{dataCount},</if>
+            <if test="deviceAddcount != null">device_addcount = #{deviceAddcount},</if>
+            <if test="msg != null and msg != ''">msg = #{msg},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="modifyDate != null">modify_date = #{modifyDate},</if>
+            <if test="deviceUpdatecount != null">device_updatecount = #{deviceUpdatecount},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="deptName != null">dept_name = #{deptName},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteInterfaceLogById" parameterType="Long">
+        delete from interface_log where id = #{id}
+    </delete>
+
+    <delete id="deleteInterfaceLogByIds" parameterType="String">
+        delete from interface_log where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

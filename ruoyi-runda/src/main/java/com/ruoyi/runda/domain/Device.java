@@ -8,20 +8,20 @@ import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.core.domain.BaseEntity;
 
 /**
- * 设备对象 rd_jianceshebei
+ * 监测设备管理设备对象 device
  * 
- * @author ruoyi
- * @date 2024-12-28
+ * @author runda
+ * @date 2025-01-07
  */
-public class RdJianceshebei extends BaseEntity
+public class Device extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
-    /** $column.columnComment */
+    /** 主键 */
     private Long id;
 
-    /** 设备名称(测站名称) */
-    @Excel(name = "设备名称(测站名称)")
+    /** 设备名称 */
+    @Excel(name = "设备名称")
     private String name;
 
     /** 设备号 */
@@ -29,11 +29,9 @@ public class RdJianceshebei extends BaseEntity
     private String sn;
 
     /** 经度 */
-    @Excel(name = "经度")
     private Long longitude;
 
     /** 纬度 */
-    @Excel(name = "纬度")
     private Long latitude;
 
     /** 创建时间 */
@@ -42,52 +40,41 @@ public class RdJianceshebei extends BaseEntity
     private Date createdTime;
 
     /** 最后修改时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "最后修改时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date lastUpdatedTime;
 
-    /** 状态(1：正常，2：停用，3：删除) */
-    @Excel(name = "状态(1：正常，2：停用，3：删除)")
+    /** 状态 */
+    @Excel(name = "状态")
     private Long status;
 
     /** 机构ID */
-    @Excel(name = "机构ID")
     private Long orgId;
 
-    /** 运行状态(1：运行正常，2：异常) */
-    @Excel(name = "运行状态(1：运行正常，2：异常)")
-    private Long runStatus;
+    /** 工地状态 */
+    @Excel(name = "工地状态")
+    private Long buildStatus;
 
     /** 省 */
-    @Excel(name = "省")
     private Long province;
 
     /** 省昵称 */
-    @Excel(name = "省昵称")
     private String provinceCn;
 
     /** 市 */
-    @Excel(name = "市")
     private Long city;
 
     /** 市昵称 */
-    @Excel(name = "市昵称")
     private String cityCn;
 
     /** 区/县 */
-    @Excel(name = "区/县")
     private Long county;
 
     /** 区/县昵称 */
-    @Excel(name = "区/县昵称")
     private String countyCn;
 
     /** 乡/镇 */
-    @Excel(name = "乡/镇")
     private Long town;
 
     /** 乡/镇昵称 */
-    @Excel(name = "乡/镇昵称")
     private String townCn;
 
     /** SIM卡号 */
@@ -98,53 +85,46 @@ public class RdJianceshebei extends BaseEntity
     @Excel(name = "制造商")
     private String manufacturer;
 
-    /** $column.columnComment */
-    @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
+    /** 部门id */
     private Long departmentId;
 
     /** 操作员 */
-    @Excel(name = "操作员")
     private Long systemUserId;
 
-    /** $column.columnComment */
-    @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
+    /** 数据来源 */
     private Long fromResource;
 
-    /** 设备类型(1：空气检测设备，2：水质检测设备) */
-    @Excel(name = "设备类型(1：空气检测设备，2：水质检测设备)")
+    /** 设备类型 */
     private Long type;
 
-    /** $column.columnComment */
-    @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
+    /** ip */
     private String ip;
 
-    /** $column.columnComment */
-    @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
+    /** 端口 */
     private String port;
 
-    /** $column.columnComment */
-    @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
+    /** 用户名 */
     private String userName;
 
-    /** $column.columnComment */
-    @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
+    /** 密码 */
     private String password;
 
-    /** 是否是标准站0.不是、1.是、 */
-    @Excel(name = "是否是标准站0.不是、1.是、")
+    /** 标准站 */
+    @Excel(name = "标准站")
     private Long isStandard;
 
-    /** 国控战站点code */
-    @Excel(name = "国控战站点code")
+    /** 国控code */
     private String guid;
 
     /** 站点id */
     @Excel(name = "站点id")
     private Long stationId;
 
-    /** $column.columnComment */
-    @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
+    /** 地址 */
     private String addr;
+
+    /** 县级id */
+    private Long userId;
 
     public void setId(Long id) 
     {
@@ -227,14 +207,14 @@ public class RdJianceshebei extends BaseEntity
     {
         return orgId;
     }
-    public void setRunStatus(Long runStatus) 
+    public void setBuildStatus(Long buildStatus) 
     {
-        this.runStatus = runStatus;
+        this.buildStatus = buildStatus;
     }
 
-    public Long getRunStatus() 
+    public Long getBuildStatus() 
     {
-        return runStatus;
+        return buildStatus;
     }
     public void setProvince(Long province) 
     {
@@ -434,6 +414,15 @@ public class RdJianceshebei extends BaseEntity
     {
         return addr;
     }
+    public void setUserId(Long userId) 
+    {
+        this.userId = userId;
+    }
+
+    public Long getUserId() 
+    {
+        return userId;
+    }
 
     @Override
     public String toString() {
@@ -447,7 +436,7 @@ public class RdJianceshebei extends BaseEntity
             .append("lastUpdatedTime", getLastUpdatedTime())
             .append("status", getStatus())
             .append("orgId", getOrgId())
-            .append("runStatus", getRunStatus())
+            .append("buildStatus", getBuildStatus())
             .append("province", getProvince())
             .append("provinceCn", getProvinceCn())
             .append("city", getCity())
@@ -471,6 +460,7 @@ public class RdJianceshebei extends BaseEntity
             .append("guid", getGuid())
             .append("stationId", getStationId())
             .append("addr", getAddr())
+            .append("userId", getUserId())
             .toString();
     }
 }

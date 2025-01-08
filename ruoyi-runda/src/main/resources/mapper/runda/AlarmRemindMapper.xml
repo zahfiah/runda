@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.runda.mapper.AlarmRemindMapper">
+    
+    <resultMap type="AlarmRemind" id="AlarmRemindResult">
+        <result property="id"    column="id"    />
+        <result property="alarmType"    column="alarm_type"    />
+        <result property="alarmParamType"    column="alarm_param_type"    />
+        <result property="guid"    column="guid"    />
+        <result property="standardValue"    column="standard_value"    />
+        <result property="beginTime"    column="begin_time"    />
+        <result property="endTime"    column="end_time"    />
+        <result property="timeSpace"    column="time_space"    />
+        <result property="notice"    column="notice"    />
+        <result property="userId"    column="user_id"    />
+        <result property="deptName"    column="dept_name"    />
+        <result property="deptPath"    column="dept_path"    />
+        <result property="systemUserId"    column="system_user_id"    />
+        <result property="status"    column="status"    />
+        <result property="createDate"    column="create_date"    />
+        <result property="lastUpdatedDate"    column="last_updated_date"    />
+    </resultMap>
+
+    <sql id="selectAlarmRemindVo">
+        select id, alarm_type, alarm_param_type, guid, standard_value, begin_time, end_time, time_space, notice, user_id, dept_name, dept_path, system_user_id, status, create_date, last_updated_date from alarm_remind
+    </sql>
+
+    <select id="selectAlarmRemindList" parameterType="AlarmRemind" resultMap="AlarmRemindResult">
+        <include refid="selectAlarmRemindVo"/>
+        <where>  
+            <if test="alarmType != null "> and alarm_type = #{alarmType}</if>
+            <if test="alarmParamType != null "> and alarm_param_type = #{alarmParamType}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+        </where>
+    </select>
+    
+    <select id="selectAlarmRemindById" parameterType="Long" resultMap="AlarmRemindResult">
+        <include refid="selectAlarmRemindVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertAlarmRemind" parameterType="AlarmRemind" useGeneratedKeys="true" keyProperty="id">
+        insert into alarm_remind
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="alarmType != null">alarm_type,</if>
+            <if test="alarmParamType != null">alarm_param_type,</if>
+            <if test="guid != null">guid,</if>
+            <if test="standardValue != null">standard_value,</if>
+            <if test="beginTime != null">begin_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="timeSpace != null">time_space,</if>
+            <if test="notice != null">notice,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="deptName != null">dept_name,</if>
+            <if test="deptPath != null">dept_path,</if>
+            <if test="systemUserId != null">system_user_id,</if>
+            <if test="status != null">status,</if>
+            <if test="createDate != null">create_date,</if>
+            <if test="lastUpdatedDate != null">last_updated_date,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="alarmType != null">#{alarmType},</if>
+            <if test="alarmParamType != null">#{alarmParamType},</if>
+            <if test="guid != null">#{guid},</if>
+            <if test="standardValue != null">#{standardValue},</if>
+            <if test="beginTime != null">#{beginTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="timeSpace != null">#{timeSpace},</if>
+            <if test="notice != null">#{notice},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="deptName != null">#{deptName},</if>
+            <if test="deptPath != null">#{deptPath},</if>
+            <if test="systemUserId != null">#{systemUserId},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createDate != null">#{createDate},</if>
+            <if test="lastUpdatedDate != null">#{lastUpdatedDate},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAlarmRemind" parameterType="AlarmRemind">
+        update alarm_remind
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="alarmType != null">alarm_type = #{alarmType},</if>
+            <if test="alarmParamType != null">alarm_param_type = #{alarmParamType},</if>
+            <if test="guid != null">guid = #{guid},</if>
+            <if test="standardValue != null">standard_value = #{standardValue},</if>
+            <if test="beginTime != null">begin_time = #{beginTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="timeSpace != null">time_space = #{timeSpace},</if>
+            <if test="notice != null">notice = #{notice},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="deptName != null">dept_name = #{deptName},</if>
+            <if test="deptPath != null">dept_path = #{deptPath},</if>
+            <if test="systemUserId != null">system_user_id = #{systemUserId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createDate != null">create_date = #{createDate},</if>
+            <if test="lastUpdatedDate != null">last_updated_date = #{lastUpdatedDate},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAlarmRemindById" parameterType="Long">
+        delete from alarm_remind where id = #{id}
+    </delete>
+
+    <delete id="deleteAlarmRemindByIds" parameterType="String">
+        delete from alarm_remind where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

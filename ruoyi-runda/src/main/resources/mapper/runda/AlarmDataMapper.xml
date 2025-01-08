@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.runda.mapper.AlarmDataMapper">
+    
+    <resultMap type="AlarmData" id="AlarmDataResult">
+        <result property="id"    column="id"    />
+        <result property="alarmType"    column="alarm_type"    />
+        <result property="alarmParamType"    column="alarm_param_type"    />
+        <result property="alarmValue"    column="alarm_value"    />
+        <result property="standardValue"    column="standard_value"    />
+        <result property="beginTime"    column="begin_time"    />
+        <result property="endTime"    column="end_time"    />
+        <result property="status"    column="status"    />
+        <result property="stationId"    column="station_id"    />
+        <result property="staName"    column="sta_name"    />
+        <result property="deviceId"    column="device_id"    />
+        <result property="deviceName"    column="device_name"    />
+        <result property="userId"    column="user_id"    />
+        <result property="userName"    column="user_name"    />
+        <result property="userPath"    column="user_path"    />
+    </resultMap>
+
+    <sql id="selectAlarmDataVo">
+        select id, alarm_type, alarm_param_type, alarm_value, standard_value, begin_time, end_time, status, station_id, sta_name, device_id, device_name, user_id, user_name, user_path from alarm_data
+    </sql>
+
+    <select id="selectAlarmDataList" parameterType="AlarmData" resultMap="AlarmDataResult">
+        <include refid="selectAlarmDataVo"/>
+        <where>  
+            <if test="alarmType != null "> and alarm_type = #{alarmType}</if>
+            <if test="alarmParamType != null "> and alarm_param_type = #{alarmParamType}</if>
+            <if test="beginTime != null "> and begin_time = #{beginTime}</if>
+            <if test="endTime != null "> and end_time = #{endTime}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+        </where>
+    </select>
+    
+    <select id="selectAlarmDataById" parameterType="Long" resultMap="AlarmDataResult">
+        <include refid="selectAlarmDataVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertAlarmData" parameterType="AlarmData" useGeneratedKeys="true" keyProperty="id">
+        insert into alarm_data
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="alarmType != null">alarm_type,</if>
+            <if test="alarmParamType != null">alarm_param_type,</if>
+            <if test="alarmValue != null">alarm_value,</if>
+            <if test="standardValue != null">standard_value,</if>
+            <if test="beginTime != null">begin_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="status != null">status,</if>
+            <if test="stationId != null">station_id,</if>
+            <if test="staName != null">sta_name,</if>
+            <if test="deviceId != null">device_id,</if>
+            <if test="deviceName != null">device_name,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="userName != null">user_name,</if>
+            <if test="userPath != null">user_path,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="alarmType != null">#{alarmType},</if>
+            <if test="alarmParamType != null">#{alarmParamType},</if>
+            <if test="alarmValue != null">#{alarmValue},</if>
+            <if test="standardValue != null">#{standardValue},</if>
+            <if test="beginTime != null">#{beginTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="status != null">#{status},</if>
+            <if test="stationId != null">#{stationId},</if>
+            <if test="staName != null">#{staName},</if>
+            <if test="deviceId != null">#{deviceId},</if>
+            <if test="deviceName != null">#{deviceName},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="userName != null">#{userName},</if>
+            <if test="userPath != null">#{userPath},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAlarmData" parameterType="AlarmData">
+        update alarm_data
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="alarmType != null">alarm_type = #{alarmType},</if>
+            <if test="alarmParamType != null">alarm_param_type = #{alarmParamType},</if>
+            <if test="alarmValue != null">alarm_value = #{alarmValue},</if>
+            <if test="standardValue != null">standard_value = #{standardValue},</if>
+            <if test="beginTime != null">begin_time = #{beginTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="stationId != null">station_id = #{stationId},</if>
+            <if test="staName != null">sta_name = #{staName},</if>
+            <if test="deviceId != null">device_id = #{deviceId},</if>
+            <if test="deviceName != null">device_name = #{deviceName},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="userName != null">user_name = #{userName},</if>
+            <if test="userPath != null">user_path = #{userPath},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAlarmDataById" parameterType="Long">
+        delete from alarm_data where id = #{id}
+    </delete>
+
+    <delete id="deleteAlarmDataByIds" parameterType="String">
+        delete from alarm_data where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

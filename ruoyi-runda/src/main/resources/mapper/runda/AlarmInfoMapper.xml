@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.runda.mapper.AlarmInfoMapper">
+    
+    <resultMap type="AlarmInfo" id="AlarmInfoResult">
+        <result property="id"     column="id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="userName"    column="user_name"    />
+        <result property="enterpriseId"    column="enterprise_id"    />
+        <result property="stationId"    column="station_id"    />
+        <result property="alarmType"    column="alarm_type"    />
+        <result property="beginTime"    column="begin_time"    />
+        <result property="endTime"    column="end_time"    />
+        <result property="timeSpace"    column="time_space"    />
+        <result property="phoneNumber"    column="phone_number"    />
+        <result property="smsTem"    column="sms_tem"    />
+        <result property="smsMessage"    column="sms_message"    />
+        <result property="smsFail"    column="sms_fail"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="deptName"    column="dept_name"    />
+        <result property="deptPath"    column="dept_path"    />
+        <result property="systemUserId"    column="system_user_id"    />
+        <result property="infoStatus"    column="info_status"    />
+        <result property="createDate"    column="create_date"    />
+        <result property="lastUpdatedDate"    column="last_updated_date"    />
+    </resultMap>
+
+    <sql id="selectAlarmInfoVo">
+        select id, user_id, user_name, enterprise_id, station_id, alarm_type, begin_time, end_time, time_space, phone_number, sms_tem, sms_message, sms_fail, dept_id, dept_name, dept_path, system_user_id, info_status, create_date, last_updated_date from alarm_info
+    </sql>
+
+    <select id="selectAlarmInfoList" parameterType="AlarmInfo" resultMap="AlarmInfoResult">
+        <include refid="selectAlarmInfoVo"/>
+        <where>  
+            <if test="stationId != null "> and station_id = #{stationId}</if>
+        </where>
+    </select>
+    
+    <select id="selectAlarmInfoById" parameterType="Long" resultMap="AlarmInfoResult">
+        <include refid="selectAlarmInfoVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertAlarmInfo" parameterType="AlarmInfo" useGeneratedKeys="true" keyProperty="id">
+        insert into alarm_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="userName != null">user_name,</if>
+            <if test="enterpriseId != null">enterprise_id,</if>
+            <if test="stationId != null">station_id,</if>
+            <if test="alarmType != null">alarm_type,</if>
+            <if test="beginTime != null">begin_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="timeSpace != null">time_space,</if>
+            <if test="phoneNumber != null and phoneNumber != ''">phone_number,</if>
+            <if test="smsTem != null and smsTem != ''">sms_tem,</if>
+            <if test="smsMessage != null and smsMessage != ''">sms_message,</if>
+            <if test="smsFail != null">sms_fail,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="deptName != null">dept_name,</if>
+            <if test="deptPath != null">dept_path,</if>
+            <if test="systemUserId != null">system_user_id,</if>
+            <if test="infoStatus != null">info_status,</if>
+            <if test="createDate != null">create_date,</if>
+            <if test="lastUpdatedDate != null">last_updated_date,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="userName != null">#{userName},</if>
+            <if test="enterpriseId != null">#{enterpriseId},</if>
+            <if test="stationId != null">#{stationId},</if>
+            <if test="alarmType != null">#{alarmType},</if>
+            <if test="beginTime != null">#{beginTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="timeSpace != null">#{timeSpace},</if>
+            <if test="phoneNumber != null and phoneNumber != ''">#{phoneNumber},</if>
+            <if test="smsTem != null and smsTem != ''">#{smsTem},</if>
+            <if test="smsMessage != null and smsMessage != ''">#{smsMessage},</if>
+            <if test="smsFail != null">#{smsFail},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="deptName != null">#{deptName},</if>
+            <if test="deptPath != null">#{deptPath},</if>
+            <if test="systemUserId != null">#{systemUserId},</if>
+            <if test="infoStatus != null">#{infoStatus},</if>
+            <if test="createDate != null">#{createDate},</if>
+            <if test="lastUpdatedDate != null">#{lastUpdatedDate},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAlarmInfo" parameterType="AlarmInfo">
+        update alarm_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="userName != null">user_name = #{userName},</if>
+            <if test="enterpriseId != null">enterprise_id = #{enterpriseId},</if>
+            <if test="stationId != null">station_id = #{stationId},</if>
+            <if test="alarmType != null">alarm_type = #{alarmType},</if>
+            <if test="beginTime != null">begin_time = #{beginTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="timeSpace != null">time_space = #{timeSpace},</if>
+            <if test="phoneNumber != null and phoneNumber != ''">phone_number = #{phoneNumber},</if>
+            <if test="smsTem != null and smsTem != ''">sms_tem = #{smsTem},</if>
+            <if test="smsMessage != null and smsMessage != ''">sms_message = #{smsMessage},</if>
+            <if test="smsFail != null">sms_fail = #{smsFail},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="deptName != null">dept_name = #{deptName},</if>
+            <if test="deptPath != null">dept_path = #{deptPath},</if>
+            <if test="systemUserId != null">system_user_id = #{systemUserId},</if>
+            <if test="infoStatus != null">info_status = #{infoStatus},</if>
+            <if test="createDate != null">create_date = #{createDate},</if>
+            <if test="lastUpdatedDate != null">last_updated_date = #{lastUpdatedDate},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAlarmInfoById" parameterType="Long">
+        delete from alarm_info where id = #{id}
+    </delete>
+
+    <delete id="deleteAlarmInfoByIds" parameterType="String">
+        delete from alarm_info where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.runda.mapper.StationMapper">
+    
+    <resultMap type="Station" id="StationResult">
+        <result property="id"    column="id"    />
+        <result property="stationCode"    column="station_code"    />
+        <result property="stationName"    column="station_name"    />
+        <result property="riverName"    column="river_name"    />
+        <result property="riverCode"    column="river_code"    />
+        <result property="sectionName"    column="section_name"    />
+        <result property="sectionCode"    column="section_code"    />
+        <result property="riverLevel"    column="river_level"    />
+        <result property="inwardWater"    column="inward_water"    />
+        <result property="sectionProperties"    column="section_properties"    />
+        <result property="monitoringWay"    column="monitoring_way"    />
+        <result property="sectionControlLevel"    column="section_control_level"    />
+        <result property="province"    column="province"    />
+        <result property="provinceCn"    column="province_cn"    />
+        <result property="city"    column="city"    />
+        <result property="cityCn"    column="city_cn"    />
+        <result property="county"    column="county"    />
+        <result property="countyCn"    column="county_cn"    />
+        <result property="town"    column="town"    />
+        <result property="townCn"    column="town_cn"    />
+        <result property="departmentId"    column="department_id"    />
+        <result property="systemUserId"    column="system_user_id"    />
+        <result property="createdTime"    column="created_time"    />
+        <result property="lastUpdatedTime"    column="last_updated_time"    />
+        <result property="longitude"    column="longitude"    />
+        <result property="latitude"    column="latitude"    />
+        <result property="type"    column="type"    />
+        <result property="remark"    column="remark"    />
+        <result property="stationStatus"    column="station_status"    />
+        <result property="phone"    column="phone"    />
+        <result property="linkMan"    column="link_man"    />
+        <result property="countryName"    column="country_name"    />
+        <result property="countryId"    column="country_id"    />
+        <result property="floorSpace"    column="floor_space"    />
+        <result property="licensNumber"    column="licens_number"    />
+        <result property="fromResource"    column="from_resource"    />
+        <result property="jsdwmc"    column="jsdwmc"    />
+        <result property="jstsyhydm"    column="jstsyhydm"    />
+        <result property="sgdwmc"    column="sgdwmc"    />
+        <result property="sgtshyhdym"    column="sgtshyhdym"    />
+        <result property="jgbm"    column="jgbm"    />
+        <result property="jgzr"    column="jgzr"    />
+        <result property="jgzrdh"    column="jgzrdh"    />
+        <result property="sjjd"    column="sjjd"    />
+        <result property="sfazjcsb"    column="sfazjcsb"    />
+        <result property="jgrq"    column="jgrq"    />
+        <result property="deviceId"    column="device_id"    />
+    </resultMap>
+
+    <sql id="selectStationVo">
+        select id, station_code, station_name, river_name, river_code, section_name, section_code, river_level, inward_water, section_properties, monitoring_way, section_control_level, province, province_cn, city, city_cn, county, county_cn, town, town_cn, department_id, system_user_id, created_time, last_updated_time, longitude, latitude, type, remark, station_status, phone, link_man, country_name, country_id, floor_space, licens_number, from_resource, jsdwmc, jstsyhydm, sgdwmc, sgtshyhdym, jgbm, jgzr, jgzrdh, sjjd, sfazjcsb, jgrq, device_id from station
+    </sql>
+
+    <select id="selectStationList" parameterType="Station" resultMap="StationResult">
+        <include refid="selectStationVo"/>
+        <where>  
+            <if test="stationName != null  and stationName != ''"> and station_name like concat('%', #{stationName}, '%')</if>
+            <if test="type != null "> and type = #{type}</if>
+            <if test="licensNumber != null  and licensNumber != ''"> and licens_number = #{licensNumber}</if>
+        </where>
+    </select>
+    
+    <select id="selectStationById" parameterType="Long" resultMap="StationResult">
+        <include refid="selectStationVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertStation" parameterType="Station">
+        insert into station
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="stationCode != null">station_code,</if>
+            <if test="stationName != null and stationName != ''">station_name,</if>
+            <if test="riverName != null">river_name,</if>
+            <if test="riverCode != null">river_code,</if>
+            <if test="sectionName != null">section_name,</if>
+            <if test="sectionCode != null">section_code,</if>
+            <if test="riverLevel != null">river_level,</if>
+            <if test="inwardWater != null">inward_water,</if>
+            <if test="sectionProperties != null">section_properties,</if>
+            <if test="monitoringWay != null">monitoring_way,</if>
+            <if test="sectionControlLevel != null">section_control_level,</if>
+            <if test="province != null">province,</if>
+            <if test="provinceCn != null">province_cn,</if>
+            <if test="city != null">city,</if>
+            <if test="cityCn != null">city_cn,</if>
+            <if test="county != null">county,</if>
+            <if test="countyCn != null">county_cn,</if>
+            <if test="town != null">town,</if>
+            <if test="townCn != null">town_cn,</if>
+            <if test="departmentId != null">department_id,</if>
+            <if test="systemUserId != null">system_user_id,</if>
+            <if test="createdTime != null">created_time,</if>
+            <if test="lastUpdatedTime != null">last_updated_time,</if>
+            <if test="longitude != null">longitude,</if>
+            <if test="latitude != null">latitude,</if>
+            <if test="type != null">type,</if>
+            <if test="remark != null">remark,</if>
+            <if test="stationStatus != null">station_status,</if>
+            <if test="phone != null and phone != ''">phone,</if>
+            <if test="linkMan != null">link_man,</if>
+            <if test="countryName != null">country_name,</if>
+            <if test="countryId != null">country_id,</if>
+            <if test="floorSpace != null">floor_space,</if>
+            <if test="licensNumber != null and licensNumber != ''">licens_number,</if>
+            <if test="fromResource != null">from_resource,</if>
+            <if test="jsdwmc != null and jsdwmc != ''">jsdwmc,</if>
+            <if test="jstsyhydm != null and jstsyhydm != ''">jstsyhydm,</if>
+            <if test="sgdwmc != null and sgdwmc != ''">sgdwmc,</if>
+            <if test="sgtshyhdym != null and sgtshyhdym != ''">sgtshyhdym,</if>
+            <if test="jgbm != null and jgbm != ''">jgbm,</if>
+            <if test="jgzr != null and jgzr != ''">jgzr,</if>
+            <if test="jgzrdh != null and jgzrdh != ''">jgzrdh,</if>
+            <if test="sjjd != null and sjjd != ''">sjjd,</if>
+            <if test="sfazjcsb != null and sfazjcsb != ''">sfazjcsb,</if>
+            <if test="jgrq != null">jgrq,</if>
+            <if test="deviceId != null">device_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="stationCode != null">#{stationCode},</if>
+            <if test="stationName != null and stationName != ''">#{stationName},</if>
+            <if test="riverName != null">#{riverName},</if>
+            <if test="riverCode != null">#{riverCode},</if>
+            <if test="sectionName != null">#{sectionName},</if>
+            <if test="sectionCode != null">#{sectionCode},</if>
+            <if test="riverLevel != null">#{riverLevel},</if>
+            <if test="inwardWater != null">#{inwardWater},</if>
+            <if test="sectionProperties != null">#{sectionProperties},</if>
+            <if test="monitoringWay != null">#{monitoringWay},</if>
+            <if test="sectionControlLevel != null">#{sectionControlLevel},</if>
+            <if test="province != null">#{province},</if>
+            <if test="provinceCn != null">#{provinceCn},</if>
+            <if test="city != null">#{city},</if>
+            <if test="cityCn != null">#{cityCn},</if>
+            <if test="county != null">#{county},</if>
+            <if test="countyCn != null">#{countyCn},</if>
+            <if test="town != null">#{town},</if>
+            <if test="townCn != null">#{townCn},</if>
+            <if test="departmentId != null">#{departmentId},</if>
+            <if test="systemUserId != null">#{systemUserId},</if>
+            <if test="createdTime != null">#{createdTime},</if>
+            <if test="lastUpdatedTime != null">#{lastUpdatedTime},</if>
+            <if test="longitude != null">#{longitude},</if>
+            <if test="latitude != null">#{latitude},</if>
+            <if test="type != null">#{type},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="stationStatus != null">#{stationStatus},</if>
+            <if test="phone != null and phone != ''">#{phone},</if>
+            <if test="linkMan != null">#{linkMan},</if>
+            <if test="countryName != null">#{countryName},</if>
+            <if test="countryId != null">#{countryId},</if>
+            <if test="floorSpace != null">#{floorSpace},</if>
+            <if test="licensNumber != null and licensNumber != ''">#{licensNumber},</if>
+            <if test="fromResource != null">#{fromResource},</if>
+            <if test="jsdwmc != null and jsdwmc != ''">#{jsdwmc},</if>
+            <if test="jstsyhydm != null and jstsyhydm != ''">#{jstsyhydm},</if>
+            <if test="sgdwmc != null and sgdwmc != ''">#{sgdwmc},</if>
+            <if test="sgtshyhdym != null and sgtshyhdym != ''">#{sgtshyhdym},</if>
+            <if test="jgbm != null and jgbm != ''">#{jgbm},</if>
+            <if test="jgzr != null and jgzr != ''">#{jgzr},</if>
+            <if test="jgzrdh != null and jgzrdh != ''">#{jgzrdh},</if>
+            <if test="sjjd != null and sjjd != ''">#{sjjd},</if>
+            <if test="sfazjcsb != null and sfazjcsb != ''">#{sfazjcsb},</if>
+            <if test="jgrq != null">#{jgrq},</if>
+            <if test="deviceId != null">#{deviceId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateStation" parameterType="Station">
+        update station
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="stationCode != null">station_code = #{stationCode},</if>
+            <if test="stationName != null and stationName != ''">station_name = #{stationName},</if>
+            <if test="riverName != null">river_name = #{riverName},</if>
+            <if test="riverCode != null">river_code = #{riverCode},</if>
+            <if test="sectionName != null">section_name = #{sectionName},</if>
+            <if test="sectionCode != null">section_code = #{sectionCode},</if>
+            <if test="riverLevel != null">river_level = #{riverLevel},</if>
+            <if test="inwardWater != null">inward_water = #{inwardWater},</if>
+            <if test="sectionProperties != null">section_properties = #{sectionProperties},</if>
+            <if test="monitoringWay != null">monitoring_way = #{monitoringWay},</if>
+            <if test="sectionControlLevel != null">section_control_level = #{sectionControlLevel},</if>
+            <if test="province != null">province = #{province},</if>
+            <if test="provinceCn != null">province_cn = #{provinceCn},</if>
+            <if test="city != null">city = #{city},</if>
+            <if test="cityCn != null">city_cn = #{cityCn},</if>
+            <if test="county != null">county = #{county},</if>
+            <if test="countyCn != null">county_cn = #{countyCn},</if>
+            <if test="town != null">town = #{town},</if>
+            <if test="townCn != null">town_cn = #{townCn},</if>
+            <if test="departmentId != null">department_id = #{departmentId},</if>
+            <if test="systemUserId != null">system_user_id = #{systemUserId},</if>
+            <if test="createdTime != null">created_time = #{createdTime},</if>
+            <if test="lastUpdatedTime != null">last_updated_time = #{lastUpdatedTime},</if>
+            <if test="longitude != null">longitude = #{longitude},</if>
+            <if test="latitude != null">latitude = #{latitude},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="stationStatus != null">station_status = #{stationStatus},</if>
+            <if test="phone != null and phone != ''">phone = #{phone},</if>
+            <if test="linkMan != null">link_man = #{linkMan},</if>
+            <if test="countryName != null">country_name = #{countryName},</if>
+            <if test="countryId != null">country_id = #{countryId},</if>
+            <if test="floorSpace != null">floor_space = #{floorSpace},</if>
+            <if test="licensNumber != null and licensNumber != ''">licens_number = #{licensNumber},</if>
+            <if test="fromResource != null">from_resource = #{fromResource},</if>
+            <if test="jsdwmc != null and jsdwmc != ''">jsdwmc = #{jsdwmc},</if>
+            <if test="jstsyhydm != null and jstsyhydm != ''">jstsyhydm = #{jstsyhydm},</if>
+            <if test="sgdwmc != null and sgdwmc != ''">sgdwmc = #{sgdwmc},</if>
+            <if test="sgtshyhdym != null and sgtshyhdym != ''">sgtshyhdym = #{sgtshyhdym},</if>
+            <if test="jgbm != null and jgbm != ''">jgbm = #{jgbm},</if>
+            <if test="jgzr != null and jgzr != ''">jgzr = #{jgzr},</if>
+            <if test="jgzrdh != null and jgzrdh != ''">jgzrdh = #{jgzrdh},</if>
+            <if test="sjjd != null and sjjd != ''">sjjd = #{sjjd},</if>
+            <if test="sfazjcsb != null and sfazjcsb != ''">sfazjcsb = #{sfazjcsb},</if>
+            <if test="jgrq != null">jgrq = #{jgrq},</if>
+            <if test="deviceId != null">device_id = #{deviceId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteStationById" parameterType="Long">
+        delete from station where id = #{id}
+    </delete>
+
+    <delete id="deleteStationByIds" parameterType="String">
+        delete from station where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
