@@ -59,3 +59,18 @@ spring:
                 wall:
                     config:
                         multi-statement-allow: true
+
+    data:
+        mongodb:
+            uri: mongodb://zytlpure:1QUazLZU@112.126.94.158:28028/envcloud_zjk
+
+mybatis-plus:
+    configuration:
+        map-underscore-to-camel-case: true
+    global-config:
+        db-config:
+            id-type: auto
+
+logging:
+    level:
+        com.ruoyi.system.mapper: debug

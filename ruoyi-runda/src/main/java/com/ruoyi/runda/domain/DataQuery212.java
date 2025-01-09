@@ -1,5 +1,6 @@
 package com.ruoyi.runda.domain;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -25,6 +26,7 @@ public class DataQuery212 extends BaseEntity
     private Long deviceId;
 
     /** 日期 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date date;
 
     /** 空气质量指数 */
@@ -110,9 +112,12 @@ public class DataQuery212 extends BaseEntity
     private Long pm10Above;
 
     /** 开始时间 */
+
+
     private Date beginTime;
 
     /** 结束时间 */
+
     private Date endTime;
 
     /** 经度 */
@@ -364,7 +369,7 @@ public class DataQuery212 extends BaseEntity
         this.beginTime = beginTime;
     }
 
-    public Date getBeginTime() 
+    public Date getBeginTime()
     {
         return beginTime;
     }

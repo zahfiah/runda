@@ -1,5 +1,6 @@
 package com.ruoyi.runda.controller;
 
+
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,6 +44,7 @@ public class StationController extends BaseController
     {
         startPage();
         List<Station> list = stationService.selectStationList(station);
+
         return getDataTable(list);
     }
 

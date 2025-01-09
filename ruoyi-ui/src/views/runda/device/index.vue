@@ -7,8 +7,11 @@
       <el-form-item label="设备号" prop="sn">
         <el-input v-model="queryParams.sn" placeholder="请输入设备号" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="站点id" prop="stationId">
-        <el-input v-model="queryParams.stationId" placeholder="请输入站点id" clearable @keyup.enter.native="handleQuery" />
+      <el-form-item label="站点名称" prop="stationId">
+        <el-select v-model="queryParams.stationId" placeholder="请选择站点">
+          <el-option v-for="station in stationList" :key="station.id" :label="station.stationName"
+            :value="station.id"></el-option>
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -41,9 +44,9 @@
       <el-table-column label="主键" align="center" prop="id" />
       <el-table-column label="设备名称" align="center" prop="name" />
       <el-table-column label="设备号" align="center" prop="sn" />
-      <el-table-column label="创建时间" align="center" prop="createdTime" width="180">
+      <el-table-column label="时间" align="center" prop="createdTime" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.createdTime, '{y}-{m}-{d}') }}</span>
+          <span>{{ parseTime(scope.row.createdTime) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="状态" align="center" prop="status">
@@ -64,7 +67,11 @@
           <dict-tag :options="dict.type.is_standard" :value="scope.row.isStandard" />
         </template>
       </el-table-column>
-      <el-table-column label="站点id" align="center" prop="stationId" />
+      <el-table-column label="站点名称" align="center" prop="stationName">
+        <template slot-scope="scope">
+          <span>{{ scope.row.stationName || '未命名站点' }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)"
@@ -94,7 +101,7 @@
           <el-input v-model="form.latitude" placeholder="请输入纬度" />
         </el-form-item>
         <el-form-item label="创建时间" prop="createdTime">
-          <el-date-picker clearable v-model="form.createdTime" type="date" value-format="yyyy-MM-dd"
+          <el-date-picker clearable v-model="form.createdTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择创建时间">
           </el-date-picker>
         </el-form-item>
@@ -149,8 +156,11 @@
               :value="parseInt(dict.value)"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="站点id" prop="stationId">
-          <el-input v-model="form.stationId" placeholder="请输入站点id" />
+        <el-form-item label="站点名称" prop="stationId">
+          <el-select v-model="queryParams.stationId" placeholder="请选择站点">
+            <el-option v-for="station in stationList" :key="station.id" :label="station.stationName"
+              :value="station.id"></el-option>
+          </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -160,10 +170,9 @@
     </el-dialog>
   </div>
 </template>
-
 <script>
 import { listDevice, getDevice, delDevice, addDevice, updateDevice } from "@/api/runda/device";
-
+import { listStation } from "@/api/runda/station";
 export default {
   name: "Device",
   dicts: ['device_status', 'from_resource', 'tell_user', 'device_type', 'is_standard', 'build_status'],
@@ -183,6 +192,8 @@ export default {
       total: 0,
       // 监测设备管理设备表格数据
       deviceList: [],
+      // 存储站点列表 
+      stationList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -234,14 +245,32 @@ export default {
   },
   created() {
     this.getList();
+    this.getStations();
   },
   methods: {
+    /** 查询监测设备管理设备列表 */
     /** 查询监测设备管理设备列表 */
     getList() {
       this.loading = true;
       listDevice(this.queryParams).then(response => {
-        this.deviceList = response.rows;
-        this.total = response.total;
+        if (response.code === 200 && Array.isArray(response.rows)) {
+          const devicesWithStationNames = response.rows.map(device => {
+            const stationIdString = String(device.stationId); // 确保转换成字符串以匹配
+            const station = this.stationList.find(s => String(s.id) === stationIdString);
+            console.log(`Looking for station with ID ${stationIdString}:`, station); // 调试输出
+            return {
+              ...device,
+              stationName: station ? station.stationName : '未命名站点'
+            };
+          });
+          this.deviceList = devicesWithStationNames;
+          this.total = response.total;
+        } else {
+          console.error('Invalid response:', response);
+        }
+      }).catch(error => {
+        console.error('Failed to fetch devices:', error);
+      }).finally(() => {
         this.loading = false;
       });
     },
@@ -249,6 +278,23 @@ export default {
     cancel() {
       this.open = false;
       this.reset();
+    },
+    // 获取站点列表
+    getStations() {
+      listStation().then(response => {
+        if (response.code === 200 && Array.isArray(response.rows)) {
+          // 打印站点列表
+          console.log('Station List:', response.rows);
+          this.stationList = response.rows.map(station => ({
+            id: station.id,
+            stationName: station.stationName // 确保这里使用了正确的字段名
+          }));
+        } else {
+          console.error('Invalid stations data structure:', response);
+        }
+      }).catch(error => {
+        console.error('Failed to fetch stations:', error); // 添加错误处理
+      });
     },
     // 表单重置
     reset() {
@@ -275,7 +321,7 @@ export default {
         phoneNumber: null,
         manufacturer: null,
         departmentId: null,
-        systemUserId: [],
+        systemUserId: [], // 初始化为空数组
         fromResource: null,
         type: null,
         ip: null,
@@ -315,12 +361,13 @@ export default {
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
-      const id = row.id || this.ids
+      const id = row.id || this.ids;
       getDevice(id).then(response => {
         this.form = response.data;
+        // 确保 systemUserId 是数组
         if (!this.form.systemUserId) {
           this.form.systemUserId = [];
-        } else {
+        } else if (typeof this.form.systemUserId === 'string') {
           this.form.systemUserId = this.form.systemUserId.split(",");
         }
         this.open = true;
@@ -331,7 +378,12 @@ export default {
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          this.form.systemUserId = this.form.systemUserId.join(",");
+          console.log('Before join:', this.form.systemUserId); // 调试信息
+          if (Array.isArray(this.form.systemUserId)) {
+            this.form.systemUserId = this.form.systemUserId.join(",");
+          } else {
+            console.error('systemUserId is not an array:', this.form.systemUserId);
+          }
           if (this.form.id != null) {
             updateDevice(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");

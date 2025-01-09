@@ -29,14 +29,14 @@ public class Device extends BaseEntity
     private String sn;
 
     /** 经度 */
-    private Long longitude;
+    private Double longitude;
 
     /** 纬度 */
-    private Long latitude;
+    private Double latitude;
 
     /** 创建时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "创建时间", width = 30, dateFormat = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "创建时间", width = 30, dateFormat = " yyyy-MM-dd HH:mm:ss")
     private Date createdTime;
 
     /** 最后修改时间 */
@@ -153,30 +153,30 @@ public class Device extends BaseEntity
     {
         return sn;
     }
-    public void setLongitude(Long longitude) 
+    public void setLongitude(Double longitude)
     {
         this.longitude = longitude;
     }
 
-    public Long getLongitude() 
+    public Double getLongitude()
     {
         return longitude;
     }
-    public void setLatitude(Long latitude) 
+    public void setLatitude(Double latitude)
     {
         this.latitude = latitude;
     }
 
-    public Long getLatitude() 
+    public Double getLatitude()
     {
         return latitude;
     }
-    public void setCreatedTime(Date createdTime) 
+    public void setCreatedTime(Date createdTime)
     {
         this.createdTime = createdTime;
     }
 
-    public Date getCreatedTime() 
+    public Date getCreatedTime()
     {
         return createdTime;
     }

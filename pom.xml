@@ -29,6 +29,8 @@
         <commons.io.version>2.13.0</commons.io.version>
         <poi.version>4.1.2</poi.version>
         <velocity.version>2.3</velocity.version>
+        <!--  MongoDB版本号为3.6.3-->
+        <mongodb.version>3.6.3</mongodb.version>
         <jwt.version>0.9.1</jwt.version>
         <!-- override dependency version -->
         <tomcat.version>9.0.96</tomcat.version>
@@ -93,6 +95,12 @@
                 <artifactId>tomcat-embed-el</artifactId>
                 <version>${tomcat.version}</version>
             </dependency>
+            <!--MongoDB数据库-->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-mongodb</artifactId>
+            </dependency>
+
 
             <dependency>
                 <groupId>org.apache.tomcat.embed</groupId>
