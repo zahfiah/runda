@@ -1,6 +1,5 @@
 package com.ruoyi.runda.controller;
 
-
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,7 +25,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * 监测站点管理Controller
  * 
  * @author runda
- * @date 2025-01-07
+ * @date 2025-01-10
  */
 @RestController
 @RequestMapping("/runda/station")
@@ -44,7 +43,6 @@ public class StationController extends BaseController
     {
         startPage();
         List<Station> list = stationService.selectStationList(station);
-
         return getDataTable(list);
     }
 

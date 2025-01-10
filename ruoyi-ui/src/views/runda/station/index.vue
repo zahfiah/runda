@@ -1,9 +1,8 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="监测站名称" prop="stationName">
-        <el-input v-model="queryParams.stationName" placeholder="请输入监测站名称" clearable
-          @keyup.enter.native="handleQuery" />
+      <el-form-item label="监测站" prop="stationName">
+        <el-input v-model="queryParams.stationName" placeholder="请输入监测站" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item label="监测站类型" prop="type">
         <el-select v-model="queryParams.type" placeholder="请选择监测站类型" clearable>
@@ -11,8 +10,8 @@
             :value="dict.value" />
         </el-select>
       </el-form-item>
-      <el-form-item label="施工许可证编号" prop="licensNumber">
-        <el-input v-model="queryParams.licensNumber" placeholder="请输入施工许可证编号" clearable
+      <el-form-item label="施工许可证" prop="licensNumber">
+        <el-input v-model="queryParams.licensNumber" placeholder="请输入施工许可证" clearable
           @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item>
@@ -44,10 +43,11 @@
     <el-table v-loading="loading" :data="stationList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="主键" align="center" prop="id" />
-      <el-table-column label="监测站名称" align="center" prop="stationName" />
+      <el-table-column label="地址" align="center" prop="stationAddr" />
+      <el-table-column label="监测站" align="center" prop="stationName" />
       <el-table-column label="创建时间" align="center" prop="createdTime" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.createdTime, '{y}-{m}-{d}') }}</span>
+          <span>{{ parseTime(scope.row.createdTime, '{y}-{m}-{d} ') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="监测站类型" align="center" prop="type">
@@ -60,9 +60,8 @@
           <dict-tag :options="dict.type.station_status" :value="scope.row.stationStatus" />
         </template>
       </el-table-column>
-      <el-table-column label="联系电话" align="center" prop="phone" />
       <el-table-column label="占地面积" align="center" prop="floorSpace" />
-      <el-table-column label="施工许可证编号" align="center" prop="licensNumber" />
+      <el-table-column label="施工许可证" align="center" prop="licensNumber" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)"
@@ -79,8 +78,11 @@
     <!-- 添加或修改监测站点管理对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="监测站名称" prop="stationName">
-          <el-input v-model="form.stationName" placeholder="请输入监测站名称" />
+        <el-form-item label="地址" prop="stationAddr">
+          <el-input v-model="form.stationAddr" placeholder="请输入地址" />
+        </el-form-item>
+        <el-form-item label="监测站" prop="stationName">
+          <el-input v-model="form.stationName" placeholder="请输入监测站" />
         </el-form-item>
         <el-form-item label="监测方式" prop="monitoringWay">
           <el-select v-model="form.monitoringWay" placeholder="请选择监测方式">
@@ -100,15 +102,17 @@
         <el-form-item label="乡/镇简称" prop="townCn">
           <el-input v-model="form.townCn" placeholder="请输入乡/镇简称" />
         </el-form-item>
+        <el-form-item label="部门ID" prop="userId">
+          <el-input v-model="form.userId" placeholder="请输入部门ID" />
+        </el-form-item>
         <el-form-item label="操作员" prop="systemUserId">
-          <el-checkbox-group v-model="form.systemUserId">
-            <el-checkbox v-for="dict in dict.type.tell_user" :key="dict.value" :label="dict.value">
-              {{ dict.label }}
-            </el-checkbox>
-          </el-checkbox-group>
+          <el-radio-group v-model="form.systemUserId">
+            <el-radio v-for="dict in dict.type.tell_user" :key="dict.value" :label="parseInt(dict.value)">{{ dict.label
+              }}</el-radio>
+          </el-radio-group>
         </el-form-item>
         <el-form-item label="创建时间" prop="createdTime">
-          <el-date-picker clearable v-model="form.createdTime" type="date" value-format="yyyy-MM-dd"
+          <el-date-picker clearable v-model="form.createdTime" type="date" value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择创建时间">
           </el-date-picker>
         </el-form-item>
@@ -133,17 +137,23 @@
               :value="parseInt(dict.value)"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="联系电话" prop="phone">
-          <el-input v-model="form.phone" placeholder="请输入联系电话" />
+        <el-form-item label="电话" prop="phone">
+          <el-input v-model="form.phone" placeholder="请输入电话" />
         </el-form-item>
         <el-form-item label="联系人" prop="linkMan">
           <el-input v-model="form.linkMan" placeholder="请输入联系人" />
         </el-form-item>
+        <el-form-item label="国控站名称" prop="countryName">
+          <el-input v-model="form.countryName" placeholder="请输入国控站名称" />
+        </el-form-item>
+        <el-form-item label="国控站ID" prop="countryId">
+          <el-input v-model="form.countryId" placeholder="请输入国控站ID" />
+        </el-form-item>
         <el-form-item label="占地面积" prop="floorSpace">
           <el-input v-model="form.floorSpace" placeholder="请输入占地面积" />
         </el-form-item>
-        <el-form-item label="施工许可证编号" prop="licensNumber">
-          <el-input v-model="form.licensNumber" placeholder="请输入施工许可证编号" />
+        <el-form-item label="施工许可证" prop="licensNumber">
+          <el-input v-model="form.licensNumber" placeholder="请输入施工许可证" />
         </el-form-item>
         <el-form-item label="数据来源" prop="fromResource">
           <el-select v-model="form.fromResource" placeholder="请选择数据来源">
@@ -151,14 +161,14 @@
               :value="parseInt(dict.value)"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="建设单位" prop="jsdwmc">
-          <el-input v-model="form.jsdwmc" placeholder="请输入建设单位" />
+        <el-form-item label="建设单位名称" prop="jsdwmc">
+          <el-input v-model="form.jsdwmc" placeholder="请输入建设单位名称" />
         </el-form-item>
         <el-form-item label="建设单位信用代码" prop="jstsyhydm">
           <el-input v-model="form.jstsyhydm" placeholder="请输入建设单位信用代码" />
         </el-form-item>
-        <el-form-item label="施工单位" prop="sgdwmc">
-          <el-input v-model="form.sgdwmc" placeholder="请输入施工单位" />
+        <el-form-item label="施工单位名称" prop="sgdwmc">
+          <el-input v-model="form.sgdwmc" placeholder="请输入施工单位名称" />
         </el-form-item>
         <el-form-item label="施工单位统一社会信用代码" prop="sgtshyhdym">
           <el-input v-model="form.sgtshyhdym" placeholder="请输入施工单位统一社会信用代码" />
@@ -178,12 +188,15 @@
               :value="dict.value"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="PM10设备安装" prop="sfazjcsb">
-          <el-checkbox-group v-model="form.sfazjcsb">
-            <el-checkbox v-for="dict in dict.type.pm10_status" :key="dict.value" :label="dict.value">
-              {{ dict.label }}
-            </el-checkbox>
-          </el-checkbox-group>
+        <el-form-item label="PM10是否安装" prop="sfazjcsb">
+          <el-radio-group v-model="form.sfazjcsb">
+            <el-radio v-for="dict in dict.type.pm10_status" :key="dict.value" :label="dict.value">{{ dict.label
+              }}</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="统计时间" prop="jgrq">
+          <el-date-picker clearable v-model="form.jgrq" type="date" value-format="yyyy-MM-dd" placeholder="请选择统计时间">
+          </el-date-picker>
         </el-form-item>
         <el-form-item label="设备id" prop="deviceId">
           <el-input v-model="form.deviceId" placeholder="请输入设备id" />
@@ -236,7 +249,7 @@ export default {
       // 表单校验
       rules: {
         stationName: [
-          { required: true, message: "监测站名称不能为空", trigger: "blur" }
+          { required: true, message: "监测站不能为空", trigger: "blur" }
         ],
         createdTime: [
           { required: true, message: "创建时间不能为空", trigger: "blur" }
@@ -253,23 +266,20 @@ export default {
         stationStatus: [
           { required: true, message: "状态不能为空", trigger: "change" }
         ],
-        phone: [
-          { required: true, message: "联系电话不能为空", trigger: "blur" }
-        ],
         floorSpace: [
           { required: true, message: "占地面积不能为空", trigger: "blur" }
         ],
         licensNumber: [
-          { required: true, message: "施工许可证编号不能为空", trigger: "blur" }
+          { required: true, message: "施工许可证不能为空", trigger: "blur" }
         ],
         jsdwmc: [
-          { required: true, message: "建设单位不能为空", trigger: "blur" }
+          { required: true, message: "建设单位名称不能为空", trigger: "blur" }
         ],
         jstsyhydm: [
           { required: true, message: "建设单位信用代码不能为空", trigger: "blur" }
         ],
         sgdwmc: [
-          { required: true, message: "施工单位不能为空", trigger: "blur" }
+          { required: true, message: "施工单位名称不能为空", trigger: "blur" }
         ],
         sgtshyhdym: [
           { required: true, message: "施工单位统一社会信用代码不能为空", trigger: "blur" }
@@ -287,7 +297,7 @@ export default {
           { required: true, message: "施工阶段不能为空", trigger: "change" }
         ],
         sfazjcsb: [
-          { required: true, message: "PM10设备安装不能为空", trigger: "blur" }
+          { required: true, message: "PM10是否安装不能为空", trigger: "change" }
         ],
       }
     };
@@ -314,7 +324,7 @@ export default {
     reset() {
       this.form = {
         id: null,
-        stationCode: null,
+        stationAddr: null,
         stationName: null,
         riverName: null,
         riverCode: null,
@@ -333,8 +343,8 @@ export default {
         countyCn: null,
         town: null,
         townCn: null,
-        departmentId: null,
-        systemUserId: [],
+        userId: null,
+        systemUserId: null,
         createdTime: null,
         lastUpdatedTime: null,
         longitude: null,
@@ -357,7 +367,7 @@ export default {
         jgzr: null,
         jgzrdh: null,
         sjjd: null,
-        sfazjcsb: [],
+        sfazjcsb: null,
         jgrq: null,
         deviceId: null
       };
@@ -391,10 +401,6 @@ export default {
       const id = row.id || this.ids
       getStation(id).then(response => {
         this.form = response.data;
-        if (!this.form.systemUserId) {
-          this.form.systemUserId = [];
-        }
-        this.form.sfazjcsb = this.form.sfazjcsb?.split(",") ?? [];
         this.open = true;
         this.title = "修改监测站点管理";
       });
@@ -403,8 +409,6 @@ export default {
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          this.form.systemUserId = this.form.systemUserId.join(",");
-          this.form.sfazjcsb = this.form.sfazjcsb.join(",");
           if (this.form.id != null) {
             updateStation(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
