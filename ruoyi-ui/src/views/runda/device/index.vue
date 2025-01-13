@@ -7,11 +7,8 @@
       <el-form-item label="设备号" prop="sn">
         <el-input v-model="queryParams.sn" placeholder="请输入设备号" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="站点名称" prop="stationId">
-        <el-select v-model="queryParams.stationId" placeholder="请选择站点">
-          <el-option v-for="station in stationList" :key="station.id" :label="station.stationName"
-            :value="station.id"></el-option>
-        </el-select>
+      <el-form-item label="县名称" prop="countyCn">
+        <el-input v-model="queryParams.countyCn" placeholder="请输入县名称" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -44,9 +41,9 @@
       <el-table-column label="主键" align="center" prop="id" />
       <el-table-column label="设备名称" align="center" prop="name" />
       <el-table-column label="设备号" align="center" prop="sn" />
-      <el-table-column label="时间" align="center" prop="createdTime" width="180">
+      <el-table-column label="创建时间" align="center" prop="createdTime" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.createdTime) }}</span>
+          <span>{{ parseTime(scope.row.createdTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="状态" align="center" prop="status">
@@ -54,24 +51,13 @@
           <dict-tag :options="dict.type.device_status" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="工地状态" align="center" prop="buildStatus">
-        <template slot-scope="scope">
-          <dict-tag :options="dict.type.build_status" :value="scope.row.buildStatus" />
-        </template>
-      </el-table-column>
-      <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="SIM卡号" align="center" prop="phoneNumber" />
-      <el-table-column label="制造商" align="center" prop="manufacturer" />
-      <el-table-column label="标准站" align="center" prop="isStandard">
+      <el-table-column label="是否运维" align="center" prop="isYunwei">
         <template slot-scope="scope">
-          <dict-tag :options="dict.type.is_standard" :value="scope.row.isStandard" />
+          <dict-tag :options="dict.type.is_yunwei" :value="scope.row.isYunwei" />
         </template>
       </el-table-column>
-      <el-table-column label="站点名称" align="center" prop="stationName">
-        <template slot-scope="scope">
-          <span>{{ scope.row.stationName || '未命名站点' }}</span>
-        </template>
-      </el-table-column>
+      <el-table-column label="站点id" align="center" prop="stationId" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)"
@@ -81,10 +67,8 @@
         </template>
       </el-table-column>
     </el-table>
-
     <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
       @pagination="getList" />
-
     <!-- 添加或修改监测设备管理设备对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
@@ -101,8 +85,13 @@
           <el-input v-model="form.latitude" placeholder="请输入纬度" />
         </el-form-item>
         <el-form-item label="创建时间" prop="createdTime">
-          <el-date-picker clearable v-model="form.createdTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss"
+          <el-date-picker clearable v-model="form.createdTime" type="date" value-format="yyyy-MM-dd"
             placeholder="请选择创建时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="最后修改时间" prop="lastUpdatedTime">
+          <el-date-picker clearable v-model="form.lastUpdatedTime" type="date" value-format="yyyy-MM-dd"
+            placeholder="请选择最后修改时间">
           </el-date-picker>
         </el-form-item>
         <el-form-item label="状态" prop="status">
@@ -111,20 +100,35 @@
               :value="parseInt(dict.value)"></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="机构ID" prop="orgId">
+          <el-input v-model="form.orgId" placeholder="请输入机构ID" />
+        </el-form-item>
         <el-form-item label="工地状态" prop="buildStatus">
           <el-select v-model="form.buildStatus" placeholder="请选择工地状态">
             <el-option v-for="dict in dict.type.build_status" :key="dict.value" :label="dict.label"
               :value="parseInt(dict.value)"></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="省" prop="province">
+          <el-input v-model="form.province" placeholder="请输入省" />
+        </el-form-item>
         <el-form-item label="省昵称" prop="provinceCn">
           <el-input v-model="form.provinceCn" placeholder="请输入省昵称" />
+        </el-form-item>
+        <el-form-item label="市" prop="city">
+          <el-input v-model="form.city" placeholder="请输入市" />
         </el-form-item>
         <el-form-item label="市昵称" prop="cityCn">
           <el-input v-model="form.cityCn" placeholder="请输入市昵称" />
         </el-form-item>
-        <el-form-item label="区/县昵称" prop="countyCn">
-          <el-input v-model="form.countyCn" placeholder="请输入区/县昵称" />
+        <el-form-item label="区/县" prop="county">
+          <el-input v-model="form.county" placeholder="请输入区/县" />
+        </el-form-item>
+        <el-form-item label="县名称" prop="countyCn">
+          <el-input v-model="form.countyCn" placeholder="请输入县名称" />
+        </el-form-item>
+        <el-form-item label="乡/镇" prop="town">
+          <el-input v-model="form.town" placeholder="请输入乡/镇" />
         </el-form-item>
         <el-form-item label="乡/镇昵称" prop="townCn">
           <el-input v-model="form.townCn" placeholder="请输入乡/镇昵称" />
@@ -138,6 +142,15 @@
         <el-form-item label="制造商" prop="manufacturer">
           <el-input v-model="form.manufacturer" placeholder="请输入制造商" />
         </el-form-item>
+        <el-form-item label="部门ID" prop="departmentId">
+          <el-input v-model="form.departmentId" placeholder="请输入部门ID" />
+        </el-form-item>
+        <el-form-item label="操作员" prop="systemUserId">
+          <el-radio-group v-model="form.systemUserId">
+            <el-radio v-for="dict in dict.type.tell_user" :key="dict.value" :label="parseInt(dict.value)">{{ dict.label
+              }}</el-radio>
+          </el-radio-group>
+        </el-form-item>
         <el-form-item label="数据来源" prop="fromResource">
           <el-select v-model="form.fromResource" placeholder="请选择数据来源">
             <el-option v-for="dict in dict.type.from_resource" :key="dict.value" :label="dict.label"
@@ -150,17 +163,35 @@
               :value="parseInt(dict.value)"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="标准站" prop="isStandard">
-          <el-select v-model="form.isStandard" placeholder="请选择标准站">
-            <el-option v-for="dict in dict.type.is_standard" :key="dict.value" :label="dict.label"
-              :value="parseInt(dict.value)"></el-option>
-          </el-select>
+        <el-form-item label="ip" prop="ip">
+          <el-input v-model="form.ip" placeholder="请输入ip" />
         </el-form-item>
-        <el-form-item label="站点名称" prop="stationId">
-          <el-select v-model="queryParams.stationId" placeholder="请选择站点">
-            <el-option v-for="station in stationList" :key="station.id" :label="station.stationName"
-              :value="station.id"></el-option>
-          </el-select>
+        <el-form-item label="端口" prop="port">
+          <el-input v-model="form.port" placeholder="请输入端口" />
+        </el-form-item>
+        <el-form-item label="用户名" prop="userName">
+          <el-input v-model="form.userName" placeholder="请输入用户名" />
+        </el-form-item>
+        <el-form-item label="用户密码" prop="password">
+          <el-input v-model="form.password" placeholder="请输入用户密码" />
+        </el-form-item>
+        <el-form-item label="是否运维" prop="isYunwei">
+          <el-radio-group v-model="form.isYunwei">
+            <el-radio v-for="dict in dict.type.is_yunwei" :key="dict.value" :label="parseInt(dict.value)">{{ dict.label
+              }}</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="国控站code" prop="guid">
+          <el-input v-model="form.guid" placeholder="请输入国控站code" />
+        </el-form-item>
+        <el-form-item label="站点id" prop="stationId">
+          <el-input v-model="form.stationId" placeholder="请输入站点id" />
+        </el-form-item>
+        <el-form-item label="地址" prop="addr">
+          <el-input v-model="form.addr" placeholder="请输入地址" />
+        </el-form-item>
+        <el-form-item label="县级id" prop="userId">
+          <el-input v-model="form.userId" placeholder="请输入县级id" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -170,12 +201,12 @@
     </el-dialog>
   </div>
 </template>
+
 <script>
 import { listDevice, getDevice, delDevice, addDevice, updateDevice } from "@/api/runda/device";
-import { listStation } from "@/api/runda/station";
 export default {
   name: "Device",
-  dicts: ['device_status', 'from_resource', 'tell_user', 'device_type', 'is_standard', 'build_status'],
+  dicts: ['device_status', 'is_yunwei', 'from_resource', 'tell_user', 'device_type', 'build_status'],
   data() {
     return {
       // 遮罩层
@@ -192,8 +223,6 @@ export default {
       total: 0,
       // 监测设备管理设备表格数据
       deviceList: [],
-      // 存储站点列表 
-      stationList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -204,7 +233,7 @@ export default {
         pageSize: 10,
         name: null,
         sn: null,
-        stationId: null,
+        countyCn: null,
       },
       // 表单参数
       form: {},
@@ -222,20 +251,11 @@ export default {
         latitude: [
           { required: true, message: "纬度不能为空", trigger: "blur" }
         ],
-        createdTime: [
-          { required: true, message: "创建时间不能为空", trigger: "blur" }
-        ],
-        status: [
-          { required: true, message: "状态不能为空", trigger: "change" }
-        ],
-        phoneNumber: [
-          { required: true, message: "SIM卡号不能为空", trigger: "blur" }
-        ],
         manufacturer: [
           { required: true, message: "制造商不能为空", trigger: "blur" }
         ],
-        isStandard: [
-          { required: true, message: "标准站不能为空", trigger: "change" }
+        isYunwei: [
+          { required: true, message: "是否运维不能为空", trigger: "change" }
         ],
         stationId: [
           { required: true, message: "站点id不能为空", trigger: "blur" }
@@ -245,32 +265,14 @@ export default {
   },
   created() {
     this.getList();
-    this.getStations();
   },
   methods: {
-    /** 查询监测设备管理设备列表 */
     /** 查询监测设备管理设备列表 */
     getList() {
       this.loading = true;
       listDevice(this.queryParams).then(response => {
-        if (response.code === 200 && Array.isArray(response.rows)) {
-          const devicesWithStationNames = response.rows.map(device => {
-            const stationIdString = String(device.stationId); // 确保转换成字符串以匹配
-            const station = this.stationList.find(s => String(s.id) === stationIdString);
-            console.log(`Looking for station with ID ${stationIdString}:`, station); // 调试输出
-            return {
-              ...device,
-              stationName: station ? station.stationName : '未命名站点'
-            };
-          });
-          this.deviceList = devicesWithStationNames;
-          this.total = response.total;
-        } else {
-          console.error('Invalid response:', response);
-        }
-      }).catch(error => {
-        console.error('Failed to fetch devices:', error);
-      }).finally(() => {
+        this.deviceList = response.rows;
+        this.total = response.total;
         this.loading = false;
       });
     },
@@ -278,23 +280,6 @@ export default {
     cancel() {
       this.open = false;
       this.reset();
-    },
-    // 获取站点列表
-    getStations() {
-      listStation().then(response => {
-        if (response.code === 200 && Array.isArray(response.rows)) {
-          // 打印站点列表
-          console.log('Station List:', response.rows);
-          this.stationList = response.rows.map(station => ({
-            id: station.id,
-            stationName: station.stationName // 确保这里使用了正确的字段名
-          }));
-        } else {
-          console.error('Invalid stations data structure:', response);
-        }
-      }).catch(error => {
-        console.error('Failed to fetch stations:', error); // 添加错误处理
-      });
     },
     // 表单重置
     reset() {
@@ -321,18 +306,18 @@ export default {
         phoneNumber: null,
         manufacturer: null,
         departmentId: null,
-        systemUserId: [], // 初始化为空数组
+        systemUserId: null,
         fromResource: null,
         type: null,
         ip: null,
         port: null,
         userName: null,
         password: null,
-        isStandard: null,
+        isYunwei: null,
         guid: null,
         stationId: null,
         addr: null,
-        userId: null
+        userId: null,
       };
       this.resetForm("form");
     },
@@ -358,18 +343,17 @@ export default {
       this.open = true;
       this.title = "添加监测设备管理设备";
     },
+    handleYunwei() {
+      this.reset();
+      this.openYunwei = true;
+      this.title = "运维日志";
+    },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
-      const id = row.id || this.ids;
+      const id = row.id || this.ids
       getDevice(id).then(response => {
         this.form = response.data;
-        // 确保 systemUserId 是数组
-        if (!this.form.systemUserId) {
-          this.form.systemUserId = [];
-        } else if (typeof this.form.systemUserId === 'string') {
-          this.form.systemUserId = this.form.systemUserId.split(",");
-        }
         this.open = true;
         this.title = "修改监测设备管理设备";
       });
@@ -378,12 +362,6 @@ export default {
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          console.log('Before join:', this.form.systemUserId); // 调试信息
-          if (Array.isArray(this.form.systemUserId)) {
-            this.form.systemUserId = this.form.systemUserId.join(",");
-          } else {
-            console.error('systemUserId is not an array:', this.form.systemUserId);
-          }
           if (this.form.id != null) {
             updateDevice(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.runda.mapper.SysYunweiMapper">
+    
+    <resultMap type="SysYunwei" id="SysYunweiResult">
+        <result property="id"    column="id"    />
+        <result property="siteName"    column="site_name"    />
+        <result property="maintenanceTime"    column="maintenance_time"    />
+        <result property="isFinsh"    column="is_finsh"    />
+        <result property="img"    column="img"    />
+        <result property="log"    column="log"    />
+        <result property="sn"    column="sn"    />
+    </resultMap>
+
+    <sql id="selectSysYunweiVo">
+        select id, site_name, maintenance_time, is_finsh, img, log,sn from sys_yunwei
+    </sql>
+
+    <select id="selectSysYunweiList" parameterType="SysYunwei" resultMap="SysYunweiResult">
+        <include refid="selectSysYunweiVo"/>
+        <where>  
+            <if test="siteName != null  and siteName != ''"> and site_name like concat('%', #{siteName}, '%')</if>
+            <if test="maintenanceTime != null "> and maintenance_time = #{maintenanceTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectSysYunweiById" parameterType="Long" resultMap="SysYunweiResult">
+        <include refid="selectSysYunweiVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertSysYunwei" parameterType="SysYunwei" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_yunwei
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="siteName != null and siteName != ''">site_name,</if>
+            <if test="maintenanceTime != null">maintenance_time,</if>
+            <if test="isFinsh != null">is_finsh,</if>
+            <if test="img != null">img,</if>
+            <if test="log != null and log != ''">log,</if>
+            <if test="sn != null and sn != ''">sn,</if>
+            <if test="siteName == null or siteName == ''">site_name,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="siteName != null and siteName != ''">#{siteName},</if>
+            <if test="maintenanceTime != null">#{maintenanceTime},</if>
+            <if test="isFinsh != null">#{isFinsh},</if>
+            <if test="img != null">#{img},</if>
+            <if test="log != null and log != ''">#{log},</if>
+            <if test="sn != null and sn != ''">#{sn},</if>
+        </trim>
+    </insert>
+
+    <update id="updateSysYunwei" parameterType="SysYunwei">
+        update sys_yunwei
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="siteName != null and siteName != ''">site_name = #{siteName},</if>
+            <if test="maintenanceTime != null">maintenance_time = #{maintenanceTime},</if>
+            <if test="isFinsh != null">is_finsh = #{isFinsh},</if>
+            <if test="img != null">img = #{img},</if>
+            <if test="log != null and log != ''">log = #{log},</if>
+            <if test="sn != null and sn != ''">sn=#{sn},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteSysYunweiById" parameterType="Long">
+        delete from sys_yunwei where id = #{id}
+    </delete>
+
+    <delete id="deleteSysYunweiByIds" parameterType="String">
+        delete from sys_yunwei where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

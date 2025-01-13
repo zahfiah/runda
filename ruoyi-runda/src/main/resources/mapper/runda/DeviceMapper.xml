@@ -34,7 +34,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="port"    column="port"    />
         <result property="userName"    column="user_name"    />
         <result property="password"    column="password"    />
-        <result property="isStandard"    column="is_standard"    />
+        <result property="isYunwei"    column="is_yunwei"    />
         <result property="guid"    column="guid"    />
         <result property="stationId"    column="station_id"    />
         <result property="addr"    column="addr"    />
@@ -42,7 +42,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectDeviceVo">
-        select id, name, sn, longitude, latitude, created_time, last_updated_time, status, org_id, build_status, province, province_cn, city, city_cn, county, county_cn, town, town_cn, remark, phone_number, manufacturer, department_id, system_user_id, fromResource, type, ip, port, user_name, password, is_standard, guid, station_id, addr, user_id from device
+        select id, name, sn, longitude, latitude, created_time, last_updated_time, status, org_id, build_status, province, province_cn, city, city_cn, county, county_cn, town, town_cn, remark, phone_number, manufacturer, department_id, system_user_id, fromResource, type, ip, port, user_name, password, is_yunwei, guid, station_id, addr, user_id from device
     </sql>
 
     <select id="selectDeviceList" parameterType="Device" resultMap="DeviceResult">
@@ -90,7 +90,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="port != null">port,</if>
             <if test="userName != null">user_name,</if>
             <if test="password != null">password,</if>
-            <if test="isStandard != null">is_standard,</if>
+            <if test="isYunwei != null">is_yunwei,</if>
             <if test="guid != null">guid,</if>
             <if test="stationId != null">station_id,</if>
             <if test="addr != null">addr,</if>
@@ -125,7 +125,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="port != null">#{port},</if>
             <if test="userName != null">#{userName},</if>
             <if test="password != null">#{password},</if>
-            <if test="isStandard != null">#{isStandard},</if>
+            <if test="isYunwei != null">#{isYunwei},</if>
             <if test="guid != null">#{guid},</if>
             <if test="stationId != null">#{stationId},</if>
             <if test="addr != null">#{addr},</if>
@@ -164,7 +164,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="port != null">port = #{port},</if>
             <if test="userName != null">user_name = #{userName},</if>
             <if test="password != null">password = #{password},</if>
-            <if test="isStandard != null">is_standard = #{isStandard},</if>
+            <if test="isYunwei!= null">is_yunwei = #{isYunwei},</if>
             <if test="guid != null">guid = #{guid},</if>
             <if test="stationId != null">station_id = #{stationId},</if>
             <if test="addr != null">addr = #{addr},</if>
