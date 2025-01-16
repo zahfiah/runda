@@ -7,7 +7,7 @@ import com.ruoyi.runda.domain.Device;
  * 监测设备管理设备Service接口
  * 
  * @author runda
- * @date 2025-01-07
+ * @date 2025-01-11
  */
 public interface IDeviceService 
 {

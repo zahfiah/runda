@@ -11,7 +11,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 监测站点管理对象 station
  * 
  * @author runda
- * @date 2025-01-07
+ * @date 2025-01-10
  */
 public class Station extends BaseEntity
 {
@@ -20,11 +20,12 @@ public class Station extends BaseEntity
     /** 主键 */
     private Long id;
 
-    /** 站点代码 */
-    private String stationCode;
+    /** 地址 */
+    @Excel(name = "地址")
+    private String stationAddr;
 
-    /** 监测站名称 */
-    @Excel(name = "监测站名称")
+    /** 监测站 */
+    @Excel(name = "监测站")
     private String stationName;
 
     /** 河流名称 */
@@ -33,25 +34,25 @@ public class Station extends BaseEntity
     /** 河流代码 */
     private String riverCode;
 
-    /** 断面名称 */
+    /** 断面名称（水质监测） */
     private String sectionName;
 
     /** 断面代码 */
     private String sectionCode;
 
-    /** 断面所在河流级别 */
+    /** 断面所在河流级别：1：干流；2：平原区；3：一级支流 */
     private Long riverLevel;
 
-    /** 汇入水体 */
+    /** 汇入水体（河、湖、库、渠） */
     private String inwardWater;
 
     /** 河流断面属性 */
     private String sectionProperties;
 
-    /** 监测方式 */
+    /** 监测方式（1：自动站；2：手工站） */
     private Long monitoringWay;
 
-    /** 断面控制级别（1：国控；2：省控；3：市控；4：县控） */
+    /** 断面控制级别 */
     private Long sectionControlLevel;
 
     /** 省 */
@@ -79,35 +80,34 @@ public class Station extends BaseEntity
     private String townCn;
 
     /** 部门ID */
-    private Long departmentId;
+    private Long userId;
 
     /** 操作员 */
     private Long systemUserId;
 
     /** 创建时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "创建时间", width = 30, dateFormat = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "创建时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date createdTime;
 
     /** 最后修改时间 */
     private Date lastUpdatedTime;
 
     /** 经度 */
-    private Long longitude;
+    private Double longitude;
 
     /** 纬度 */
-    private Long latitude;
+    private Double latitude;
 
-    /** 监测站类型 */
-    @Excel(name = "监测站类型")
+    /** 监测站类型（1：空气监测；2：水质监测；3：土壤监测） */
+    @Excel(name = "监测站类型", readConverterExp = "1=：空气监测；2：水质监测；3：土壤监测")
     private Long type;
 
     /** 状态 */
     @Excel(name = "状态")
     private Long stationStatus;
 
-    /** 联系电话 */
-    @Excel(name = "联系电话")
+    /** 电话 */
     private String phone;
 
     /** 联系人 */
@@ -123,20 +123,20 @@ public class Station extends BaseEntity
     @Excel(name = "占地面积")
     private Long floorSpace;
 
-    /** 施工许可证编号 */
-    @Excel(name = "施工许可证编号")
+    /** 施工许可证 */
+    @Excel(name = "施工许可证")
     private String licensNumber;
 
-    /** 数据来源 */
+    /** 数据来源（0:本平台；1:第三方） */
     private Long fromResource;
 
-    /** 建设单位 */
+    /** 建设单位名称 */
     private String jsdwmc;
 
     /** 建设单位信用代码 */
     private String jstsyhydm;
 
-    /** 施工单位 */
+    /** 施工单位名称 */
     private String sgdwmc;
 
     /** 施工单位统一社会信用代码 */
@@ -154,7 +154,7 @@ public class Station extends BaseEntity
     /** 施工阶段 */
     private String sjjd;
 
-    /** PM10设备安装 */
+    /** PM10是否安装 */
     private String sfazjcsb;
 
     /** 统计时间 */
@@ -172,14 +172,14 @@ public class Station extends BaseEntity
     {
         return id;
     }
-    public void setStationCode(String stationCode) 
+    public void setStationAddr(String stationAddr) 
     {
-        this.stationCode = stationCode;
+        this.stationAddr = stationAddr;
     }
 
-    public String getStationCode() 
+    public String getStationAddr() 
     {
-        return stationCode;
+        return stationAddr;
     }
     public void setStationName(String stationName) 
     {
@@ -343,14 +343,14 @@ public class Station extends BaseEntity
     {
         return townCn;
     }
-    public void setDepartmentId(Long departmentId) 
+    public void setUserId(Long userId) 
     {
-        this.departmentId = departmentId;
+        this.userId = userId;
     }
 
-    public Long getDepartmentId() 
+    public Long getUserId() 
     {
-        return departmentId;
+        return userId;
     }
     public void setSystemUserId(Long systemUserId) 
     {
@@ -379,21 +379,21 @@ public class Station extends BaseEntity
     {
         return lastUpdatedTime;
     }
-    public void setLongitude(Long longitude) 
+    public void setLongitude(Double longitude) 
     {
         this.longitude = longitude;
     }
 
-    public Long getLongitude() 
+    public Double getLongitude() 
     {
         return longitude;
     }
-    public void setLatitude(Long latitude) 
+    public void setLatitude(Double latitude) 
     {
         this.latitude = latitude;
     }
 
-    public Long getLatitude() 
+    public Double getLatitude() 
     {
         return latitude;
     }
@@ -582,7 +582,7 @@ public class Station extends BaseEntity
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
             .append("id", getId())
-            .append("stationCode", getStationCode())
+            .append("stationAddr", getStationAddr())
             .append("stationName", getStationName())
             .append("riverName", getRiverName())
             .append("riverCode", getRiverCode())
@@ -601,7 +601,7 @@ public class Station extends BaseEntity
             .append("countyCn", getCountyCn())
             .append("town", getTown())
             .append("townCn", getTownCn())
-            .append("departmentId", getDepartmentId())
+            .append("userId", getUserId())
             .append("systemUserId", getSystemUserId())
             .append("createdTime", getCreatedTime())
             .append("lastUpdatedTime", getLastUpdatedTime())

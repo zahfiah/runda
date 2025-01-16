@@ -6,7 +6,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     
     <resultMap type="Station" id="StationResult">
         <result property="id"    column="id"    />
-        <result property="stationCode"    column="station_code"    />
+        <result property="stationAddr"    column="station_addr"    />
         <result property="stationName"    column="station_name"    />
         <result property="riverName"    column="river_name"    />
         <result property="riverCode"    column="river_code"    />
@@ -25,7 +25,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="countyCn"    column="county_cn"    />
         <result property="town"    column="town"    />
         <result property="townCn"    column="town_cn"    />
-        <result property="departmentId"    column="department_id"    />
+        <result property="userId"    column="user_id"    />
         <result property="systemUserId"    column="system_user_id"    />
         <result property="createdTime"    column="created_time"    />
         <result property="lastUpdatedTime"    column="last_updated_time"    />
@@ -55,7 +55,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectStationVo">
-        select id, station_code, station_name, river_name, river_code, section_name, section_code, river_level, inward_water, section_properties, monitoring_way, section_control_level, province, province_cn, city, city_cn, county, county_cn, town, town_cn, department_id, system_user_id, created_time, last_updated_time, longitude, latitude, type, remark, station_status, phone, link_man, country_name, country_id, floor_space, licens_number, from_resource, jsdwmc, jstsyhydm, sgdwmc, sgtshyhdym, jgbm, jgzr, jgzrdh, sjjd, sfazjcsb, jgrq, device_id from station
+        select id, station_addr, station_name, river_name, river_code, section_name, section_code, river_level, inward_water, section_properties, monitoring_way, section_control_level, province, province_cn, city, city_cn, county, county_cn, town, town_cn, user_id, system_user_id, created_time, last_updated_time, longitude, latitude, type, remark, station_status, phone, link_man, country_name, country_id, floor_space, licens_number, from_resource, jsdwmc, jstsyhydm, sgdwmc, sgtshyhdym, jgbm, jgzr, jgzrdh, sjjd, sfazjcsb, jgrq, device_id from station
     </sql>
 
     <select id="selectStationList" parameterType="Station" resultMap="StationResult">
@@ -76,7 +76,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         insert into station
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null">id,</if>
-            <if test="stationCode != null">station_code,</if>
+            <if test="stationAddr != null">station_addr,</if>
             <if test="stationName != null and stationName != ''">station_name,</if>
             <if test="riverName != null">river_name,</if>
             <if test="riverCode != null">river_code,</if>
@@ -95,7 +95,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="countyCn != null">county_cn,</if>
             <if test="town != null">town,</if>
             <if test="townCn != null">town_cn,</if>
-            <if test="departmentId != null">department_id,</if>
+            <if test="userId != null">user_id,</if>
             <if test="systemUserId != null">system_user_id,</if>
             <if test="createdTime != null">created_time,</if>
             <if test="lastUpdatedTime != null">last_updated_time,</if>
@@ -125,7 +125,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">#{id},</if>
-            <if test="stationCode != null">#{stationCode},</if>
+            <if test="stationAddr != null">#{stationAddr},</if>
             <if test="stationName != null and stationName != ''">#{stationName},</if>
             <if test="riverName != null">#{riverName},</if>
             <if test="riverCode != null">#{riverCode},</if>
@@ -144,7 +144,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="countyCn != null">#{countyCn},</if>
             <if test="town != null">#{town},</if>
             <if test="townCn != null">#{townCn},</if>
-            <if test="departmentId != null">#{departmentId},</if>
+            <if test="userId != null">#{userId},</if>
             <if test="systemUserId != null">#{systemUserId},</if>
             <if test="createdTime != null">#{createdTime},</if>
             <if test="lastUpdatedTime != null">#{lastUpdatedTime},</if>
@@ -177,7 +177,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <update id="updateStation" parameterType="Station">
         update station
         <trim prefix="SET" suffixOverrides=",">
-            <if test="stationCode != null">station_code = #{stationCode},</if>
+            <if test="stationAddr != null">station_addr = #{stationAddr},</if>
             <if test="stationName != null and stationName != ''">station_name = #{stationName},</if>
             <if test="riverName != null">river_name = #{riverName},</if>
             <if test="riverCode != null">river_code = #{riverCode},</if>
@@ -196,7 +196,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="countyCn != null">county_cn = #{countyCn},</if>
             <if test="town != null">town = #{town},</if>
             <if test="townCn != null">town_cn = #{townCn},</if>
-            <if test="departmentId != null">department_id = #{departmentId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
             <if test="systemUserId != null">system_user_id = #{systemUserId},</if>
             <if test="createdTime != null">created_time = #{createdTime},</if>
             <if test="lastUpdatedTime != null">last_updated_time = #{lastUpdatedTime},</if>

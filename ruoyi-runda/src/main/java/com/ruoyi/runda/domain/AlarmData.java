@@ -15,7 +15,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  */
 public class AlarmData extends BaseEntity
 {
-    private static final long serialVersionUID = 1L;
+    private static final  long serialVersionUID = 1L;
 
     /** 主键 */
     private Long id;

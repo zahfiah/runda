@@ -25,7 +25,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * 监测设备管理设备Controller
  * 
  * @author runda
- * @date 2025-01-07
+ * @date 2025-01-11
  */
 @RestController
 @RequestMapping("/runda/device")

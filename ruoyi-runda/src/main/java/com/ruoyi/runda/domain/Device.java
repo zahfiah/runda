@@ -11,7 +11,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 监测设备管理设备对象 device
  * 
  * @author runda
- * @date 2025-01-07
+ * @date 2025-01-11
  */
 public class Device extends BaseEntity
 {
@@ -35,8 +35,8 @@ public class Device extends BaseEntity
     private Double latitude;
 
     /** 创建时间 */
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    @Excel(name = "创建时间", width = 30, dateFormat = " yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "创建时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date createdTime;
 
     /** 最后修改时间 */
@@ -50,7 +50,6 @@ public class Device extends BaseEntity
     private Long orgId;
 
     /** 工地状态 */
-    @Excel(name = "工地状态")
     private Long buildStatus;
 
     /** 省 */
@@ -68,7 +67,7 @@ public class Device extends BaseEntity
     /** 区/县 */
     private Long county;
 
-    /** 区/县昵称 */
+    /** 县名称 */
     private String countyCn;
 
     /** 乡/镇 */
@@ -82,10 +81,9 @@ public class Device extends BaseEntity
     private String phoneNumber;
 
     /** 制造商 */
-    @Excel(name = "制造商")
     private String manufacturer;
 
-    /** 部门id */
+    /** 部门ID */
     private Long departmentId;
 
     /** 操作员 */
@@ -106,14 +104,14 @@ public class Device extends BaseEntity
     /** 用户名 */
     private String userName;
 
-    /** 密码 */
+    /** 用户密码 */
     private String password;
 
-    /** 标准站 */
-    @Excel(name = "标准站")
-    private Long isStandard;
+    /** 是否运维 */
+    @Excel(name = "是否运维")
+    private Long isYunwei;
 
-    /** 国控code */
+    /** 国控站code */
     private String guid;
 
     /** 站点id */
@@ -153,30 +151,30 @@ public class Device extends BaseEntity
     {
         return sn;
     }
-    public void setLongitude(Double longitude)
+    public void setLongitude(Double longitude) 
     {
         this.longitude = longitude;
     }
 
-    public Double getLongitude()
+    public Double getLongitude() 
     {
         return longitude;
     }
-    public void setLatitude(Double latitude)
+    public void setLatitude(Double latitude) 
     {
         this.latitude = latitude;
     }
 
-    public Double getLatitude()
+    public Double getLatitude() 
     {
         return latitude;
     }
-    public void setCreatedTime(Date createdTime)
+    public void setCreatedTime(Date createdTime) 
     {
         this.createdTime = createdTime;
     }
 
-    public Date getCreatedTime()
+    public Date getCreatedTime() 
     {
         return createdTime;
     }
@@ -378,14 +376,14 @@ public class Device extends BaseEntity
     {
         return password;
     }
-    public void setIsStandard(Long isStandard) 
+    public void setIsYunwei(Long isYunwei) 
     {
-        this.isStandard = isStandard;
+        this.isYunwei = isYunwei;
     }
 
-    public Long getIsStandard() 
+    public Long getIsYunwei() 
     {
-        return isStandard;
+        return isYunwei;
     }
     public void setGuid(String guid) 
     {
@@ -456,7 +454,7 @@ public class Device extends BaseEntity
             .append("port", getPort())
             .append("userName", getUserName())
             .append("password", getPassword())
-            .append("isStandard", getIsStandard())
+            .append("isYunwei", getIsYunwei())
             .append("guid", getGuid())
             .append("stationId", getStationId())
             .append("addr", getAddr())
