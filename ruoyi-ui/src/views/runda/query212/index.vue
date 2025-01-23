@@ -238,6 +238,17 @@ export default {
         this.loading = false;
       });
     },
+    /** 查询当天大气数据 */
+    getTodayData() {
+      this.loading = true;
+      getTodayData().then(response => {
+        this.query212List = response; // 直接将返回的数据赋值给表格数据
+        this.total = response.length; // 更新总条数
+        this.loading = false;
+      }).catch(() => {
+        this.loading = false;
+      });
+    },
     // 取消按钮
     cancel() {
       this.open = false;
@@ -352,4 +363,5 @@ export default {
     }
   }
 };
+
 </script>

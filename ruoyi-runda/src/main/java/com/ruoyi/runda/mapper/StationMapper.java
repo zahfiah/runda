@@ -2,6 +2,7 @@ package com.ruoyi.runda.mapper;
 
 import java.util.List;
 import com.ruoyi.runda.domain.Station;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * 监测站点管理Mapper接口
@@ -9,6 +10,7 @@ import com.ruoyi.runda.domain.Station;
  * @author runda
  * @date 2025-01-10
  */
+@Mapper
 public interface StationMapper 
 {
     /**
