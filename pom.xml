@@ -29,10 +29,8 @@
         <commons.io.version>2.13.0</commons.io.version>
         <poi.version>4.1.2</poi.version>
         <velocity.version>2.3</velocity.version>
-        <!--  MongoDB版本号为3.6.3-->
         <mongodb.version>3.6.3</mongodb.version>
         <jwt.version>0.9.1</jwt.version>
-        <!-- override dependency version -->
         <tomcat.version>9.0.96</tomcat.version>
         <logback.version>1.2.13</logback.version>
         <spring-security.version>5.7.12</spring-security.version>
@@ -42,6 +40,14 @@
     <!-- 依赖声明 -->
     <dependencyManagement>
         <dependencies>
+            <!-- SpringBoot的依赖配置-->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
             <!-- 覆盖SpringFramework的依赖配置-->
             <dependency>
@@ -57,15 +63,6 @@
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-bom</artifactId>
                 <version>${spring-security.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <!-- SpringBoot的依赖配置-->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -95,17 +92,18 @@
                 <artifactId>tomcat-embed-el</artifactId>
                 <version>${tomcat.version}</version>
             </dependency>
-            <!--MongoDB数据库-->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-data-mongodb</artifactId>
-            </dependency>
-
 
             <dependency>
                 <groupId>org.apache.tomcat.embed</groupId>
                 <artifactId>tomcat-embed-websocket</artifactId>
                 <version>${tomcat.version}</version>
+            </dependency>
+
+            <!--MongoDB数据库-->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-mongodb</artifactId>
+                <version>${spring-boot.version}</version>
             </dependency>
 
             <!-- 阿里数据库连接池 -->
@@ -232,7 +230,6 @@
                 <artifactId>ruoyi-runda</artifactId>
                 <version>${ruoyi.version}</version>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
