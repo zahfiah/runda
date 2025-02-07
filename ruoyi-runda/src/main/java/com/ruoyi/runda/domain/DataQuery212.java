@@ -195,7 +195,7 @@ public class DataQuery212 extends BaseEntity {
         setLatitude(latitude);
         setCreateDate(createDate);
         setDate(date);
-//		this
+
     }
 
     // Getters and Setters

@@ -3,6 +3,7 @@ package com.ruoyi.runda.domain;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -17,7 +18,7 @@ public class AirDataHour {
     private static final long serialVersionUID = 1L;
 
     @Id
-    private Long id;
+    private ObjectId id;
 
     /** 空气质量指数 */
     @Field( "aqi")
@@ -36,7 +37,7 @@ public class AirDataHour {
     private String positionName;
 
     /** CO浓度 */
-    @Field(name = "coThickness浓度")
+    @Field("coThickness")
     private Double coThickness;
 
     /** CO浓度/24h */
@@ -44,15 +45,15 @@ public class AirDataHour {
     private Double co24h;
 
     /** NO2浓度 */
-    @Field(name = "no2coThickness浓度")
-    private Double no2Thickness;
+    @Field("noThickness")
+    private Double noThickness;
 
     /** NO2浓度/24h */
     @Field(name = "no2浓度/24h")
     private Double no224h;
 
     /** O3 浓度 */
-    @Field(name = "co3 浓度")
+    @Field("co3Thickness")
     private Double co3Thickness;
 
     /** O3 浓度/24h */
@@ -64,7 +65,7 @@ public class AirDataHour {
     private Double o38h;
 
     /** PM10浓度 */
-    @Field(name = "pm10浓度")
+    @Field( "pm10")
     private Double pm10;
 
     /** PM10浓度/24h */
@@ -72,7 +73,7 @@ public class AirDataHour {
     private Double pm1024h;
 
     /** PM2.5浓度 */
-    @Field(name = "pm2_5浓度")
+    @Field("dust")
     private Double pm25;
 
     /** PM2.5浓度/24h */
@@ -80,7 +81,7 @@ public class AirDataHour {
     private Double pm2524h;
 
     /** SO2浓度 */
-    @Field(name = "so2Thickness浓度")
+    @Field( "so2Thickness")
     private Double so2Thickness;
 
     /** SO2浓度/24h */
@@ -88,7 +89,7 @@ public class AirDataHour {
     private Double so224h;
 
     /** 首要污染物 */
-    @Field(name = "首要污染物")
+    @Field( "primaryPollutant")
     private String primaryPollutant;
 
     /** 空气质量指数类别 */
@@ -106,8 +107,12 @@ public class AirDataHour {
     private Date modifyDate;
 
     /** 设备id */
-    @Field(name = "设备id")
-    private Long deviceId;
+    @Field(name = "deviceId")
+    private String deviceId;
+
+    /** 部门id */
+    @Field("deptId")
+    private String deptId;
 
     /** 日期 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -123,7 +128,7 @@ public class AirDataHour {
 
     /** 污染等级 */
     @Field("level")
-    private Integer level;
+    private String level;
 
     /** 颜色 */
     @Field("color")
@@ -133,19 +138,30 @@ public class AirDataHour {
     @Field("ranking")
     private Integer ranking;
 
-    public Long getId() {
+    /** 小时 */
+    private int hour;
+
+    public ObjectId getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(ObjectId id) {
         this.id = id;
     }
 
-    public Long getDeviceId() {
+    public String getDeviceId() {
         return deviceId;
     }
 
-    public void setDeviceId(Long deviceId) {
+    public void setDeptId(String deptId) {
+        this.deptId = deptId;
+    }
+
+    public String getDeptId() {
+        return deptId;
+    }
+
+    public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
     }
 
@@ -206,11 +222,11 @@ public class AirDataHour {
     }
 
     public Double getNo2Thickness() {
-        return no2Thickness;
+        return noThickness;
     }
 
-    public void setNo2Thickness(Double no2Thickness) {
-        this.no2Thickness = no2Thickness;
+    public void setNo2Thickness(Double noThickness) {
+        this.noThickness = noThickness;
     }
 
     public Double getNo224h() {
@@ -341,11 +357,11 @@ public class AirDataHour {
         this.latitude = latitude;
     }
 
-    public Integer getLevel() {
+    public String getLevel() {
         return level;
     }
 
-    public void setLevel(Integer level) {
+    public void setLevel(String level) {
         this.level = level;
     }
 
@@ -365,11 +381,20 @@ public class AirDataHour {
         this.ranking = ranking;
     }
 
+    public int getHour() {
+        return hour;
+    }
+
+    public void setHour(int hour) {
+        this.hour = hour;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
                 .append("id", getId())
                 .append("deviceId", getDeviceId())
+                .append("deptId", getDeptId())
                 .append("date", getDate())
                 .append("aqi", getAqi())
                 .append("area", getArea())
@@ -397,6 +422,7 @@ public class AirDataHour {
                 .append("level", getLevel())
                 .append("color", getColor())
                 .append("ranking", getRanking())
+                .append("hour", getHour())
                 .toString();
     }
 }

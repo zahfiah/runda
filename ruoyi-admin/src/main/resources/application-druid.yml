@@ -62,7 +62,7 @@ spring:
 
     data:
         mongodb:
-            uri: mongodb://zytlpure:1QUazLZU@112.126.94.158:28028/?authSource=envcloud_zjk
+            uri: mongodb://localhost:27017/mongodb
             options:
                 maxConnectionsPerHost: 100
                 connectTimeoutMS: 30000
