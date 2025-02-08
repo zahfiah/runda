@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.runda.mapper.StationMapper">
-    
+
     <resultMap type="Station" id="StationResult">
         <result property="id"    column="id"    />
         <result property="stationAddr"    column="station_addr"    />
@@ -60,13 +60,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="selectStationList" parameterType="Station" resultMap="StationResult">
         <include refid="selectStationVo"/>
-        <where>  
+        <where>
             <if test="stationName != null  and stationName != ''"> and station_name like concat('%', #{stationName}, '%')</if>
             <if test="type != null "> and type = #{type}</if>
             <if test="licensNumber != null  and licensNumber != ''"> and licens_number = #{licensNumber}</if>
         </where>
     </select>
-    
+
     <select id="selectStationById" parameterType="Long" resultMap="StationResult">
         <include refid="selectStationVo"/>
         where id = #{id}
@@ -122,7 +122,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="sfazjcsb != null and sfazjcsb != ''">sfazjcsb,</if>
             <if test="jgrq != null">jgrq,</if>
             <if test="deviceId != null">device_id,</if>
-         </trim>
+        </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">#{id},</if>
             <if test="stationAddr != null">#{stationAddr},</if>
@@ -171,7 +171,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="sfazjcsb != null and sfazjcsb != ''">#{sfazjcsb},</if>
             <if test="jgrq != null">#{jgrq},</if>
             <if test="deviceId != null">#{deviceId},</if>
-         </trim>
+        </trim>
     </insert>
 
     <update id="updateStation" parameterType="Station">
@@ -196,7 +196,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="countyCn != null">county_cn = #{countyCn},</if>
             <if test="town != null">town = #{town},</if>
             <if test="townCn != null">town_cn = #{townCn},</if>
-            <if test="userId != null">department_id = #{userId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
             <if test="systemUserId != null">system_user_id = #{systemUserId},</if>
             <if test="createdTime != null">created_time = #{createdTime},</if>
             <if test="lastUpdatedTime != null">last_updated_time = #{lastUpdatedTime},</if>
@@ -232,7 +232,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteStationByIds" parameterType="String">
-        delete from station where id in 
+        delete from station where id in
         <foreach item="id" collection="array" open="(" separator="," close=")">
             #{id}
         </foreach>
