@@ -103,6 +103,16 @@ public class DataQuery212Controller extends BaseController {
 
         return dataQuery212Service.selectDataQuery212ListByDateTimeRangeAndDeviceId(deviceId, startDateTime, endDateTime, page, size);
     }
+
+    @GetMapping("/listByDateAndDeviceId")
+    public TableDataInfo listByDateAndDeviceId(
+            @RequestParam("deviceId") String deviceId,
+            @RequestParam("date") String date,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+
+        return dataQuery212Service.selectDataQuery212ListByDateAndDeviceId(deviceId, date, page, size);
+    }
 }
 
 
