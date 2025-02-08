@@ -20,6 +20,8 @@ public interface DataQuery212Repository extends MongoRepository<DataQuery212, St
 
     Page<DataQuery212> findAll(Pageable pageable);
 
+    Page<DataQuery212> findByDeviceIdAndCreateDateBetween(String deviceId, long startTimestamp, long endTimestamp, Pageable pageable);
+
 }
 
 

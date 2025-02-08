@@ -235,6 +235,62 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
             logger.error("Error during scheduled task", e);
         }
     }
+
+    public TableDataInfo selectDataQuery212ListByDateTimeRangeAndDeviceId(
+            String deviceId,
+            String startDateTimeStr,
+            String endDateTimeStr,
+            int page,
+            int size) {
+
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            Date startDate = dateFormat.parse(startDateTimeStr);
+            Date endDate = dateFormat.parse(endDateTimeStr);
+
+            long startTimestamp = startDate.getTime();
+            long endTimestamp = endDate.getTime();
+
+            // 创建 Pageable 对象时使用正确的类
+            Pageable pageable = PageRequest.of(page - 1, size); // 注意：Spring Data 是0索引的
+
+            // 打印查询条件
+            logger.debug("deviceId: {}, startTimestamp: {}, endTimestamp: {}", deviceId, startTimestamp, endTimestamp);
+
+            // 调用新增的组合查询方法
+            Page<DataQuery212> dataPage = dataQuery212Repository.findByDeviceIdAndCreateDateBetween(deviceId, startTimestamp, endTimestamp, pageable);
+
+            // 打印查询到的数据条数
+            logger.debug("Total number of records found: {}", dataPage.getTotalElements());
+
+            // 打印查询到的数据
+            if (logger.isDebugEnabled()) {
+                for (DataQuery212 data : dataPage.getContent()) {
+                    logger.debug("DataQuery212: {}", data);
+                }
+            }
+
+            TableDataInfo result = new TableDataInfo();
+            result.setCode(0);
+            result.setMsg("ok");
+            result.setTotal(dataPage.getTotalElements());
+            result.setRows(dataPage.getContent());
+
+            return result;
+        } catch (ParseException e) {
+            logger.error("Error parsing date time", e);
+            TableDataInfo errorResult = new TableDataInfo();
+            errorResult.setCode(-1);
+            errorResult.setMsg("Invalid date time format. Please use yyyy-MM-dd HH:mm.");
+            return errorResult;
+        } catch (Exception e) {
+            logger.error("Error while fetching data", e);
+            TableDataInfo errorResult = new TableDataInfo();
+            errorResult.setCode(-1);
+            errorResult.setMsg(e.getMessage());
+            return errorResult;
+        }
+    }
 }
 
 

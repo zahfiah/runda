@@ -140,9 +140,11 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         metrics.put("level", getAqiLevel(averageAqi));
         metrics.put("quality", getAqiQuality(averageAqi));
         metrics.put("color", getAqiColor(averageAqi));
-
-        metrics.put("primaryPollutant", getPrimaryPollutant(reports));
-
+        if(averageAqi>50) {
+            metrics.put("primaryPollutant", getPrimaryPollutant(reports));
+        }else {
+            metrics.put("primaryPollutant", "-");
+        }
         return new AbstractMap.SimpleEntry<>(deviceId, metrics);
     }
 
@@ -326,9 +328,11 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         metrics.put("level", getAqiLevel(averageAqi));
         metrics.put("quality", getAqiQuality(averageAqi));
         metrics.put("color", getAqiColor(averageAqi));
-
-        metrics.put("primaryPollutant", getPrimaryPollutant(reports));
-
+        if(averageAqi>50) {
+            metrics.put("primaryPollutant", getPrimaryPollutant(reports));
+        }else {
+            metrics.put("primaryPollutant", "-");
+        }
         return metrics;
     }
 

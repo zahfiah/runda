@@ -14,4 +14,6 @@ public interface DataQuery212Service {
     TableDataInfo selectDataQuery212ListByDateTimeRange(String startDateTimeStr, String endDateTimeStr, int page, int size);
 
     List<DataQuery212> fetchLatestData();
+
+    TableDataInfo selectDataQuery212ListByDateTimeRangeAndDeviceId(String deviceId, String startDateTime, String endDateTime, int page, int size);
 }

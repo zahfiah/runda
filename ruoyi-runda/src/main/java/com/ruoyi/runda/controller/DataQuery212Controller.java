@@ -92,6 +92,17 @@ public class DataQuery212Controller extends BaseController {
         logger.debug("Fetching current day data...");
         return dataQuery212Service.fetchLatestData();
     }
+
+    @GetMapping("/listByDateTimeRangeAndDeviceId")
+    public TableDataInfo listByDateTimeRangeAndDeviceId(
+            @RequestParam("deviceId") String deviceId,
+            @RequestParam("startDateTime") String startDateTime,
+            @RequestParam("endDateTime") String endDateTime,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+
+        return dataQuery212Service.selectDataQuery212ListByDateTimeRangeAndDeviceId(deviceId, startDateTime, endDateTime, page, size);
+    }
 }
 
 
