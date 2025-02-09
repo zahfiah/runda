@@ -1,49 +1,37 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="报警类型" prop="alarmType">
-        <el-select v-model="queryParams.alarmType" placeholder="请选择报警类型" clearable>
-          <el-option
-            v-for="dict in dict.type.alarm_type"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="报警参数类型" prop="alarmParamType">
-        <el-select v-model="queryParams.alarmParamType" placeholder="请选择报警参数类型" clearable>
-          <el-option
-            v-for="dict in dict.type.alarm_param_type"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="开始时间" prop="beginTime">
-        <el-date-picker clearable
-          v-model="queryParams.beginTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择开始时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="结束时间" prop="endTime">
-        <el-date-picker clearable
-          v-model="queryParams.endTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择结束时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="部门id" prop="userId">
+      <el-form-item label="设备id" prop="deviceId">
         <el-input
-          v-model="queryParams.userId"
-          placeholder="请输入部门id"
+          v-model="queryParams.deviceId"
+          placeholder="请输入设备id"
           clearable
           @keyup.enter.native="handleQuery"
         />
+      </el-form-item>
+      <el-form-item label="查询时间" prop="queryTime">
+        <el-date-picker clearable
+          v-model="queryParams.queryTime"
+          type="date"
+          value-format="yyyy-MM-dd"
+          placeholder="请选择查询时间">
+        </el-date-picker>
+      </el-form-item>
+      <el-form-item label="创建时间" prop="createdAt">
+        <el-date-picker clearable
+          v-model="queryParams.createdAt"
+          type="date"
+          value-format="yyyy-MM-dd"
+          placeholder="请选择创建时间">
+        </el-date-picker>
+      </el-form-item>
+      <el-form-item label="更新时间" prop="updatedAt">
+        <el-date-picker clearable
+          v-model="queryParams.updatedAt"
+          type="date"
+          value-format="yyyy-MM-dd"
+          placeholder="请选择更新时间">
+        </el-date-picker>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -100,36 +88,32 @@
     <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="主键" align="center" prop="id" />
-      <el-table-column label="报警类型" align="center" prop="alarmType">
-        <template slot-scope="scope">
-          <dict-tag :options="dict.type.alarm_type" :value="scope.row.alarmType"/>
-        </template>
-      </el-table-column>
-      <el-table-column label="报警参数类型" align="center" prop="alarmParamType">
-        <template slot-scope="scope">
-          <dict-tag :options="dict.type.alarm_param_type" :value="scope.row.alarmParamType"/>
-        </template>
-      </el-table-column>
-      <el-table-column label="报警值" align="center" prop="alarmValue" />
-      <el-table-column label="阀值" align="center" prop="standardValue" />
-      <el-table-column label="开始时间" align="center" prop="beginTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.beginTime, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="结束时间" align="center" prop="endTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="报警信息状态" align="center" prop="status">
-        <template slot-scope="scope">
-          <dict-tag :options="dict.type.alarm_status" :value="scope.row.status"/>
-        </template>
-      </el-table-column>
-      <el-table-column label="站点id" align="center" prop="stationId" />
       <el-table-column label="设备id" align="center" prop="deviceId" />
-      <el-table-column label="部门id" align="center" prop="userId" />
+      <el-table-column label="查询时间" align="center" prop="queryTime" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.queryTime, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="平均aqi" align="center" prop="averageAqi" />
+      <el-table-column label="平均so2" align="center" prop="averageSo2" />
+      <el-table-column label="平均no2" align="center" prop="averageNo2" />
+      <el-table-column label="平均o3" align="center" prop="averageO3" />
+      <el-table-column label="平均pm25" align="center" prop="averagePm25" />
+      <el-table-column label="平均pm10" align="center" prop="averagePm10" />
+      <el-table-column label="级别" align="center" prop="aqiLevel" />
+      <el-table-column label="质量" align="center" prop="aqiQuality" />
+      <el-table-column label="颜色" align="center" prop="aqiColor" />
+      <el-table-column label="主要污染物" align="center" prop="primaryPollutant" />
+      <el-table-column label="创建时间" align="center" prop="createdAt" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.createdAt, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="更新时间" align="center" prop="updatedAt" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.updatedAt, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -158,70 +142,9 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改告警日志对话框 -->
+    <!-- 添加或修改监测小时报表对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="报警类型" prop="alarmType">
-          <el-select v-model="form.alarmType" placeholder="请选择报警类型">
-            <el-option
-              v-for="dict in dict.type.alarm_type"
-              :key="dict.value"
-              :label="dict.label"
-              :value="parseInt(dict.value)"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="报警参数类型" prop="alarmParamType">
-          <el-select v-model="form.alarmParamType" placeholder="请选择报警参数类型">
-            <el-option
-              v-for="dict in dict.type.alarm_param_type"
-              :key="dict.value"
-              :label="dict.label"
-              :value="parseInt(dict.value)"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="报警值" prop="alarmValue">
-          <el-input v-model="form.alarmValue" placeholder="请输入报警值" />
-        </el-form-item>
-        <el-form-item label="阀值" prop="standardValue">
-          <el-input v-model="form.standardValue" placeholder="请输入阀值" />
-        </el-form-item>
-        <el-form-item label="开始时间" prop="beginTime">
-          <el-date-picker clearable
-            v-model="form.beginTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择开始时间">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="结束时间" prop="endTime">
-          <el-date-picker clearable
-            v-model="form.endTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择结束时间">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="报警信息状态" prop="status">
-          <el-select v-model="form.status" placeholder="请选择报警信息状态">
-            <el-option
-              v-for="dict in dict.type.alarm_status"
-              :key="dict.value"
-              :label="dict.label"
-              :value="parseInt(dict.value)"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="站点id" prop="stationId">
-          <el-input v-model="form.stationId" placeholder="请输入站点id" />
-        </el-form-item>
-        <el-form-item label="设备id" prop="deviceId">
-          <el-input v-model="form.deviceId" placeholder="请输入设备id" />
-        </el-form-item>
-        <el-form-item label="部门id" prop="userId">
-          <el-input v-model="form.userId" placeholder="请输入部门id" />
-        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -236,7 +159,6 @@ import { listData, getData, delData, addData, updateData } from "@/api/runda/dat
 
 export default {
   name: "Data",
-  dicts: ['alarm_status', 'alarm_type', 'alarm_param_type'],
   data() {
     return {
       // 遮罩层
@@ -251,7 +173,7 @@ export default {
       showSearch: true,
       // 总条数
       total: 0,
-      // 告警日志表格数据
+      // 监测小时报表表格数据
       dataList: [],
       // 弹出层标题
       title: "",
@@ -261,37 +183,15 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        alarmType: null,
-        alarmParamType: null,
-        beginTime: null,
-        endTime: null,
-        userId: null,
+        deviceId: null,
+        queryTime: null,
+        createdAt: null,
+        updatedAt: null
       },
       // 表单参数
       form: {},
       // 表单校验
       rules: {
-        alarmType: [
-          { required: true, message: "报警类型不能为空", trigger: "change" }
-        ],
-        alarmParamType: [
-          { required: true, message: "报警参数类型不能为空", trigger: "change" }
-        ],
-        standardValue: [
-          { required: true, message: "阀值不能为空", trigger: "blur" }
-        ],
-        status: [
-          { required: true, message: "报警信息状态不能为空", trigger: "change" }
-        ],
-        stationId: [
-          { required: true, message: "站点id不能为空", trigger: "blur" }
-        ],
-        deviceId: [
-          { required: true, message: "设备id不能为空", trigger: "blur" }
-        ],
-        userId: [
-          { required: true, message: "部门id不能为空", trigger: "blur" }
-        ],
       }
     };
   },
@@ -299,7 +199,7 @@ export default {
     this.getList();
   },
   methods: {
-    /** 查询告警日志列表 */
+    /** 查询监测小时报表列表 */
     getList() {
       this.loading = true;
       listData(this.queryParams).then(response => {
@@ -317,20 +217,20 @@ export default {
     reset() {
       this.form = {
         id: null,
-        alarmType: null,
-        alarmParamType: null,
-        alarmValue: null,
-        standardValue: null,
-        beginTime: null,
-        endTime: null,
-        status: null,
-        stationId: null,
-        staName: null,
         deviceId: null,
-        deviceName: null,
-        userId: null,
-        userName: null,
-        userPath: null
+        queryTime: null,
+        averageAqi: null,
+        averageSo2: null,
+        averageNo2: null,
+        averageO3: null,
+        averagePm25: null,
+        averagePm10: null,
+        aqiLevel: null,
+        aqiQuality: null,
+        aqiColor: null,
+        primaryPollutant: null,
+        createdAt: null,
+        updatedAt: null
       };
       this.resetForm("form");
     },
@@ -354,7 +254,7 @@ export default {
     handleAdd() {
       this.reset();
       this.open = true;
-      this.title = "添加告警日志";
+      this.title = "添加监测小时报表";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
@@ -363,7 +263,7 @@ export default {
       getData(id).then(response => {
         this.form = response.data;
         this.open = true;
-        this.title = "修改告警日志";
+        this.title = "修改监测小时报表";
       });
     },
     /** 提交按钮 */
@@ -389,7 +289,7 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除告警日志编号为"' + ids + '"的数据项？').then(function() {
+      this.$modal.confirm('是否确认删除监测小时报表编号为"' + ids + '"的数据项？').then(function() {
         return delData(ids);
       }).then(() => {
         this.getList();

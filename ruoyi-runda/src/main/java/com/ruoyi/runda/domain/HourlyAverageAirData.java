@@ -1,0 +1,273 @@
+package com.ruoyi.runda.domain;
+
+import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import com.ruoyi.common.annotation.Excel;
+import com.ruoyi.common.core.domain.BaseEntity;
+
+import javax.persistence.*;
+
+/**
+ * 监测小时报表对象 hourly_average_air_data
+ * 
+ * @author runda
+ * @date 2025-02-08
+ */
+@Entity
+public class HourlyAverageAirData extends BaseEntity
+{
+    private static final long serialVersionUID = 1L;
+
+    /** 主键 */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    /** 设备id */
+    @Excel(name = "设备id")
+    @Column(name = "device_id")
+    private String deviceId;
+
+//    /** 查询时间 */
+//    @JsonFormat(pattern = "yyyy-MM-dd")
+//    @Column(name = "query_time")
+//    @Excel(name = "查询时间", width = 30, dateFormat = "yyyy-MM-dd")
+//    private Date queryTime;
+
+    /** 平均aqi */
+    @Excel(name = "平均aqi")
+    @Column(name = "average_aqi")
+    private Long averageAqi;
+
+    /** 平均so2 */
+    @Excel(name = "平均so2")
+    @Column(name = "average_so2")
+    private Long averageSo2;
+
+    /** 平均no2 */
+    @Excel(name = "平均no2")
+    @Column(name = "average_no2")
+    private Long averageNo2;
+
+    /** 平均o3 */
+    @Excel(name = "平均o3")
+    @Column(name = "average_o3")
+    private Long averageO3;
+
+    /** 平均pm25 */
+    @Excel(name = "平均pm25")
+    @Column(name = "average_pm2_5")
+    private Long averagePm25;
+
+    /** 平均pm10 */
+    @Excel(name = "平均pm10")
+    @Column(name = "average_pm10")
+    private Long averagePm10;
+
+    /** 级别 */
+    @Excel(name = "级别")
+    @Column(name = "aqi_level")
+    private String aqiLevel;
+
+    /** 质量 */
+    @Excel(name = "质量")
+    @Column(name = "aqi_quality")
+    private String aqiQuality;
+
+    /** 颜色 */
+    @Excel(name = "颜色")
+    @Column(name = "aqi_color")
+    private String aqiColor;
+
+    /** 主要污染物 */
+    @Excel(name = "主要污染物")
+    @Column(name = "primary_pollutant")
+    private String primaryPollutant;
+
+    @Excel(name = "部门id")
+    @Column(name = "dept_id")
+    private String deptId;
+
+    /** 创建时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @Column(name = "created_At")
+    @Excel(name = "创建时间", width = 30, dateFormat = "yyyy-MM-dd")
+    private Date createdAt;
+
+    /** 更新时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @Column(name = "updated_At")
+    @Excel(name = "更新时间", width = 30, dateFormat = "yyyy-MM-dd")
+    private Date updatedAt;
+
+    public void setId(Long id) 
+    {
+        this.id = id;
+    }
+
+    public Long getId()
+    {
+        return id;
+    }
+    public void setDeviceId(String deviceId) 
+    {
+        this.deviceId = deviceId;
+    }
+
+    public String getDeviceId() 
+    {
+        return deviceId;
+    }
+//    public void setQueryTime(Date queryTime)
+//    {
+//        this.queryTime = queryTime;
+//    }
+//
+//    public Date getQueryTime()
+//    {
+//        return queryTime;
+//    }
+    public void setAverageAqi(Long averageAqi) 
+    {
+        this.averageAqi = averageAqi;
+    }
+
+    public Long getAverageAqi() 
+    {
+        return averageAqi;
+    }
+    public void setAverageSo2(Long averageSo2) 
+    {
+        this.averageSo2 = averageSo2;
+    }
+
+    public Long getAverageSo2() 
+    {
+        return averageSo2;
+    }
+    public void setAverageNo2(Long averageNo2) 
+    {
+        this.averageNo2 = averageNo2;
+    }
+
+    public Long getAverageNo2() 
+    {
+        return averageNo2;
+    }
+    public void setAverageO3(Long averageO3) 
+    {
+        this.averageO3 = averageO3;
+    }
+
+    public Long getAverageO3() 
+    {
+        return averageO3;
+    }
+    public void setAveragePm25(Long averagePm25) 
+    {
+        this.averagePm25 = averagePm25;
+    }
+
+    public Long getAveragePm25() 
+    {
+        return averagePm25;
+    }
+    public void setAveragePm10(Long averagePm10) 
+    {
+        this.averagePm10 = averagePm10;
+    }
+
+    public Long getAveragePm10() 
+    {
+        return averagePm10;
+    }
+    public void setAqiLevel(String aqiLevel) 
+    {
+        this.aqiLevel = aqiLevel;
+    }
+
+    public String getAqiLevel() 
+    {
+        return aqiLevel;
+    }
+    public void setAqiQuality(String aqiQuality) 
+    {
+        this.aqiQuality = aqiQuality;
+    }
+
+    public String getAqiQuality() 
+    {
+        return aqiQuality;
+    }
+    public void setAqiColor(String aqiColor) 
+    {
+        this.aqiColor = aqiColor;
+    }
+
+    public String getAqiColor() 
+    {
+        return aqiColor;
+    }
+    public void setPrimaryPollutant(String primaryPollutant) 
+    {
+        this.primaryPollutant = primaryPollutant;
+    }
+
+    public String getPrimaryPollutant() 
+    {
+        return primaryPollutant;
+    }
+
+    public void setDeptId(String DeptId)
+    {
+        this.deptId = deptId;
+    }
+
+    public String getDeptId()
+    {
+        return deptId;
+    }
+
+    public void setCreatedAt(Date createdAt) 
+    {
+        this.createdAt = createdAt;
+    }
+
+    public Date getCreatedAt() 
+    {
+        return createdAt;
+    }
+    public void setUpdatedAt(Date updatedAt) 
+    {
+        this.updatedAt = updatedAt;
+    }
+
+    public Date getUpdatedAt() 
+    {
+        return updatedAt;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
+            .append("id", getId())
+            .append("deviceId", getDeviceId())
+                .append("deptId", getDeptId())
+//            .append("queryTime", getQueryTime())
+            .append("averageAqi", getAverageAqi())
+            .append("averageSo2", getAverageSo2())
+            .append("averageNo2", getAverageNo2())
+            .append("averageO3", getAverageO3())
+            .append("averagePm25", getAveragePm25())
+            .append("averagePm10", getAveragePm10())
+            .append("aqiLevel", getAqiLevel())
+            .append("aqiQuality", getAqiQuality())
+            .append("aqiColor", getAqiColor())
+            .append("primaryPollutant", getPrimaryPollutant())
+            .append("createdAt", getCreatedAt())
+            .append("updatedAt", getUpdatedAt())
+            .toString();
+    }
+}

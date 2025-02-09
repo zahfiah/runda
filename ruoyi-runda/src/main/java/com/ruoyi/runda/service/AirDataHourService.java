@@ -5,6 +5,8 @@ import com.ruoyi.runda.domain.AirDataHour;
 import org.springframework.data.domain.Pageable;
 
 import java.text.ParseException;
+import java.util.List;
+import java.util.Map;
 
 
 public interface AirDataHourService {
@@ -21,4 +23,6 @@ public interface AirDataHourService {
     TableDataInfo calculateDailyAveragePm25AndPm10(String date, String deviceId) throws Exception;
 
     TableDataInfo getCurrentHourAverageForAllDevices() throws Exception;
+
+    void saveToMysql(List<Map<String, Object>> data) throws ParseException;
 }

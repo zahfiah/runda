@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 查询告警日志列表
+// 查询监测小时报表列表
 export function listData(query) {
   return request({
     url: '/runda/data/list',
@@ -9,7 +9,7 @@ export function listData(query) {
   })
 }
 
-// 查询告警日志详细
+// 查询监测小时报表详细
 export function getData(id) {
   return request({
     url: '/runda/data/' + id,
@@ -17,7 +17,7 @@ export function getData(id) {
   })
 }
 
-// 新增告警日志
+// 新增监测小时报表
 export function addData(data) {
   return request({
     url: '/runda/data',
@@ -26,7 +26,7 @@ export function addData(data) {
   })
 }
 
-// 修改告警日志
+// 修改监测小时报表
 export function updateData(data) {
   return request({
     url: '/runda/data',
@@ -35,7 +35,7 @@ export function updateData(data) {
   })
 }
 
-// 删除告警日志
+// 删除监测小时报表
 export function delData(id) {
   return request({
     url: '/runda/data/' + id,

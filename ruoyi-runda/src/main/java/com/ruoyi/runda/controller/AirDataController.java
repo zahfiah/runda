@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/runda/air")
@@ -36,7 +38,15 @@ public class AirDataController extends BaseController {
 
     @GetMapping("/hourly-average-for-specific-time")
     public TableDataInfo hourlyAverageForSpecificTime(@RequestParam String dateTime, @RequestParam String deviceId) throws Exception {
-        return airDataHourService.calculateHourlyAverageForSpecificTime(dateTime, deviceId);
+        TableDataInfo tableDataInfo = airDataHourService.calculateHourlyAverageForSpecificTime(dateTime, deviceId);
+
+        // 获取计算结果中的数据列表
+        List<Map<String, Object>> data = (List<Map<String, Object>>) tableDataInfo.getRows();
+
+        // 保存计算结果到MySQL
+        airDataHourService.saveToMysql(data);
+
+        return tableDataInfo;
     }
 
     @GetMapping("/daily-average-pm25-and-pm10")

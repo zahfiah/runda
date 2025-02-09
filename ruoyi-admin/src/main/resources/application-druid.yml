@@ -1,40 +1,26 @@
-# 数据源配置
 spring:
     datasource:
         type: com.alibaba.druid.pool.DruidDataSource
         driverClassName: com.mysql.cj.jdbc.Driver
         druid:
-            # 主库数据源
             master:
-                url: jdbc:mysql://localhost:3306/runda?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+                url: jdbc:mysql://localhost:3306/runda?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8
                 username: root
                 password: 2818542061
-            # 从库数据源
             slave:
-                # 从数据源开关/默认关闭
                 enabled: false
                 url:
                 username:
                 password:
-            # 初始连接数
             initialSize: 5
-            # 最小连接池数量
             minIdle: 10
-            # 最大连接池数量
             maxActive: 20
-            # 配置获取连接等待超时的时间
             maxWait: 60000
-            # 配置连接超时时间
             connectTimeout: 30000
-            # 配置网络超时时间
             socketTimeout: 60000
-            # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
             timeBetweenEvictionRunsMillis: 60000
-            # 配置一个连接在池中最小生存的时间，单位是毫秒
             minEvictableIdleTimeMillis: 300000
-            # 配置一个连接在池中最大生存的时间，单位是毫秒
             maxEvictableIdleTimeMillis: 900000
-            # 配置检测连接是否有效
             validationQuery: SELECT 1 FROM DUAL
             testWhileIdle: true
             testOnBorrow: false
@@ -43,16 +29,13 @@ spring:
                 enabled: true
             statViewServlet:
                 enabled: true
-                # 设置白名单，不填则允许所有访问
-                allow:
+                allow: 127.0.0.1  # 仅允许本地访问
                 url-pattern: /druid/*
-                # 控制台管理用户名和密码
                 login-username: ruoyi
                 login-password: 123456
             filter:
                 stat:
                     enabled: true
-                    # 慢SQL记录
                     log-slow-sql: true
                     slow-sql-millis: 1000
                     merge-sql: true
@@ -65,9 +48,20 @@ spring:
             uri: mongodb://localhost:27017/mongodb
             options:
                 maxConnectionsPerHost: 100
-                connectTimeoutMS: 30000
-                socketTimeoutMS: 30000
-                serverSelectionTimeoutMS: 30000
+                connectTimeoutMS: 10000  # 10秒
+                socketTimeoutMS: 10000   # 10秒
+                serverSelectionTimeoutMS: 10000  # 10秒
+
+    jpa:
+        hibernate:
+            ddl-auto: none  # 在生产环境中建议设置为none
+        show-sql: true
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.MySQL8Dialect
+
+    main:
+        allow-bean-definition-overriding: true  # 启用Bean定义覆盖
 
 mybatis-plus:
     configuration:
