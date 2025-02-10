@@ -92,10 +92,10 @@ public class DataQuery212Controller extends BaseController {
 
 
     @GetMapping("/export")
-    public void exportData(@RequestParam String startDateTimeStr, @RequestParam String endDateTimeStr,
+    public void exportData(@RequestParam String startDateTime, @RequestParam String endDateTime,
                            @RequestParam int page, @RequestParam int size, HttpServletResponse response) throws IOException, ParseException {
         // 查询数据
-        TableDataInfo tableDataInfo = dataQuery212Service.selectDataQuery212ListByDateTimeRange(startDateTimeStr, endDateTimeStr, page, size);
+        TableDataInfo tableDataInfo = dataQuery212Service.selectDataQuery212ListByDateTimeRange(startDateTime, endDateTime, page, size);
 
         // 提取数据列表
         List<DataQuery212> dataList = (List<DataQuery212>) tableDataInfo.getRows();

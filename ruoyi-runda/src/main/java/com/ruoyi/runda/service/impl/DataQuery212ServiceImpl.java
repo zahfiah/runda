@@ -160,20 +160,21 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
             row.createCell(0).setCellValue(data.getDeviceId());
             row.createCell(1).setCellValue(data.getDeviceName());
             row.createCell(2).setCellValue(data.getStationId());
-            row.createCell(3).setCellValue(data.getStationName());
-            row.createCell(4).setCellValue(data.getSn());
-            row.createCell(5).setCellValue(data.getTemperature());
-            row.createCell(6).setCellValue(data.getHumidity());
-            row.createCell(7).setCellValue(data.getWindSpeed());
-            row.createCell(8).setCellValue(data.getWindDirectionString());
-            row.createCell(9).setCellValue(data.getPressure());
-            row.createCell(10).setCellValue(data.getDust());
-            row.createCell(11).setCellValue(data.getPm10());
-            row.createCell(12).setCellValue(data.getLongitude());
-            row.createCell(13).setCellValue(data.getLatitude());
-            row.createCell(14).setCellValue(data.getAqi());
-            row.createCell(15).setCellValue(data.getPrimaryPollutant());
-            row.createCell(16).setCellValue(data.getCreateDate().toString());
+            row.createCell(3).setCellValue(data.getStationName() != null ? data.getStationName() : "");
+            row.createCell(4).setCellValue(data.getSn() != null ? data.getSn() : "");
+            row.createCell(5).setCellValue(data.getTemperature() != null ? data.getTemperature().toString() : "");
+            row.createCell(6).setCellValue(data.getHumidity() != null ? data.getHumidity().toString() : "");
+            row.createCell(7).setCellValue(data.getWindSpeed() != null ? data.getWindSpeed().toString() : "");
+            row.createCell(8).setCellValue(data.getWindDirectionString() != null ? data.getWindDirectionString() : "");
+            row.createCell(9).setCellValue(data.getPressure() != null ? data.getPressure().toString() : "");
+            row.createCell(10).setCellValue(data.getDust() != null ? data.getDust().toString() : "");
+            row.createCell(11).setCellValue(data.getPm10() != null ? data.getPm10().toString() : "");
+            row.createCell(12).setCellValue(data.getLongitude() != null ? data.getLongitude().toString() : "");
+            row.createCell(13).setCellValue(data.getLatitude() != null ? data.getLatitude().toString() : "");
+            row.createCell(14).setCellValue(data.getAqi() != null ? data.getAqi().toString() : "");
+            row.createCell(15).setCellValue(data.getPrimaryPollutant() != null ? data.getPrimaryPollutant() : "");
+            row.createCell(16).setCellValue(data.getCreateDate() != null ? data.getCreateDate().toString() : "");
+
         }
 
         // 自动调整列宽
