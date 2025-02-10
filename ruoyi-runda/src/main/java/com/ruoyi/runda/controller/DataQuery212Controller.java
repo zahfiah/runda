@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.List;
 
 
@@ -87,6 +90,19 @@ public class DataQuery212Controller extends BaseController {
         return dataQuery212Service.selectDataQuery212ListByDateTimeRange(startDateTime, endDateTime, page, size);
     }
 
+
+    @GetMapping("/export")
+    public void exportData(@RequestParam String startDateTimeStr, @RequestParam String endDateTimeStr,
+                           @RequestParam int page, @RequestParam int size, HttpServletResponse response) throws IOException, ParseException {
+        // 查询数据
+        TableDataInfo tableDataInfo = dataQuery212Service.selectDataQuery212ListByDateTimeRange(startDateTimeStr, endDateTimeStr, page, size);
+
+        // 提取数据列表
+        List<DataQuery212> dataList = (List<DataQuery212>) tableDataInfo.getRows();
+
+        // 导出为Excel
+        dataQuery212Service.exportToExcel(response, dataList);
+    }
     @GetMapping("/list")
     public List<DataQuery212> listCurrentDayData() {
         logger.debug("Fetching current day data...");
@@ -102,6 +118,22 @@ public class DataQuery212Controller extends BaseController {
             @RequestParam(value = "size", defaultValue = "10") int size) {
 
         return dataQuery212Service.selectDataQuery212ListByDateTimeRangeAndDeviceId(deviceId, startDateTime, endDateTime, page, size);
+    }
+
+    @GetMapping("/export2")
+    public void exportData( @RequestParam("deviceId") String deviceId,
+                            @RequestParam("startDateTime") String startDateTime,
+                            @RequestParam("endDateTime") String endDateTime,
+                            @RequestParam(value = "page", defaultValue = "1") int page,
+                            @RequestParam(value = "size", defaultValue = "10") int size, HttpServletResponse response) throws IOException, ParseException {
+        // 查询数据
+        TableDataInfo tableDataInfo =dataQuery212Service.selectDataQuery212ListByDateTimeRangeAndDeviceId(deviceId, startDateTime, endDateTime, page, size);
+
+        // 提取数据列表
+        List<DataQuery212> dataList = (List<DataQuery212>) tableDataInfo.getRows();
+
+        // 导出为Excel
+        dataQuery212Service.exportToExcel(response, dataList);
     }
 
     @GetMapping("/listByDateAndDeviceId")

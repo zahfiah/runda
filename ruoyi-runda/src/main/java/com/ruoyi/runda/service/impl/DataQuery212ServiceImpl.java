@@ -4,6 +4,11 @@ import com.ruoyi.runda.domain.DataQuery212;
 import com.ruoyi.runda.repository.DataQuery212Repository;
 import com.ruoyi.runda.service.DataQuery212Service;
 import com.ruoyi.common.core.page.TableDataInfo;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +20,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -132,7 +140,57 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
         }
     }
 
+    public void exportToExcel(HttpServletResponse response, List<DataQuery212> dataList) throws IOException {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Data");
 
+        // 创建标题行
+        Row headerRow = sheet.createRow(0);
+        String[] headers = {"DeviceId", "DeviceName","StationId","StationName", "sn","temperature","humidity","windSpeed","windDirectionString",
+                "pressure","dust","pm10","longitude","latitude","aqi","primaryPollutant","CreateDate"};
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(headers[i]);
+        }
+
+        // 填充数据
+        int rowNum = 1;
+        for (DataQuery212 data : dataList) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(data.getDeviceId());
+            row.createCell(1).setCellValue(data.getDeviceName());
+            row.createCell(2).setCellValue(data.getStationId());
+            row.createCell(3).setCellValue(data.getStationName());
+            row.createCell(4).setCellValue(data.getSn());
+            row.createCell(5).setCellValue(data.getTemperature());
+            row.createCell(6).setCellValue(data.getHumidity());
+            row.createCell(7).setCellValue(data.getWindSpeed());
+            row.createCell(8).setCellValue(data.getWindDirectionString());
+            row.createCell(9).setCellValue(data.getPressure());
+            row.createCell(10).setCellValue(data.getDust());
+            row.createCell(11).setCellValue(data.getPm10());
+            row.createCell(12).setCellValue(data.getLongitude());
+            row.createCell(13).setCellValue(data.getLatitude());
+            row.createCell(14).setCellValue(data.getAqi());
+            row.createCell(15).setCellValue(data.getPrimaryPollutant());
+            row.createCell(16).setCellValue(data.getCreateDate().toString());
+        }
+
+        // 自动调整列宽
+        for (int i = 0; i < headers.length; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        // 设置响应头信息
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=data.xlsx");
+
+        // 将工作簿写入响应输出流
+        try (OutputStream outputStream = response.getOutputStream()) {
+            workbook.write(outputStream);
+        }
+        workbook.close();
+    }
     @Override
     public TableDataInfo selectDataQuery212ListByDateTimeRange(String startDateTimeStr, String endDateTimeStr, int page, int size) {
         try {
