@@ -110,6 +110,10 @@ public class AirDataHour {
     @Field(name = "deviceId")
     private String deviceId;
 
+    /** 站点id */
+    @Field(name = "stationId")
+    private String stationId;
+
     /** 部门id */
     @Field("deptId")
     private String deptId;
@@ -163,6 +167,14 @@ public class AirDataHour {
 
     public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
+    }
+
+    public String getStationId() {
+        return stationId;
+    }
+
+    public void setStationId(String stationId) {
+        this.stationId = stationId;
     }
 
     public String getStationCode() {

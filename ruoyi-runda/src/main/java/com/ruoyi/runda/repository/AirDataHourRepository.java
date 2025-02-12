@@ -40,4 +40,7 @@ public interface AirDataHourRepository extends MongoRepository<AirDataHour, Stri
     @Query("{ 'createDate' : { $gte : ?0, $lte : ?1 } }")
     List<AirDataHour> findByCreateDateBetween(long startDate, long endDate);
 
+    @Query("{ 'createDate' : { $gte : ?0, $lte : ?1 } }")
+    List<AirDataHour> findByCreateDateBetween2(long startDate, long endDate);
+
 }
