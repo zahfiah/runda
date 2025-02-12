@@ -614,12 +614,34 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             results.add(result);
         }
 
+        // 查询已存在的 HourlyAverageAirData 记录
+        Set<String> deviceIds = groupedData.keySet();
+        List<HourlyAverageAirData> existingRecords = hourlyAverageAirDataRepository.findByDateAndDeviceIds(date, deviceIds);
+
+        // 更新记录
+        for (Map<String, Object> result : results) {
+            String deviceId = (String) result.get("deviceId");
+            HourlyAverageAirData existingRecord = existingRecords.stream()
+                    .filter(record -> deviceId.equals(record.getDeviceId()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (existingRecord != null) {
+                existingRecord.setAveragePm25_24(((Number) result.get("averagePm2_5_24")).longValue());
+                existingRecord.setAveragePm10_24(((Number) result.get("averagePm10_24")).longValue());
+                hourlyAverageAirDataRepository.save(existingRecord);
+            } else {
+                logger.warn("No existing record found for deviceId: {}", deviceId);
+            }
+        }
+
         // 将结果转换为TableDataInfo类型
         TableDataInfo tableDataInfo = new TableDataInfo();
         tableDataInfo.setCode(0); // Assuming success code is 0
         tableDataInfo.setMsg("success");
         tableDataInfo.setRows(results);
         tableDataInfo.setTotal(hourlyData.size());
+
         return tableDataInfo;
     }
 

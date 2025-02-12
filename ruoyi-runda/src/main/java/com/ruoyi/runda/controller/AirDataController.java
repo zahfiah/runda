@@ -35,7 +35,6 @@ public class AirDataController extends BaseController {
     public TableDataInfo averageByDateTime(@RequestParam String dateTime) throws Exception {
         TableDataInfo tableDataInfo = airDataHourService.calculateAverageForSpecificDateTime(dateTime);
         List<Map<String, Object>> data = (List<Map<String, Object>>) tableDataInfo.getRows();
-        airDataHourService.saveToMysql(data);
         return tableDataInfo;
     }
 
