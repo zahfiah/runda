@@ -7,13 +7,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="HourlyAverageAirData" id="HourlyAverageAirDataResult">
         <result property="id"    column="id"    />
         <result property="deviceId"    column="device_id"    />
-        <result property="queryTime"    column="query_time"    />
         <result property="averageAqi"    column="average_aqi"    />
         <result property="averageSo2"    column="average_so2"    />
         <result property="averageNo2"    column="average_no2"    />
         <result property="averageO3"    column="average_o3"    />
         <result property="averagePm25"    column="average_pm2_5"    />
         <result property="averagePm10"    column="average_pm10"    />
+        <result property="averagePm25_24"    column="average_pm2_5_24"    />
+        <result property="averagePm10_24"    column="average_pm10_24"    />
         <result property="aqiLevel"    column="aqi_level"    />
         <result property="aqiQuality"    column="aqi_quality"    />
         <result property="aqiColor"    column="aqi_color"    />
@@ -23,14 +24,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectHourlyAverageAirDataVo">
-        select id, device_id, query_time, average_aqi, average_so2, average_no2, average_o3, average_pm2_5, average_pm10, aqi_level, aqi_quality, aqi_color, primary_pollutant, created_at, updated_at from hourly_average_air_data
+        select id, device_id,  average_aqi, average_so2, average_no2, average_o3, average_pm2_5, average_pm10,  aqi_level, aqi_quality, aqi_color, primary_pollutant, created_at, updated_at,average_pm2_5_24, average_pm10_24, from hourly_average_air_data
     </sql>
 
     <select id="selectHourlyAverageAirDataList" parameterType="HourlyAverageAirData" resultMap="HourlyAverageAirDataResult">
         <include refid="selectHourlyAverageAirDataVo"/>
         <where>  
             <if test="deviceId != null  and deviceId != ''"> and device_id = #{deviceId}</if>
-            <if test="queryTime != null "> and query_time = #{queryTime}</if>
             <if test="createdAt != null "> and created_at = #{createdAt}</if>
             <if test="updatedAt != null "> and updated_at = #{updatedAt}</if>
         </where>
@@ -45,7 +45,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         insert into hourly_average_air_data
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="deviceId != null">device_id,</if>
-            <if test="queryTime != null">query_time,</if>
             <if test="averageAqi != null">average_aqi,</if>
             <if test="averageSo2 != null">average_so2,</if>
             <if test="averageNo2 != null">average_no2,</if>
@@ -58,10 +57,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="primaryPollutant != null">primary_pollutant,</if>
             <if test="createdAt != null">created_at,</if>
             <if test="updatedAt != null">updated_at,</if>
+            <if test="averagePm25_24 != null">average_pm2_5_24,</if>
+            <if test="averagePm10_24 != null">average_pm10_24,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="deviceId != null">#{deviceId},</if>
-            <if test="queryTime != null">#{queryTime},</if>
             <if test="averageAqi != null">#{averageAqi},</if>
             <if test="averageSo2 != null">#{averageSo2},</if>
             <if test="averageNo2 != null">#{averageNo2},</if>
@@ -74,6 +74,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="primaryPollutant != null">#{primaryPollutant},</if>
             <if test="createdAt != null">#{createdAt},</if>
             <if test="updatedAt != null">#{updatedAt},</if>
+            <if test="averagePm25_24 != null">#{averagePm25_24},</if>
+            <if test="averagePm10_24 != null">#{averagePm10_24},</if>
          </trim>
     </insert>
 

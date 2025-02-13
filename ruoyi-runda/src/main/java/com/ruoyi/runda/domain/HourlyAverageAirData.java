@@ -61,10 +61,20 @@ public class HourlyAverageAirData extends BaseEntity
     @Column(name = "average_pm2_5")
     private Long averagePm25;
 
+    /** 平均pm25/24 */
+    @Excel(name = "平均pm25/24")
+    @Column(name = "average_pm2_5_24")
+    private Long averagePm25_24;
+
     /** 平均pm10 */
     @Excel(name = "平均pm10")
     @Column(name = "average_pm10")
     private Long averagePm10;
+
+    /** 平均pm10 */
+    @Excel(name = "平均pm10/24")
+    @Column(name = "average_pm10_24")
+    private Long averagePm10_24;
 
     /** 级别 */
     @Excel(name = "级别")
@@ -86,9 +96,9 @@ public class HourlyAverageAirData extends BaseEntity
     @Column(name = "primary_pollutant")
     private String primaryPollutant;
 
-    @Excel(name = "部门id")
-    @Column(name = "dept_id")
-    private String deptId;
+    @Excel(name = "站点id")
+    @Column(name = "station_id")
+    private String stationId;
 
     /** 创建时间 */
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -174,6 +184,16 @@ public class HourlyAverageAirData extends BaseEntity
     {
         return averagePm25;
     }
+
+    public void setAveragePm25_24(Long averagePm25_24)
+    {
+        this.averagePm25_24 = averagePm25_24;
+    }
+
+    public Long getAveragePm25_24()
+    {
+        return averagePm25_24;
+    }
     public void setAveragePm10(Long averagePm10) 
     {
         this.averagePm10 = averagePm10;
@@ -182,6 +202,16 @@ public class HourlyAverageAirData extends BaseEntity
     public Long getAveragePm10() 
     {
         return averagePm10;
+    }
+
+    public void setAveragePm10_24(Long averagePm10_24)
+    {
+        this.averagePm10_24 = averagePm10_24;
+    }
+
+    public Long getAveragePm10_24()
+    {
+        return averagePm10_24;
     }
     public void setAqiLevel(String aqiLevel) 
     {
@@ -220,14 +250,14 @@ public class HourlyAverageAirData extends BaseEntity
         return primaryPollutant;
     }
 
-    public void setDeptId(String DeptId)
+    public void setStationId(String stationId)
     {
-        this.deptId = deptId;
+        this.stationId = stationId;
     }
 
-    public String getDeptId()
+    public String getStationId()
     {
-        return deptId;
+        return stationId;
     }
 
     public void setCreatedAt(Date createdAt) 
@@ -254,7 +284,7 @@ public class HourlyAverageAirData extends BaseEntity
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
             .append("id", getId())
             .append("deviceId", getDeviceId())
-                .append("deptId", getDeptId())
+                .append("stationId", getStationId())
 //            .append("queryTime", getQueryTime())
             .append("averageAqi", getAverageAqi())
             .append("averageSo2", getAverageSo2())
