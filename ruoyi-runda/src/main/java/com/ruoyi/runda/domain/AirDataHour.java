@@ -114,6 +114,13 @@ public class AirDataHour {
     @Field(name = "stationId")
     private String stationId;
 
+    /** 站点名称 */
+    @Field(name = "stationName")
+    private String stationName;
+    /** 设备名称 */
+    @Field(name = "deviceName")
+    private String deviceName;
+
     /** 部门id */
     @Field("deptId")
     private String deptId;
@@ -401,6 +408,24 @@ public class AirDataHour {
         this.hour = hour;
     }
 
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
+    }
+
+    public String getStationName() {
+        return stationName;
+    }
+
+    public void setStationName(String stationName) {
+        this.stationName = stationName;
+    }
+
+
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
@@ -435,6 +460,8 @@ public class AirDataHour {
                 .append("color", getColor())
                 .append("ranking", getRanking())
                 .append("hour", getHour())
+                .append("deviceName", getDeviceName())
+                .append("stationName", getStationName())
                 .toString();
     }
 }

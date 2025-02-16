@@ -3,6 +3,7 @@ package com.ruoyi.runda.mapper;
 import java.util.List;
 import com.ruoyi.runda.domain.Station;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * 监测站点管理Mapper接口
@@ -60,4 +61,6 @@ public interface StationMapper
      * @return 结果
      */
     public int deleteStationByIds(Long[] ids);
+    @Select("select count(1) from runda_station where id = #{stationId}")
+    boolean selectById(Long stationId);
 }

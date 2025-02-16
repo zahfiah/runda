@@ -100,6 +100,10 @@ public class HourlyAverageAirData extends BaseEntity
     @Column(name = "station_id")
     private String stationId;
 
+    @Excel(name = "部门id")
+    @Column(name = "dept_id")
+    private String deptId;
+
     /** 创建时间 */
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "created_At")
@@ -111,6 +115,16 @@ public class HourlyAverageAirData extends BaseEntity
     @Column(name = "updated_At")
     @Excel(name = "更新时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date updatedAt;
+
+    /** 设备名称 */
+    @Excel(name = "设备名称")
+    @Column(name = "device_name")
+    private String deviceName;
+
+    /** 站点名称 */
+    @Excel(name = "站点名称")
+    @Column(name = "station_name")
+    private String stationName;
 
     public void setId(Long id) 
     {
@@ -130,15 +144,17 @@ public class HourlyAverageAirData extends BaseEntity
     {
         return deviceId;
     }
-//    public void setQueryTime(Date queryTime)
-//    {
-//        this.queryTime = queryTime;
-//    }
-//
-//    public Date getQueryTime()
-//    {
-//        return queryTime;
-//    }
+
+    public void setDeptId(String deptId)
+    {
+        this.deptId = deptId;
+    }
+
+    public String getDeptId()
+    {
+        return deptId;
+    }
+
     public void setAverageAqi(Long averageAqi) 
     {
         this.averageAqi = averageAqi;
@@ -277,6 +293,26 @@ public class HourlyAverageAirData extends BaseEntity
     public Date getUpdatedAt() 
     {
         return updatedAt;
+    }
+
+    public void setStationName(String stationName)
+    {
+        this.stationName = stationName;
+    }
+
+    public String getStationName()
+    {
+        return stationName;
+    }
+
+    public void setDeviceName(String deviceName)
+    {
+        this.deviceName = deviceName;
+    }
+
+    public String getDeviceName()
+    {
+        return deviceName;
     }
 
     @Override

@@ -25,7 +25,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * 短信记录Controller
  * 
  * @author runda
- * @date 2025-01-07
+ * @date 2025-02-14
  */
 @RestController
 @RequestMapping("/runda/info")

@@ -1,10 +1,10 @@
 package com.ruoyi.runda.service.impl;
 
 import com.ruoyi.common.core.page.TableDataInfo;
-import com.ruoyi.runda.domain.AirDataHour;
-import com.ruoyi.runda.domain.DataQuery212;
-import com.ruoyi.runda.domain.HourlyAverageAirData;
+import com.ruoyi.runda.domain.*;
+import com.ruoyi.runda.mapper.AlarmInfoMapper;
 import com.ruoyi.runda.mapper.AlarmRemindMapper;
+import com.ruoyi.runda.mapper.StationMapper;
 import com.ruoyi.runda.repository.AirDataHourRepository;
 import com.ruoyi.runda.repository.HourlyAverageAirDataRepository;
 import com.ruoyi.runda.service.AirDataHourService;
@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -44,13 +45,27 @@ public class AirDataHourServiceImpl implements AirDataHourService {
     static {
         sdf.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai")); // 明确指定时区
     }
+
+    // 定义并初始化部门ID到部门名称的映射
+    private static final Map<String, String> deptIdToDeptNameMap = new HashMap<>();
+
+    static {
+        deptIdToDeptNameMap.put("18002", "张家口怀来");
+        // 添加其他部门ID和部门名称的对应关系
+        deptIdToDeptNameMap.put("18003", "张家口经开区");
+        // 可以继续添加更多部门ID和名称
+    }
     @Autowired
     private AirDataHourRepository airDataHourRepository;
 
     @Autowired
     private HourlyAverageAirDataRepository hourlyAverageAirDataRepository; // MySQL Repository
 
+    @Autowired
+    private AlarmInfoMapper alarmInfoMapper;
+
     @Override
+    @Transactional
     public TableDataInfo calculateAverageForSpecificDateTime(String dateTimeStr) throws Exception {
         SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         dateTimeFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai")); // 明确指定时区
@@ -90,9 +105,9 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         } else {
             logger.info("Found {} records in total", pageReports.getTotalElements());
             // 打印每条记录的 deviceId 和 aqi
-            pageReports.getContent().forEach(report -> logger.debug("Report: deviceId={}, aqi={}, so2={}, no2={}, co={}, o3={}, pm2_5={}, pm10={}, deptId={}, stationId={}",
+            pageReports.getContent().forEach(report -> logger.debug("Report: deviceId={}, aqi={}, so2={}, no2={}, co={}, o3={}, pm2_5={}, pm10={}, deptId={}, stationId={},deviceName={},stationName={},deptId={}",
                     report.getDeviceId(), report.getAqi(), report.getSo2Thickness(), report.getNo2Thickness(),
-                    report.getCo(), report.getCo3Thickness(), report.getPm25(), report.getPm10(), report.getDeptId(), report.getStationId()));
+                    report.getCo(), report.getCo3Thickness(), report.getPm25(), report.getPm10(), report.getDeptId(), report.getStationId(),report.getDeviceName(),report.getStationName(),report.getDeptId()));
         }
 
 
@@ -126,9 +141,12 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                 })
                 .collect(Collectors.toList());
         // 添加日志信息以确认 stationId 是否存在
-        data.forEach(row -> logger.debug("Row data: {}", row));
+//        data.forEach(row -> logger.debug("Row data: {}", row));
+
+
         // 将平均数据保存到MySQL数据库中
-      saveToMysql(data);
+        saveToMysql(data);
+
 
         TableDataInfo tableDataInfo = new TableDataInfo();
         tableDataInfo.setCode(0); // Assuming success code is 0
@@ -149,11 +167,37 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                 .filter(Objects::nonNull)
                 .findFirst()
                 .orElse(null);
+        // 使用 Optional 处理可能为 null 的 deviceName
+        String deviceName = reports.stream()
+                .filter(Objects::nonNull)
+                .map(AirDataHour::getDeviceName)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+
+        // 使用 Optional 处理可能为 null 的 stationName
+        String stationName = reports.stream()
+                .filter(Objects::nonNull)
+                .map(AirDataHour::getStationName)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+        //使用 Optional 处理可能为 null 的 deptId
+        String deptId = reports.stream()
+                .filter(Objects::nonNull)
+                .map(AirDataHour::getDeptId)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+
 
         Map<String, Object> metrics = new HashMap<>();
 
         metrics.put("deviceId", deviceId);
         metrics.put("stationId", stationId);
+        metrics.put("deptId", deptId);
+        metrics.put("deviceName", deviceName);
+        metrics.put("stationName", stationName);
         metrics.put("averageAqi", round(calculateAverage(reports, AirDataHour::getAqi)));
         metrics.put("averageSo2", round(calculateAverage(reports, AirDataHour::getSo2Thickness)));
         metrics.put("averageNo2", round(calculateAverage(reports, AirDataHour::getNo2Thickness)));
@@ -161,7 +205,6 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         metrics.put("averageO3", round(calculateAverage(reports, AirDataHour::getCo3Thickness)));
         metrics.put("averagePm2_5", round(calculateAverage(reports, AirDataHour::getPm25)));
         metrics.put("averagePm10", round(calculateAverage(reports, AirDataHour::getPm10)));
-
         Double averageAqi = (Double) metrics.get("averageAqi");
         metrics.put("level", getAqiLevel(averageAqi));
         metrics.put("quality", getAqiQuality(averageAqi));
@@ -267,6 +310,13 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             //计算createAt 时间，应该与data中的dateTimeStr一样
             Date createAt = dateTimeFormat.parse((String) row.get("dateTimeStr"));
 
+            // 检查数据库中是否已存在相同记录
+            boolean exists = hourlyAverageAirDataRepository.existsByDeviceIdAndCreatedAtCustom(deviceId, createAt);
+            if (exists) {
+                logger.info("Record with deviceId {} and createdAt {} already exists. Skipping insertion.", deviceId, createAt);
+                continue;
+            }
+
             // 计算 updateAt 时间，比 createAt 晚 59 分钟
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(createAt);
@@ -274,10 +324,13 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             Date updateAt = calendar.getTime();
 
             HourlyAverageAirData hourlyAverageAirData = new HourlyAverageAirData();
+
+
             hourlyAverageAirData.setDeviceId(deviceId);
             hourlyAverageAirData.setCreatedAt(createAt); // 设置 create_at 字段
             hourlyAverageAirData.setUpdatedAt(updateAt); // 设置 update_at 字段
             hourlyAverageAirData.setStationId(stationId); // 添加 stationId 字段
+            hourlyAverageAirData.setDeptId((String) row.get("deptId"));
             hourlyAverageAirData.setAverageAqi(((Number) row.get("averageAqi")).longValue());
             hourlyAverageAirData.setAverageSo2(((Number) row.get("averageSo2")).longValue());
             hourlyAverageAirData.setAverageNo2(((Number) row.get("averageNo2")).longValue());
@@ -288,6 +341,32 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             hourlyAverageAirData.setAqiQuality((String) row.get("quality"));
             hourlyAverageAirData.setAqiColor((String) row.get("color"));
             hourlyAverageAirData.setPrimaryPollutant((String) row.get("primaryPollutant"));
+            hourlyAverageAirData.setDeviceName((String) row.get("deviceName"));
+            hourlyAverageAirData.setStationName((String) row.get("stationName"));
+
+            Long averagePm25 =  hourlyAverageAirData.getAveragePm25();
+            System.out.println("averagePm25: " + averagePm25);
+            Long averagePm10 =  hourlyAverageAirData.getAveragePm10();
+            if (averagePm25 != null && averagePm10 != null && averagePm25 > 50 && averagePm10 > 50) {
+                AlarmInfo alarmInfo = new AlarmInfo();
+                alarmInfo.setStationId(Long.valueOf(stationId));
+                alarmInfo.setDeviceId(Long.valueOf(deviceId));
+                alarmInfo.setDeptId(Long.valueOf((String) row.get("deptId")));
+                String deptId = (String) row.get("deptId");
+                // 使用映射获取部门名称
+                String deptName = deptIdToDeptNameMap.get(deptId);
+                if (deptName != null) {
+                    alarmInfo.setDeptName(deptName);
+                } else {
+                    logger.warn("No department name found for deptId: {}", deptId);
+                }
+                alarmInfo.setStationName(hourlyAverageAirData.getStationName());
+                alarmInfo.setDeviceName(hourlyAverageAirData.getDeviceName());
+                alarmInfo.setCreateDate(updateAt);
+                alarmInfo.setStatus("设备高值");
+                alarmInfo.setSmsMessage("设备" + deviceId + "数据异常，请及时处理");
+                alarmInfoMapper.insertAlarmInfo(alarmInfo);
+            }
 
             // 打印调试信息以确认 deptId 的值
             logger.debug("Saving record with deviceId={}, stationId={}, createAt={}, updateAt={}",
@@ -298,6 +377,7 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             hourlyAverageAirDataRepository.save(hourlyAverageAirData);
         }
     }
+
 
     @Override
     public void exportToExcel(HttpServletResponse response, List<AirDataHour> dataList) throws IOException {

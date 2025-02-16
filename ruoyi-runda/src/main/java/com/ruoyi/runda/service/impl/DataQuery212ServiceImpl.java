@@ -147,7 +147,7 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
         // 创建标题行
         Row headerRow = sheet.createRow(0);
         String[] headers = {"DeviceId", "DeviceName","StationId","StationName", "sn","temperature","humidity","windSpeed","windDirectionString",
-                "pressure","dust","pm10","longitude","latitude","aqi","primaryPollutant","CreateDate"};
+                "pressure","dust","pm10","longitude","latitude","aqi","primaryPollutant","CreateDate","DeptId"};
         for (int i = 0; i < headers.length; i++) {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(headers[i]);
@@ -174,6 +174,8 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
             row.createCell(14).setCellValue(data.getAqi() != null ? data.getAqi().toString() : "");
             row.createCell(15).setCellValue(data.getPrimaryPollutant() != null ? data.getPrimaryPollutant() : "");
             row.createCell(16).setCellValue(data.getCreateDate() != null ? data.getCreateDate().toString() : "");
+            row.createCell(17).setCellValue(data.getDeptId());
+
 
         }
 

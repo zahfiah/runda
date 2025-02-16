@@ -11,7 +11,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 短信记录对象 alarm_info
  * 
  * @author runda
- * @date 2025-01-07
+ * @date 2025-02-14
  */
 public class AlarmInfo extends BaseEntity
 {
@@ -24,17 +24,16 @@ public class AlarmInfo extends BaseEntity
     private Long userId;
 
     /** 联系人 */
+    @Excel(name = "联系人")
     private String userName;
 
     /** 单位id */
     private Long enterpriseId;
 
     /** 站点id */
-    @Excel(name = "站点id")
     private Long stationId;
 
     /** 报警类型 */
-    @Excel(name = "报警类型")
     private Long alarmType;
 
     /** 开始时间 */
@@ -82,8 +81,24 @@ public class AlarmInfo extends BaseEntity
     @Excel(name = "创建时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date createDate;
 
-    /** 最后一次修改时间 */
+    /** 更新时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @Excel(name = "更新时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date lastUpdatedDate;
+
+    /** 设备状态 */
+    @Excel(name = "设备状态")
+    private String status;
+
+    /** 设备id */
+    private Long deviceId;
+
+    /** 设备名称 */
+    @Excel(name = "设备名称")
+    private String deviceName;
+
+    /** 站点名称 */
+    private String stationName;
 
     public void setId(Long id) 
     {
@@ -265,6 +280,42 @@ public class AlarmInfo extends BaseEntity
     {
         return lastUpdatedDate;
     }
+    public void setStatus(String status) 
+    {
+        this.status = status;
+    }
+
+    public String getStatus() 
+    {
+        return status;
+    }
+    public void setDeviceId(Long deviceId) 
+    {
+        this.deviceId = deviceId;
+    }
+
+    public Long getDeviceId() 
+    {
+        return deviceId;
+    }
+    public void setDeviceName(String deviceName) 
+    {
+        this.deviceName = deviceName;
+    }
+
+    public String getDeviceName() 
+    {
+        return deviceName;
+    }
+    public void setStationName(String stationName) 
+    {
+        this.stationName = stationName;
+    }
+
+    public String getStationName() 
+    {
+        return stationName;
+    }
 
     @Override
     public String toString() {
@@ -289,6 +340,10 @@ public class AlarmInfo extends BaseEntity
             .append("infoStatus", getInfoStatus())
             .append("createDate", getCreateDate())
             .append("lastUpdatedDate", getLastUpdatedDate())
+            .append("status", getStatus())
+            .append("deviceId", getDeviceId())
+            .append("deviceName", getDeviceName())
+            .append("stationName", getStationName())
             .toString();
     }
 }

@@ -161,7 +161,9 @@ public class DataQuery212 extends BaseEntity {
     @Field("createDate")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createDate;
-
+    /** 部门_id */
+    @Field("deptId")
+    private Long deptId;
 
     /** 站点_id */
     @Field("stationId")
@@ -172,7 +174,6 @@ public class DataQuery212 extends BaseEntity {
     private Long deviceId;
 
     /** 设备名称 */
-    @Field("deviceName")
     private String deviceName;
     /** 站点名称 */
     @Field("stationName")
@@ -189,6 +190,7 @@ public class DataQuery212 extends BaseEntity {
         setDeviceId(deviceId);
         setSn(mn);
         setDeviceName(deviceName);
+        setDeptId(deptId);
         setStationId(stationId);
         setStationName(stationName);
         setLongitude(longitude);
@@ -254,6 +256,13 @@ public class DataQuery212 extends BaseEntity {
     public void setPm10above(String pm10above) {
         this.pm10above = pm10above;
     }
+    public Long getDeptId() {
+        return deptId;
+    }
+    public void setDeptId(Long deptId) {
+        this.deptId = deptId;
+    }
+
     public Long getStationId() {
         return stationId;
     }

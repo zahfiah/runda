@@ -7,7 +7,7 @@ import com.ruoyi.runda.domain.AlarmInfo;
  * 短信记录Service接口
  * 
  * @author runda
- * @date 2025-01-07
+ * @date 2025-02-14
  */
 public interface IAlarmInfoService 
 {

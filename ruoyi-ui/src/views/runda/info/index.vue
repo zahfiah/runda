@@ -1,8 +1,21 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="站点id" prop="stationId">
-        <el-input v-model="queryParams.stationId" placeholder="请输入站点id" clearable @keyup.enter.native="handleQuery" />
+      <el-form-item label="县级id" prop="userId">
+        <el-input
+          v-model="queryParams.userId"
+          placeholder="请输入县级id"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="设备名称" prop="deviceName">
+        <el-input
+          v-model="queryParams.deviceName"
+          placeholder="请输入设备名称"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -12,20 +25,46 @@
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd"
-          v-hasPermi="['runda:info:add']">新增</el-button>
+        <el-button
+          type="primary"
+          plain
+          icon="el-icon-plus"
+          size="mini"
+          @click="handleAdd"
+          v-hasPermi="['runda:info:add']"
+        >新增</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button type="success" plain icon="el-icon-edit" size="mini" :disabled="single" @click="handleUpdate"
-          v-hasPermi="['runda:info:edit']">修改</el-button>
+        <el-button
+          type="success"
+          plain
+          icon="el-icon-edit"
+          size="mini"
+          :disabled="single"
+          @click="handleUpdate"
+          v-hasPermi="['runda:info:edit']"
+        >修改</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button type="danger" plain icon="el-icon-delete" size="mini" :disabled="multiple" @click="handleDelete"
-          v-hasPermi="['runda:info:remove']">删除</el-button>
+        <el-button
+          type="danger"
+          plain
+          icon="el-icon-delete"
+          size="mini"
+          :disabled="multiple"
+          @click="handleDelete"
+          v-hasPermi="['runda:info:remove']"
+        >删除</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button type="warning" plain icon="el-icon-download" size="mini" @click="handleExport"
-          v-hasPermi="['runda:info:export']">导出</el-button>
+        <el-button
+          type="warning"
+          plain
+          icon="el-icon-download"
+          size="mini"
+          @click="handleExport"
+          v-hasPermi="['runda:info:export']"
+        >导出</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
@@ -33,12 +72,7 @@
     <el-table v-loading="loading" :data="infoList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="主键" align="center" prop="id" />
-      <el-table-column label="站点id" align="center" prop="stationId" />
-      <el-table-column label="报警类型" align="center" prop="alarmType">
-        <template slot-scope="scope">
-          <dict-tag :options="dict.type.alarm_type" :value="scope.row.alarmType" />
-        </template>
-      </el-table-column>
+      <el-table-column label="联系人" align="center" prop="userName" />
       <el-table-column label="手机号" align="center" prop="phoneNumber" />
       <el-table-column label="短信模板" align="center" prop="smsTem" />
       <el-table-column label="发送内容" align="center" prop="smsMessage" />
@@ -48,30 +82,71 @@
           <span>{{ parseTime(scope.row.createDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="更新时间" align="center" prop="lastUpdatedDate" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.lastUpdatedDate, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="设备状态" align="center" prop="status" />
+      <el-table-column label="设备名称" align="center" prop="deviceName" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)"
-            v-hasPermi="['runda:info:edit']">修改</el-button>
-          <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)"
-            v-hasPermi="['runda:info:remove']">删除</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-edit"
+            @click="handleUpdate(scope.row)"
+            v-hasPermi="['runda:info:edit']"
+          >修改</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-delete"
+            @click="handleDelete(scope.row)"
+            v-hasPermi="['runda:info:remove']"
+          >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-
-    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
-      @pagination="getList" />
+    
+    <pagination
+      v-show="total>0"
+      :total="total"
+      :page.sync="queryParams.pageNum"
+      :limit.sync="queryParams.pageSize"
+      @pagination="getList"
+    />
 
     <!-- 添加或修改短信记录对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="县级id" prop="userId">
+          <el-input v-model="form.userId" placeholder="请输入县级id" />
+        </el-form-item>
+        <el-form-item label="联系人" prop="userName">
+          <el-input v-model="form.userName" placeholder="请输入联系人" />
+        </el-form-item>
+        <el-form-item label="单位id" prop="enterpriseId">
+          <el-input v-model="form.enterpriseId" placeholder="请输入单位id" />
+        </el-form-item>
         <el-form-item label="站点id" prop="stationId">
           <el-input v-model="form.stationId" placeholder="请输入站点id" />
         </el-form-item>
         <el-form-item label="报警类型" prop="alarmType">
           <el-select v-model="form.alarmType" placeholder="请选择报警类型">
-            <el-option v-for="dict in dict.type.alarm_type" :key="dict.value" :label="dict.label"
-              :value="parseInt(dict.value)"></el-option>
+            <el-option
+              v-for="dict in dict.type.alarm_type"
+              :key="dict.value"
+              :label="dict.label"
+              :value="parseInt(dict.value)"
+            ></el-option>
           </el-select>
+        </el-form-item>
+        <el-form-item label="开始时间" prop="beginTime">
+          <el-input v-model="form.beginTime" placeholder="请输入开始时间" />
+        </el-form-item>
+        <el-form-item label="结束时间" prop="endTime">
+          <el-input v-model="form.endTime" placeholder="请输入结束时间" />
         </el-form-item>
         <el-form-item label="手机号" prop="phoneNumber">
           <el-input v-model="form.phoneNumber" placeholder="请输入手机号" />
@@ -85,17 +160,56 @@
         <el-form-item label="失败原因" prop="smsFail">
           <el-input v-model="form.smsFail" placeholder="请输入失败原因" />
         </el-form-item>
+        <el-form-item label="部门id" prop="deptId">
+          <el-input v-model="form.deptId" placeholder="请输入部门id" />
+        </el-form-item>
+        <el-form-item label="部门昵称" prop="deptName">
+          <el-input v-model="form.deptName" placeholder="请输入部门昵称" />
+        </el-form-item>
         <el-form-item label="操作员" prop="systemUserId">
           <el-checkbox-group v-model="form.systemUserId">
-            <el-checkbox v-for="dict in dict.type.tell_user" :key="dict.value" :label="dict.value">
-              {{ dict.label }}
+            <el-checkbox
+              v-for="dict in dict.type.tell_user"
+              :key="dict.value"
+              :label="dict.value">
+              {{dict.label}}
             </el-checkbox>
           </el-checkbox-group>
         </el-form-item>
+        <el-form-item label="信息发送状态" prop="infoStatus">
+          <el-select v-model="form.infoStatus" placeholder="请选择信息发送状态">
+            <el-option
+              v-for="dict in dict.type.info_status"
+              :key="dict.value"
+              :label="dict.label"
+              :value="parseInt(dict.value)"
+            ></el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="创建时间" prop="createDate">
-          <el-date-picker clearable v-model="form.createDate" type="date" value-format="yyyy-MM-dd"
+          <el-date-picker clearable
+            v-model="form.createDate"
+            type="date"
+            value-format="yyyy-MM-dd"
             placeholder="请选择创建时间">
           </el-date-picker>
+        </el-form-item>
+        <el-form-item label="更新时间" prop="lastUpdatedDate">
+          <el-date-picker clearable
+            v-model="form.lastUpdatedDate"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="请选择更新时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="设备id" prop="deviceId">
+          <el-input v-model="form.deviceId" placeholder="请输入设备id" />
+        </el-form-item>
+        <el-form-item label="设备名称" prop="deviceName">
+          <el-input v-model="form.deviceName" placeholder="请输入设备名称" />
+        </el-form-item>
+        <el-form-item label="站点名称" prop="stationName">
+          <el-input v-model="form.stationName" placeholder="请输入站点名称" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -136,30 +250,13 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        stationId: null,
+        userId: null,
+        deviceName: null,
       },
       // 表单参数
       form: {},
       // 表单校验
       rules: {
-        stationId: [
-          { required: true, message: "站点id不能为空", trigger: "blur" }
-        ],
-        alarmType: [
-          { required: true, message: "报警类型不能为空", trigger: "change" }
-        ],
-        phoneNumber: [
-          { required: true, message: "手机号不能为空", trigger: "blur" }
-        ],
-        smsTem: [
-          { required: true, message: "短信模板不能为空", trigger: "blur" }
-        ],
-        smsMessage: [
-          { required: true, message: "发送内容不能为空", trigger: "blur" }
-        ],
-        createDate: [
-          { required: true, message: "创建时间不能为空", trigger: "blur" }
-        ],
       }
     };
   },
@@ -203,7 +300,11 @@ export default {
         systemUserId: [],
         infoStatus: null,
         createDate: null,
-        lastUpdatedDate: null
+        lastUpdatedDate: null,
+        status: null,
+        deviceId: null,
+        deviceName: null,
+        stationName: null
       };
       this.resetForm("form");
     },
@@ -220,7 +321,7 @@ export default {
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.id)
-      this.single = selection.length !== 1
+      this.single = selection.length!==1
       this.multiple = !selection.length
     },
     /** 新增按钮操作 */
@@ -235,8 +336,7 @@ export default {
       const id = row.id || this.ids
       getInfo(id).then(response => {
         this.form = response.data;
-        // this.form.systemUserId = this.form.systemUserId?.split(",") ?? [];
-        this.form.sfazjcsb = this.form.sfazjcsb?.split(",") ?? [];
+        this.form.systemUserId = this.form.systemUserId.split(",");
         this.open = true;
         this.title = "修改短信记录";
       });
@@ -265,12 +365,12 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除短信记录编号为"' + ids + '"的数据项？').then(function () {
+      this.$modal.confirm('是否确认删除短信记录编号为"' + ids + '"的数据项？').then(function() {
         return delInfo(ids);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
-      }).catch(() => { });
+      }).catch(() => {});
     },
     /** 导出按钮操作 */
     handleExport() {

@@ -5,7 +5,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.ruoyi.runda.mapper.AlarmInfoMapper">
     
     <resultMap type="AlarmInfo" id="AlarmInfoResult">
-        <result property="id"     column="id"    />
+        <result property="id"    column="id"    />
         <result property="userId"    column="user_id"    />
         <result property="userName"    column="user_name"    />
         <result property="enterpriseId"    column="enterprise_id"    />
@@ -25,16 +25,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="infoStatus"    column="info_status"    />
         <result property="createDate"    column="create_date"    />
         <result property="lastUpdatedDate"    column="last_updated_date"    />
+        <result property="status"    column="status"    />
+        <result property="deviceId"    column="device_id"    />
+        <result property="deviceName"    column="device_name"    />
+        <result property="stationName"    column="station_name"    />
     </resultMap>
 
     <sql id="selectAlarmInfoVo">
-        select id, user_id, user_name, enterprise_id, station_id, alarm_type, begin_time, end_time, time_space, phone_number, sms_tem, sms_message, sms_fail, dept_id, dept_name, dept_path, system_user_id, info_status, create_date, last_updated_date from alarm_info
+        select id, user_id, user_name, enterprise_id, station_id, alarm_type, begin_time, end_time, time_space, phone_number, sms_tem, sms_message, sms_fail, dept_id, dept_name, dept_path, system_user_id, info_status, create_date, last_updated_date, status, device_id, device_name, station_name from alarm_info
     </sql>
 
     <select id="selectAlarmInfoList" parameterType="AlarmInfo" resultMap="AlarmInfoResult">
         <include refid="selectAlarmInfoVo"/>
         <where>  
-            <if test="stationId != null "> and station_id = #{stationId}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="deviceName != null  and deviceName != ''"> and device_name like concat('%', #{deviceName}, '%')</if>
         </where>
     </select>
     
@@ -54,9 +59,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="beginTime != null">begin_time,</if>
             <if test="endTime != null">end_time,</if>
             <if test="timeSpace != null">time_space,</if>
-            <if test="phoneNumber != null and phoneNumber != ''">phone_number,</if>
-            <if test="smsTem != null and smsTem != ''">sms_tem,</if>
-            <if test="smsMessage != null and smsMessage != ''">sms_message,</if>
+            <if test="phoneNumber != null">phone_number,</if>
+            <if test="smsTem != null">sms_tem,</if>
+            <if test="smsMessage != null">sms_message,</if>
             <if test="smsFail != null">sms_fail,</if>
             <if test="deptId != null">dept_id,</if>
             <if test="deptName != null">dept_name,</if>
@@ -65,6 +70,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="infoStatus != null">info_status,</if>
             <if test="createDate != null">create_date,</if>
             <if test="lastUpdatedDate != null">last_updated_date,</if>
+            <if test="status != null">status,</if>
+            <if test="deviceId != null">device_id,</if>
+            <if test="deviceName != null">device_name,</if>
+            <if test="stationName != null">station_name,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="userId != null">#{userId},</if>
@@ -75,9 +84,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="beginTime != null">#{beginTime},</if>
             <if test="endTime != null">#{endTime},</if>
             <if test="timeSpace != null">#{timeSpace},</if>
-            <if test="phoneNumber != null and phoneNumber != ''">#{phoneNumber},</if>
-            <if test="smsTem != null and smsTem != ''">#{smsTem},</if>
-            <if test="smsMessage != null and smsMessage != ''">#{smsMessage},</if>
+            <if test="phoneNumber != null">#{phoneNumber},</if>
+            <if test="smsTem != null">#{smsTem},</if>
+            <if test="smsMessage != null">#{smsMessage},</if>
             <if test="smsFail != null">#{smsFail},</if>
             <if test="deptId != null">#{deptId},</if>
             <if test="deptName != null">#{deptName},</if>
@@ -86,6 +95,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="infoStatus != null">#{infoStatus},</if>
             <if test="createDate != null">#{createDate},</if>
             <if test="lastUpdatedDate != null">#{lastUpdatedDate},</if>
+            <if test="status != null">#{status},</if>
+            <if test="deviceId != null">#{deviceId},</if>
+            <if test="deviceName != null">#{deviceName},</if>
+            <if test="stationName != null">#{stationName},</if>
          </trim>
     </insert>
 
@@ -100,9 +113,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="beginTime != null">begin_time = #{beginTime},</if>
             <if test="endTime != null">end_time = #{endTime},</if>
             <if test="timeSpace != null">time_space = #{timeSpace},</if>
-            <if test="phoneNumber != null and phoneNumber != ''">phone_number = #{phoneNumber},</if>
-            <if test="smsTem != null and smsTem != ''">sms_tem = #{smsTem},</if>
-            <if test="smsMessage != null and smsMessage != ''">sms_message = #{smsMessage},</if>
+            <if test="phoneNumber != null">phone_number = #{phoneNumber},</if>
+            <if test="smsTem != null">sms_tem = #{smsTem},</if>
+            <if test="smsMessage != null">sms_message = #{smsMessage},</if>
             <if test="smsFail != null">sms_fail = #{smsFail},</if>
             <if test="deptId != null">dept_id = #{deptId},</if>
             <if test="deptName != null">dept_name = #{deptName},</if>
@@ -111,6 +124,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="infoStatus != null">info_status = #{infoStatus},</if>
             <if test="createDate != null">create_date = #{createDate},</if>
             <if test="lastUpdatedDate != null">last_updated_date = #{lastUpdatedDate},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="deviceId != null">device_id = #{deviceId},</if>
+            <if test="deviceName != null">device_name = #{deviceName},</if>
+            <if test="stationName != null">station_name = #{stationName},</if>
         </trim>
         where id = #{id}
     </update>
