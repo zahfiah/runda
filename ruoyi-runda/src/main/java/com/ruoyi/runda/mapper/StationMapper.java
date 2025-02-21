@@ -63,4 +63,6 @@ public interface StationMapper
     public int deleteStationByIds(Long[] ids);
     @Select("select count(1) from runda_station where id = #{stationId}")
     boolean selectById(Long stationId);
+    @Select("select phone from station where id = #{id}")
+    String getPhoneByStationId(String stationId);
 }

@@ -64,6 +64,9 @@ public class AirDataHourServiceImpl implements AirDataHourService {
     @Autowired
     private AlarmInfoMapper alarmInfoMapper;
 
+    @Autowired
+    private  StationMapper stationMapper;
+
     @Override
     @Transactional
     public TableDataInfo calculateAverageForSpecificDateTime(String dateTimeStr) throws Exception {
@@ -347,21 +350,33 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             Long averagePm25 =  hourlyAverageAirData.getAveragePm25();
             System.out.println("averagePm25: " + averagePm25);
             Long averagePm10 =  hourlyAverageAirData.getAveragePm10();
-            if (averagePm25 != null && averagePm10 != null && averagePm25 > 50 && averagePm10 > 50) {
+            if (averagePm25 != null && averagePm10 != null && averagePm25 > 30 && averagePm10 > 30) {
                 AlarmInfo alarmInfo = new AlarmInfo();
                 alarmInfo.setStationId(Long.valueOf(stationId));
                 alarmInfo.setDeviceId(Long.valueOf(deviceId));
                 alarmInfo.setDeptId(Long.valueOf((String) row.get("deptId")));
-                String deptId = (String) row.get("deptId");
-                // 使用映射获取部门名称
-                String deptName = deptIdToDeptNameMap.get(deptId);
-                if (deptName != null) {
-                    alarmInfo.setDeptName(deptName);
+//                String deptId = (String) row.get("deptId");
+//                // 使用映射获取部门名称
+//                String deptName = deptIdToDeptNameMap.get(deptId);
+//                if (deptName != null) {
+//                    alarmInfo.setDeptName(deptName);
+//                } else {
+//                    logger.warn("No department name found for deptId: {}", deptId);
+//                }
+
+                //根据stationId进行查询station表中的phone信息并把phone插入到alarmInfo表中
+                // 根据stationId获取电话号码
+                String phone = stationMapper.getPhoneByStationId(stationId);
+                if (phone != null) {
+                    alarmInfo.setPhoneNumber(phone);
                 } else {
-                    logger.warn("No department name found for deptId: {}", deptId);
+
+                    alarmInfo.setPhoneNumber(null);
                 }
+
                 alarmInfo.setStationName(hourlyAverageAirData.getStationName());
                 alarmInfo.setDeviceName(hourlyAverageAirData.getDeviceName());
+                alarmInfo.setAlarmType(2L);
                 alarmInfo.setCreateDate(updateAt);
                 alarmInfo.setStatus("设备高值");
                 alarmInfo.setSmsMessage("设备" + deviceId + "数据异常，请及时处理");
@@ -472,9 +487,9 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         } else {
             logger.info("Found {} records in total", hourlyData.size());
             // 打印每条记录的 deviceId 和 aqi
-            hourlyData.forEach(report -> logger.debug("Report: deviceId={}, aqi={}, so2={}, no2={}, co={}, o3={}, pm2_5={}, pm10={}, deptId={},stationId={}",
+            hourlyData.forEach(report -> logger.debug("Report: deviceId={}, aqi={}, so2={}, no2={}, co={}, o3={}, pm2_5={}, pm10={}, deptId={},stationId={},deviceName={},stationName={}",
                     report.getDeviceId(), report.getAqi(), report.getSo2Thickness(), report.getNo2Thickness(),
-                    report.getCo(), report.getCo3Thickness(), report.getPm25(), report.getPm10(), report.getDeptId(),report.getStationId()));
+                    report.getCo(), report.getCo3Thickness(), report.getPm25(), report.getPm10(), report.getDeptId(),report.getStationId(),report.getDeviceName(),report.getStationName()));
         }
 
         // 分组按小时计算平均值，并保留 deptId
@@ -491,6 +506,8 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                     List<AirDataHour> reports = entry.getValue();
                     Map<String, Object> metrics = calculateMetrics(reports);
                     metrics.put("hour", hour);
+                    metrics.put("deviceName", reports.get(0).getDeviceName());
+                    metrics.put("stationName", reports.get(0).getStationName());
                     //得到deviceId
                     metrics.put("deviceId", reports.get(0).getDeviceId());
                     // 得到stationId
