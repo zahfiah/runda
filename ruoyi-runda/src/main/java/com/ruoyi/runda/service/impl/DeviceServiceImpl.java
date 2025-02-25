@@ -1,6 +1,8 @@
 package com.ruoyi.runda.service.impl;
 
 import java.util.List;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.runda.mapper.DeviceMapper;
@@ -14,6 +16,9 @@ import com.ruoyi.runda.service.IDeviceService;
  * @date 2025-01-11
  */
 @Service
+//引入打印日志
+@Slf4j
+
 public class DeviceServiceImpl implements IDeviceService 
 {
     @Autowired
@@ -40,6 +45,8 @@ public class DeviceServiceImpl implements IDeviceService
     @Override
     public List<Device> selectDeviceList(Device device)
     {
+       //打印查询到的设备数据
+//        log.info(deviceMapper.selectDeviceList(device).toString());
         return deviceMapper.selectDeviceList(device);
     }
 

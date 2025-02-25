@@ -1,91 +1,41 @@
 <template>
   <div class="app-container">
-    <el-form
-      :model="queryParams"
-      ref="queryForm"
-      size="small"
-      :inline="true"
-      v-show="showSearch"
-      label-width="68px"
-    >
+    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="设备名称" prop="name">
-        <el-input
-          v-model="queryParams.name"
-          placeholder="请输入设备名称"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-input v-model="queryParams.name" placeholder="请输入设备名称" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item label="设备号" prop="sn">
-        <el-input
-          v-model="queryParams.sn"
-          placeholder="请输入设备号"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-input v-model="queryParams.sn" placeholder="请输入设备号" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
 
       <el-form-item label="站点名称" prop="stationId">
         <el-select v-model="queryParams.stationId" placeholder="请选择站点">
           <!-- <el-select v-model="form.stationId" placeholder="请选择站点"> -->
-          <el-option
-            v-for="station in stationList"
-            :key="station.id"
-            :label="station.stationName"
-            :value="station.id"
-          ></el-option>
+          <el-option v-for="station in stationList" :key="station.id" :label="station.stationName"
+            :value="station.id"></el-option>
         </el-select>
       </el-form-item>
 
       <el-form-item>
-        <el-button
-          type="primary"
-          icon="el-icon-search"
-          size="mini"
-          @click="handleQuery"
-          >搜索</el-button
-        >
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery"
-          >重置</el-button
-        >
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['runda:device:add']"
-          >新增</el-button
-        >
+        <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd"
+          v-hasPermi="['runda:device:add']">新增</el-button>
       </el-col>
 
       <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['runda:device:export']"
-          >导出</el-button
-        >
+        <el-button type="warning" plain icon="el-icon-download" size="mini" @click="handleExport"
+          v-hasPermi="['runda:device:export']">导出</el-button>
       </el-col>
-      <right-toolbar
-        :showSearch.sync="showSearch"
-        @queryTable="getList"
-      ></right-toolbar>
+      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table
-      v-loading="loading"
-      :data="deviceList"
-      @selection-change="handleSelectionChange"
-    >
+    <el-table v-loading="loading" :data="deviceList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
 
       <el-table-column label="设备号" align="center" prop="sn" />
@@ -103,84 +53,40 @@
       </el-table-column>
       <el-table-column label="状态" align="center" prop="status">
         <template slot-scope="scope">
-          <dict-tag
-            :options="dict.type.device_status"
-            :value="scope.row.status"
-          />
+          <dict-tag :options="dict.type.device_status" :value="scope.row.status" />
         </template>
       </el-table-column>
 
       <el-table-column label="是否运维" align="center" prop="isYunwei">
         <template slot-scope="scope">
-          <dict-tag
-            :options="dict.type.is_yunwei"
-            :value="scope.row.isYunwei"
-          />
+          <dict-tag :options="dict.type.is_yunwei" :value="scope.row.isYunwei" />
         </template>
       </el-table-column>
       <el-table-column label="SIM卡号" align="center" prop="phoneNumber" />
 
-      <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createdTime"
-        width="180"
-      >
+      <el-table-column label="创建时间" align="center" prop="createdTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createdTime) }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column
-        label="操作"
-        align="center"
-        class-name="small-padding fixed-width"
-      >
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['runda:device:edit']"
-            >编辑</el-button
-          >
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['runda:device:remove']"
-            >删除</el-button
-          >
-          <el-button
-            v-if="scope.row.isYunwei === 1"
-            size="mini"
-            type="text"
-            style="color: #f56c6c"
-            icon="el-icon-setting"
-            @click="handleMaintenance(scope.row)"
-            v-hasPermi="['runda:device:maintenance']"
-            >运维</el-button
-          >
+          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)"
+            v-hasPermi="['runda:device:edit']">编辑</el-button>
+          <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)"
+            v-hasPermi="['runda:device:remove']">删除</el-button>
+          <el-button v-if="scope.row.isYunwei === 1" size="mini" type="text" style="color: #f56c6c"
+            icon="el-icon-setting" @click="handleMaintenance(scope.row)"
+            v-hasPermi="['runda:device:maintenance']">运维</el-button>
         </template>
       </el-table-column>
     </el-table>
-    <pagination
-      v-show="total > 0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
+      @pagination="getList" />
     <!-- 添加或修改监测设备管理设备对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form
-        ref="deviceForm"
-        :model="deviceForm"
-        :rules="rules"
-        label-width="80px"
-      >
+      <el-form ref="deviceForm" :model="deviceForm" :rules="rules" label-width="80px">
         <el-form-item label="设备名称" prop="name">
           <el-input v-model="deviceForm.name" placeholder="请输入设备名称" />
         </el-form-item>
@@ -188,10 +94,7 @@
           <el-input v-model="deviceForm.sn" placeholder="请输入设备号" />
         </el-form-item>
         <el-form-item label="制造商" prop="manufacturer">
-          <el-input
-            v-model="deviceForm.manufacturer"
-            placeholder="请输入制造商"
-          />
+          <el-input v-model="deviceForm.manufacturer" placeholder="请输入制造商" />
         </el-form-item>
         <el-form-item label="经度" prop="longitude">
           <el-input v-model="deviceForm.longitude" placeholder="请输入经度" />
@@ -203,102 +106,53 @@
         <el-form-item label="站点名称" prop="stationId">
           <!-- <el-select v-model="queryParams.stationId" placeholder="请选择站点"> -->
           <el-select v-model="deviceForm.stationId" placeholder="请选择站点">
-            <el-option
-              v-for="station in stationList"
-              :key="station.id"
-              :label="station.stationName"
-              :value="station.id"
-            ></el-option>
+            <el-option v-for="station in stationList" :key="station.id" :label="station.stationName"
+              :value="station.id"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="设备状态" prop="status">
           <el-select v-model="deviceForm.status" placeholder="请选择设备状态">
-            <el-option
-              v-for="dict in dict.type.device_status"
-              :key="dict.value"
-              :label="dict.label"
-              :value="parseInt(dict.value)"
-            ></el-option>
+            <el-option v-for="dict in dict.type.device_status" :key="dict.value" :label="dict.label"
+              :value="parseInt(dict.value)"></el-option>
           </el-select>
         </el-form-item>
 
         <el-form-item label="省" prop="provinceCn">
-          <el-input
-            v-model="deviceForm.provinceCn"
-            placeholder="河北省"
-            disabled
-          />
+          <el-input v-model="deviceForm.provinceCn" placeholder="河北省" disabled />
         </el-form-item>
         <el-form-item label="市" prop="cityCn">
-          <el-input
-            v-model="deviceForm.cityCn"
-            placeholder="张家口市"
-            disabled
-          />
+          <el-input v-model="deviceForm.cityCn" placeholder="张家口市" disabled />
         </el-form-item>
         <el-form-item label="区" prop="countyCn">
-          <el-select
-            v-model="deviceForm.countyCn"
-            placeholder="请输入区/县昵称"
-            @change="handleCountyChange"
-          >
-            <el-option
-              v-for="item in countys"
-              :key="item.value"
-              :label="item.label"
-              :value="item.label"
-            ></el-option>
+          <el-select v-model="deviceForm.countyCn" placeholder="请输入区/县昵称" @change="handleCountyChange">
+            <el-option v-for="item in countys" :key="item.value" :label="item.label" :value="item.label"></el-option>
           </el-select>
         </el-form-item>
 
         <el-form-item label="乡镇" prop="townCn">
-          <el-select
-            v-model="deviceForm.townCn"
-            placeholder="请选择乡/镇"
-            :disabled="!deviceForm.countyCn"
-          >
-            <el-option
-              v-for="item in currentTowns"
-              :key="item.value"
-              :label="item.label"
-              :value="item.label"
-            />
+          <el-select v-model="deviceForm.townCn" placeholder="请选择乡/镇" :disabled="!deviceForm.countyCn">
+            <el-option v-for="item in currentTowns" :key="item.value" :label="item.label" :value="item.label" />
           </el-select>
         </el-form-item>
         <el-form-item label="SIM卡号" prop="phoneNumber">
-          <el-input
-            v-model="deviceForm.phoneNumber"
-            placeholder="请输入SIM卡号"
-          />
+          <el-input v-model="deviceForm.phoneNumber" placeholder="请输入SIM卡号" />
         </el-form-item>
 
         <el-form-item label="设备类型" prop="type">
           <el-select v-model="deviceForm.type" placeholder="请选择设备类型">
-            <el-option
-              v-for="dict in dict.type.device_type"
-              :key="dict.value"
-              :label="dict.label"
-              :value="parseInt(dict.value)"
-            ></el-option>
+            <el-option v-for="dict in dict.type.device_type" :key="dict.value" :label="dict.label"
+              :value="parseInt(dict.value)"></el-option>
           </el-select>
         </el-form-item>
 
         <el-form-item label="是否运维" prop="isYunwei">
           <el-radio-group v-model="deviceForm.isYunwei">
-            <el-radio
-              v-for="dict in dict.type.is_yunwei"
-              :key="dict.value"
-              :label="parseInt(dict.value)"
-              >{{ dict.label }}</el-radio
-            >
+            <el-radio v-for="dict in dict.type.is_yunwei" :key="dict.value" :label="parseInt(dict.value)">{{ dict.label
+            }}</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="备注" prop="remark">
-          <el-input
-            v-model="deviceForm.remark"
-            type="textarea"
-            placeholder="请输入内容"
-          />
+          <el-input v-model="deviceForm.remark" type="textarea" placeholder="请输入内容" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -307,46 +161,25 @@
       </div>
     </el-dialog>
     <!-- 添加运维日志 -->
-    <el-dialog
-      :title="title"
-      :visible.sync="openYunwei"
-      width="500px"
-      append-to-body
-    >
-      <el-form
-        ref="yunweiForm"
-        :model="yunweiForm"
-        :rules="rules"
-        label-width="80px"
-      >
+    <el-dialog :title="title" :visible.sync="openYunwei" width="500px" append-to-body>
+      <el-form ref="yunweiForm" :model="yunweiForm" :rules="rules" label-width="80px">
         <el-form-item label="工地名称" prop="siteName">
-          <el-input
-            v-model="yunweiForm.siteName"
-            placeholder="请输入工地名称"
-          />
+          <el-input v-model="yunweiForm.siteName" placeholder="请输入工地名称" />
         </el-form-item>
         <el-form-item label="设备号" prop="sn">
           <el-input v-model="yunweiForm.sn" placeholder="请输入设备号" />
         </el-form-item>
         <el-form-item label="运维时间" prop="maintenanceTime">
-          <el-date-picker
-            clearable
-            v-model="yunweiForm.maintenanceTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择运维时间"
-          >
+          <el-date-picker clearable v-model="yunweiForm.maintenanceTime" type="date" value-format="yyyy-MM-dd"
+            placeholder="请选择运维时间">
           </el-date-picker>
         </el-form-item>
 
         <el-form-item label="是否完成" prop="isFinsh">
           <el-radio-group v-model="yunweiForm.isFinsh">
-            <el-radio
-              v-for="dict in dict.type.is_complete"
-              :key="dict.value"
-              :label="parseInt(dict.value)"
-              >{{ dict.label }}</el-radio
-            >
+            <el-radio v-for="dict in dict.type.is_complete" :key="dict.value" :label="parseInt(dict.value)">{{
+              dict.label
+            }}</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="图片" prop="img">
@@ -739,6 +572,8 @@ export default {
       currentTowns: [], // 当前选中区县的乡镇列表
       // 设备表单参数
       deviceForm: {},
+      // 确保stationList存在
+      stationList: [],
       // 运维日志表单参数
       yunweiForm: {},
       // 表单校验
@@ -823,13 +658,11 @@ export default {
       listDevice(this.queryParams)
         .then((response) => {
           if (response.code === 200 && Array.isArray(response.rows)) {
+            // console.log("Current stationList:", this.stationList); // 调试输出
             const devicesWithStationNames = response.rows.map((device) => {
-              const stationIdString = String(device.stationId); // 确保转换成字符串以匹配
-              // const station = this.stationList.find(
-              //   (s) => String(s.id) === stationIdString
-              // );
+              const stationIdString = String(device.stationId);
               const station = this.stationList.find(
-                (s) => String(s.id) === String(device.stationId)
+                (s) => String(s.id) === stationIdString
               );
               console.log(
                 `Looking for station with ID ${stationIdString}:`,
@@ -859,10 +692,14 @@ export default {
       this.resetDeviceForm();
     },
     getStations() {
-      return listStation()
+      return listStation({
+        pageNum: 1, // 设置第一页
+        pageSize: 99999, // 设置大页数，确保获取所有数据
+      })
         .then((response) => {
           if (response.code === 200 && Array.isArray(response.rows)) {
             this.stationList = response.rows;
+            console.log("Current stationList:", this.stationList); // 调试输出
           } else {
             console.error("Invalid stations data structure:", response);
           }
@@ -1039,7 +876,7 @@ export default {
           this.getList();
           this.$modal.msgSuccess("删除成功");
         })
-        .catch(() => {});
+        .catch(() => { });
     },
     /** 导出按钮操作 */
     handleExport() {
