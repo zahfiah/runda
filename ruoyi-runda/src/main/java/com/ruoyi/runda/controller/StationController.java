@@ -2,6 +2,9 @@ package com.ruoyi.runda.controller;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.runda.domain.Message;
+import com.ruoyi.runda.service.IMessageService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +36,9 @@ public class StationController extends BaseController
 {
     @Autowired
     private IStationService stationService;
+
+    @Autowired
+    private IMessageService messageService;
 
     /**
      * 查询监测站点管理列表
@@ -78,6 +84,21 @@ public class StationController extends BaseController
     public AjaxResult add(@RequestBody Station station)
     {
         return toAjax(stationService.insertStation(station));
+    }
+
+    /**
+     * 新增站点消息
+     */
+    @PreAuthorize("@ss.hasPermi('runda:station:send')")
+    @Log(title = "消息记录", businessType = BusinessType.INSERT)
+    @PostMapping("/send")
+    public AjaxResult send(@RequestBody String name)
+    {
+
+        Message message = new Message();
+        message.setContent("管理员新增了一个站点："+name);
+        //webSocket.sendMessage("管理员新增了一个站点："+name);
+        return toAjax(messageService.insertMessage(message));
     }
 
     /**

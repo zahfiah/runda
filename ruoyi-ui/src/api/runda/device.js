@@ -25,7 +25,14 @@ export function addDevice(data) {
     data: data
   })
 }
-
+//新增设备消息发送
+export function sendDevice(data) {
+  return request({
+    url: '/runda/device/send',
+    method: 'post',
+    data: data
+  })
+}
 // 修改监测设备管理设备
 export function updateDevice(data) {
   return request({
