@@ -40,9 +40,9 @@
         </template>
       </el-table-column>
       <el-table-column label="地址" align="center">
-                    <el-table-column label="市" align="center" prop="cityCn" />
-                    <el-table-column label="区" align="center" prop="countyCn" />
-                    <el-table-column label="乡镇" align="center" prop="townCn" />
+        <el-table-column label="市" align="center" prop="cityCn" />
+        <el-table-column label="区" align="center" prop="countyCn" />
+        <el-table-column label="乡镇" align="center" prop="townCn" />
       </el-table-column>
       <el-table-column label="占地面积" align="center" prop="floorSpace" />
       <el-table-column label="施工许可证" align="center" prop="licensNumber" />
@@ -58,8 +58,8 @@
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button size="mini" type="text" icon="el-icon-setting"
-            @click="handleViewDevices(scope.row)" v-if="hasDevicesForStation(scope.row.id)">设备</el-button>
+          <el-button size="mini" type="text" icon="el-icon-setting" @click="handleViewDevices(scope.row)"
+            v-if="hasDevicesForStation(scope.row.id)">设备</el-button>
           <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)"
             v-hasPermi="['runda:station:edit']">修改</el-button>
           <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)"
@@ -111,42 +111,24 @@
             </el-form-item>
             <el-form-item label="省" prop="provinceCn">
               <el-select v-model="form.provinceCn" placeholder="请输入省名称" @change="onProvinceChange">
-                <el-option
-                  v-for="item in regions.provinces"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.label"
-                ></el-option>
+                <el-option v-for="item in regions.provinces" :key="item.value" :label="item.label"
+                  :value="item.label"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="市" prop="cityCn">
               <el-select v-model="form.cityCn" placeholder="请输入市昵称" @change="onCityChange">
-                <el-option
-                  v-for="item in cities"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.label"
-                ></el-option>
+                <el-option v-for="item in cities" :key="item.value" :label="item.label" :value="item.label"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="区" prop="countyCn">
               <el-select v-model="form.countyCn" placeholder="请输入区/县昵称" @change="onCountyChange">
-                <el-option
-                  v-for="item in counties"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.label"
-                ></el-option>
+                <el-option v-for="item in counties" :key="item.value" :label="item.label"
+                  :value="item.label"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="乡镇" prop="townCn">
               <el-select v-model="form.townCn" placeholder="请输入乡/镇昵称">
-                <el-option
-                  v-for="item in towns"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.label"
-                ></el-option>
+                <el-option v-for="item in towns" :key="item.value" :label="item.label" :value="item.label"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="备注" prop="remark">
@@ -158,18 +140,14 @@
           <el-form ref="form" :model="form" :rules="rules" label-width="120px">
             <el-form-item label="部门名称" prop="userId">
               <el-select v-model="form.userId" placeholder="请选择部门名称" clearable>
-                <el-option
-                  v-for="user in userOptions"
-                  :key="user.id"
-                  :label="user.userName"
-                  :value="user.id"
-                />
+                <el-option v-for="user in userOptions" :key="user.id" :label="user.userName" :value="user.id" />
               </el-select>
             </el-form-item>
             <el-form-item label="操作员" prop="systemUserId">
               <el-radio-group v-model="form.systemUserId">
-                <el-radio v-for="dict in dict.type.tell_user" :key="dict.value" :label="parseInt(dict.value)">{{ dict.label
-                  }}</el-radio>
+                <el-radio v-for="dict in dict.type.tell_user" :key="dict.value" :label="parseInt(dict.value)">{{
+                  dict.label
+                }}</el-radio>
               </el-radio-group>
             </el-form-item>
           </el-form>
@@ -223,7 +201,8 @@
     </el-dialog>
 
     <!-- 设备详情对话框 -->
-    <el-dialog title="设备详情" :visible.sync="deviceDialogVisible" width="600px" append-to-body custom-class="device-dialog">
+    <el-dialog title="设备详情" :visible.sync="deviceDialogVisible" width="600px" append-to-body
+      custom-class="device-dialog">
       <div v-if="selectedDevices.length > 0">
         <div v-for="(device, index) in selectedDevices" :key="index" class="device-card">
           <div class="device-header">
@@ -383,7 +362,10 @@ export default {
     },
     /** 获取设备列表 */
     getDevices() {
-      listDevice().then(response => {
+      listDevice({
+        pageNum: 1, // 设置第一页
+        pageSize: 99999, // 设置大页数，确保获取所有数据
+      }).then(response => {
         if (response.code === 200 && Array.isArray(response.rows)) {
           this.deviceList = response.rows.map(device => ({
             id: device.id,
@@ -614,6 +596,3 @@ export default {
   color: #666;
 }
 </style>
-
-
-
