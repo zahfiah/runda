@@ -16,6 +16,32 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+      <!-- <el-form-item label="设备名称" prop="name">
+        <el-select v-model="queryParams.name" placeholder="请选择设备">
+          <el-option
+            v-for="device in deviceList"
+            :key="device.id"
+            :label="device.name"
+            :value="device.name"
+          ></el-option>
+        </el-select>
+      </el-form-item> -->
+      <!-- <el-form-item label="设备名称" prop="name">
+        <el-select
+          v-model="queryParams.name"
+          placeholder="请选择设备"
+          clearable
+          @keyup.enter.native="handleQuery"
+        >
+        
+          <el-option
+            v-for="station in deviceList"
+            :key="station.id"
+            :label="station.name"
+            :value="station.id"
+          ></el-option>
+        </el-select>
+      </el-form-item> -->
       <el-form-item label="设备号" prop="sn">
         <el-input
           v-model="queryParams.sn"
@@ -106,16 +132,23 @@
           <dict-tag
             :options="dict.type.device_status"
             :value="scope.row.status"
+            v-if="scope.row.status !== 7"
           />
+          <span v-else>未知</span>
         </template>
       </el-table-column>
-
-      <el-table-column label="是否运维" align="center" prop="isYunwei">
+      <!-- <el-table-column label="是否运维" align="center" prop="isYunwei">
         <template slot-scope="scope">
           <dict-tag
             :options="dict.type.is_yunwei"
             :value="scope.row.isYunwei"
           />
+        </template>
+      </el-table-column> -->
+      <el-table-column label="是否运维" align="center" prop="isYunwei">
+        <template slot-scope="scope">
+          <span v-if="scope.row.isYunwei === 0">否</span>
+          <span v-else>是</span>
         </template>
       </el-table-column>
       <el-table-column label="SIM卡号" align="center" prop="phoneNumber" />
@@ -319,12 +352,13 @@
         :rules="rules"
         label-width="80px"
       >
-        <el-form-item label="工地名称" prop="siteName">
+        <el-form-item label="设备名称" prop="siteName">
           <el-input
             v-model="yunweiForm.siteName"
-            placeholder="请输入工地名称"
+            placeholder="请输入设备名称"
           />
         </el-form-item>
+
         <el-form-item label="设备号" prop="sn">
           <el-input v-model="yunweiForm.sn" placeholder="请输入设备号" />
         </el-form-item>
@@ -369,10 +403,10 @@ import {
   getDevice,
   delDevice,
   addDevice,
-  updateDevice, sendDevice,
+  updateDevice,
 } from "@/api/runda/device";
 import { addYunwei, updateYunwei } from "@/api/runda/yunwei";
-import {listStation, sendStation} from "@/api/runda/station";
+import { listStation } from "@/api/runda/station";
 export default {
   name: "Device",
   dicts: [
@@ -739,6 +773,8 @@ export default {
       currentTowns: [], // 当前选中区县的乡镇列表
       // 设备表单参数
       deviceForm: {},
+      // 确保stationList存在
+      stationList: [],
       // 运维日志表单参数
       yunweiForm: {},
       // 表单校验
@@ -823,13 +859,11 @@ export default {
       listDevice(this.queryParams)
         .then((response) => {
           if (response.code === 200 && Array.isArray(response.rows)) {
+            // console.log("Current stationList:", this.stationList); // 调试输出
             const devicesWithStationNames = response.rows.map((device) => {
-              const stationIdString = String(device.stationId); // 确保转换成字符串以匹配
-              // const station = this.stationList.find(
-              //   (s) => String(s.id) === stationIdString
-              // );
+              const stationIdString = String(device.stationId);
               const station = this.stationList.find(
-                (s) => String(s.id) === String(device.stationId)
+                (s) => String(s.id) === stationIdString
               );
               console.log(
                 `Looking for station with ID ${stationIdString}:`,
@@ -841,6 +875,7 @@ export default {
               };
             });
             this.deviceList = devicesWithStationNames;
+            console.log("Current deviceList:", this.deviceList); // 调试输出
             this.total = response.total;
           } else {
             console.error("Invalid response:", response);
@@ -859,10 +894,14 @@ export default {
       this.resetDeviceForm();
     },
     getStations() {
-      return listStation()
+      return listStation({
+        pageNum: 1, // 设置第一页
+        pageSize: 99999, // 设置大页数，确保获取所有数据
+      })
         .then((response) => {
           if (response.code === 200 && Array.isArray(response.rows)) {
             this.stationList = response.rows;
+            console.log("Current stationList:", this.stationList); // 调试输出
           } else {
             console.error("Invalid stations data structure:", response);
           }
@@ -952,7 +991,8 @@ export default {
       this.yunweiForm = {
         deviceId: row.id,
         sn: row.sn,
-        siteName: "",
+        // siteName: "",
+        siteName: row.name, // 初始化设备名称
         maintenanceTime: "",
         isFinsh: 2,
         img: "",
@@ -990,11 +1030,6 @@ export default {
               this.$modal.msgSuccess("新增成功");
               this.open = false;
               this.getList();
-
-              sendDevice(this.deviceForm).then(response => {
-                this.$modal.msgSuccess("发送成功");
-                console.log(this.deviceForm)
-              });
             });
           }
         }
