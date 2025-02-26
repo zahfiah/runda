@@ -58,4 +58,6 @@ public interface IDataQueryCountryService
      * @return 结果
      */
     public int deleteDataQueryCountryById(Long id);
+
+    public void httpRequest();
 }
