@@ -16,7 +16,7 @@ import com.ruoyi.runda.service.IMessageService;
 @Service
 public class MessageServiceImpl implements IMessageService
 {
-    //@Autowired
+    @Autowired
     private MessageMapper messageMapper;
 
     /**

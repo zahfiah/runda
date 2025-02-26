@@ -1,28 +1,12 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="站点id" prop="stationId">
-        <el-input
-          v-model="queryParams.stationId"
-          placeholder="请输入站点id"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="站点名称" prop="stationName">
-        <el-input
-          v-model="queryParams.stationName"
-          placeholder="请输入站点名称"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="日期" prop="date">
+      <el-form-item label="更新时间" prop="time">
         <el-date-picker clearable
-          v-model="queryParams.date"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择日期">
+                        v-model="queryParams.time"
+                        type="date"
+                        value-format="yyyy-MM-dd"
+                        placeholder="请选择更新时间">
         </el-date-picker>
       </el-form-item>
       <el-form-item>
@@ -79,23 +63,24 @@
 
     <el-table v-loading="loading" :data="countryList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键id" align="center" prop="id" />
-      <el-table-column label="站点id" align="center" prop="stationId" />
-      <el-table-column label="站点名称" align="center" prop="stationName" />
-      <el-table-column label="日期" align="center" prop="date" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.date, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="空气质量指数" align="center" prop="aqi" />
+      <el-table-column label="主键" align="center" prop="id" />
+      <el-table-column label="监测点昵称" align="center" prop="name" />
+      <el-table-column label="空气质量指数aqi" align="center" prop="aqi" />
       <el-table-column label="pm2.5浓度" align="center" prop="pm" />
       <el-table-column label="pm10浓度" align="center" prop="pm10" />
       <el-table-column label="so2浓度" align="center" prop="so2Thickness" />
       <el-table-column label="no2浓度" align="center" prop="no2Thickness" />
       <el-table-column label="co浓度" align="center" prop="coThickness" />
       <el-table-column label="o3 浓度" align="center" prop="co3Thickness" />
-      <el-table-column label="vocs浓度" align="center" prop="voscThickness" />
-      <el-table-column label="设备_id" align="center" prop="deviceId" />
+      <el-table-column label="更新时间" align="center" prop="time" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.time, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="经度" align="center" prop="longitude" />
+      <el-table-column label="纬度" align="center" prop="latitude" />
+      <el-table-column label="站点编号" align="center" prop="stationId" />
+      <el-table-column label="设备编号" align="center" prop="deviceId" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -115,7 +100,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -124,59 +109,9 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改国控数据查询对话框 -->
+    <!-- 添加或修改国控数据对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="站点id" prop="stationId">
-          <el-input v-model="form.stationId" placeholder="请输入站点id" />
-        </el-form-item>
-        <el-form-item label="站点名称" prop="stationName">
-          <el-input v-model="form.stationName" placeholder="请输入站点名称" />
-        </el-form-item>
-        <el-form-item label="日期" prop="date">
-          <el-date-picker clearable
-            v-model="form.date"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择日期">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="空气质量指数" prop="aqi">
-          <el-input v-model="form.aqi" placeholder="请输入空气质量指数" />
-        </el-form-item>
-        <el-form-item label="pm2.5浓度" prop="pm">
-          <el-input v-model="form.pm" placeholder="请输入pm2.5浓度" />
-        </el-form-item>
-        <el-form-item label="pm10浓度" prop="pm10">
-          <el-input v-model="form.pm10" placeholder="请输入pm10浓度" />
-        </el-form-item>
-        <el-form-item label="so2浓度" prop="so2Thickness">
-          <el-input v-model="form.so2Thickness" placeholder="请输入so2浓度" />
-        </el-form-item>
-        <el-form-item label="no2浓度" prop="no2Thickness">
-          <el-input v-model="form.no2Thickness" placeholder="请输入no2浓度" />
-        </el-form-item>
-        <el-form-item label="co浓度" prop="coThickness">
-          <el-input v-model="form.coThickness" placeholder="请输入co浓度" />
-        </el-form-item>
-        <el-form-item label="o3 浓度" prop="co3Thickness">
-          <el-input v-model="form.co3Thickness" placeholder="请输入o3 浓度" />
-        </el-form-item>
-        <el-form-item label="vocs浓度" prop="voscThickness">
-          <el-input v-model="form.voscThickness" placeholder="请输入vocs浓度" />
-        </el-form-item>
-        <el-form-item label="经度" prop="longitude">
-          <el-input v-model="form.longitude" placeholder="请输入经度" />
-        </el-form-item>
-        <el-form-item label="纬度" prop="latitude">
-          <el-input v-model="form.latitude" placeholder="请输入纬度" />
-        </el-form-item>
-        <el-form-item label="首要污染物" prop="primaryPollutant">
-          <el-input v-model="form.primaryPollutant" placeholder="请输入首要污染物" />
-        </el-form-item>
-        <el-form-item label="设备_id" prop="deviceId">
-          <el-input v-model="form.deviceId" placeholder="请输入设备_id" />
-        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -205,7 +140,7 @@ export default {
       showSearch: true,
       // 总条数
       total: 0,
-      // 国控数据查询表格数据
+      // 国控数据表格数据
       countryList: [],
       // 弹出层标题
       title: "",
@@ -215,47 +150,12 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        stationId: null,
-        stationName: null,
-        date: null,
+        time: null,
       },
       // 表单参数
       form: {},
       // 表单校验
       rules: {
-        stationId: [
-          { required: true, message: "站点id不能为空", trigger: "blur" }
-        ],
-        stationName: [
-          { required: true, message: "站点名称不能为空", trigger: "blur" }
-        ],
-        date: [
-          { required: true, message: "日期不能为空", trigger: "blur" }
-        ],
-        aqi: [
-          { required: true, message: "空气质量指数不能为空", trigger: "blur" }
-        ],
-        pm: [
-          { required: true, message: "pm2.5浓度不能为空", trigger: "blur" }
-        ],
-        pm10: [
-          { required: true, message: "pm10浓度不能为空", trigger: "blur" }
-        ],
-        so2Thickness: [
-          { required: true, message: "so2浓度不能为空", trigger: "blur" }
-        ],
-        no2Thickness: [
-          { required: true, message: "no2浓度不能为空", trigger: "blur" }
-        ],
-        coThickness: [
-          { required: true, message: "co浓度不能为空", trigger: "blur" }
-        ],
-        co3Thickness: [
-          { required: true, message: "o3 浓度不能为空", trigger: "blur" }
-        ],
-        voscThickness: [
-          { required: true, message: "vocs浓度不能为空", trigger: "blur" }
-        ],
       }
     };
   },
@@ -263,7 +163,7 @@ export default {
     this.getList();
   },
   methods: {
-    /** 查询国控数据查询列表 */
+    /** 查询国控数据列表 */
     getList() {
       this.loading = true;
       listCountry(this.queryParams).then(response => {
@@ -281,38 +181,19 @@ export default {
     reset() {
       this.form = {
         id: null,
-        stationId: null,
-        stationName: null,
-        date: null,
+        name: null,
         aqi: null,
-        temperature: null,
-        windSpeed: null,
-        windDirection: null,
-        humidity: null,
-        pressure: null,
-        noise: null,
         pm: null,
         pm10: null,
         so2Thickness: null,
         no2Thickness: null,
         coThickness: null,
         co3Thickness: null,
-        voscThickness: null,
-        pm03Above: null,
-        pm05Above: null,
-        pm1: null,
-        pm25: null,
-        pm10: null,
-        pm1Above: null,
-        pm25Above: null,
-        pm5Above: null,
-        pm10Above: null,
+        time: null,
         longitude: null,
         latitude: null,
-        tsp: null,
-        primaryPollutant: null,
-        deviceId: null,
-        sn: null
+        stationId: null,
+        deviceId: null
       };
       this.resetForm("form");
     },
@@ -336,7 +217,7 @@ export default {
     handleAdd() {
       this.reset();
       this.open = true;
-      this.title = "添加国控数据查询";
+      this.title = "添加国控数据";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
@@ -345,7 +226,7 @@ export default {
       getCountry(id).then(response => {
         this.form = response.data;
         this.open = true;
-        this.title = "修改国控数据查询";
+        this.title = "修改国控数据";
       });
     },
     /** 提交按钮 */
@@ -371,7 +252,7 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除国控数据查询编号为"' + ids + '"的数据项？').then(function() {
+      this.$modal.confirm('是否确认删除国控数据编号为"' + ids + '"的数据项？').then(function() {
         return delCountry(ids);
       }).then(() => {
         this.getList();
