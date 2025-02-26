@@ -4,10 +4,11 @@
       <el-form-item label="更新时间" prop="time">
         <el-date-picker clearable
                         v-model="queryParams.time"
-                        type="date"
-                        value-format="yyyy-MM-dd"
+                        type="datetime"
+                        value-format="yyyy-MM-dd HH:mm:ss"
                         placeholder="请选择更新时间">
         </el-date-picker>
+
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -74,7 +75,7 @@
       <el-table-column label="o3 浓度" align="center" prop="co3Thickness" />
       <el-table-column label="更新时间" align="center" prop="time" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.time, '{y}-{m}-{d}') }}</span>
+          <span>{{ parseTime(scope.row.time, '{y}-{m}-{d} {h}:{i}:{s}' ) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="经度" align="center" prop="longitude" />
