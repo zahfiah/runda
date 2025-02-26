@@ -2,6 +2,10 @@ package com.ruoyi.runda.controller;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.runda.domain.Message;
+import com.ruoyi.runda.service.IMessageService;
+import com.ruoyi.runda.service.IStationService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +37,12 @@ public class DeviceController extends BaseController
 {
     @Autowired
     private IDeviceService deviceService;
+
+    @Autowired
+    private IMessageService messageService;
+
+    @Autowired
+    private IStationService StationService;
 
     /**
      * 查询监测设备管理设备列表
@@ -79,6 +89,25 @@ public class DeviceController extends BaseController
     {
         return toAjax(deviceService.insertDevice(device));
     }
+
+    /**
+     * 新增设备消息
+     */
+    @PreAuthorize("@ss.hasPermi('runda:device:send')")
+    @Log(title = "消息记录", businessType = BusinessType.INSERT)
+    @PostMapping("/send")
+    public AjaxResult send(@RequestBody Device device)
+    {
+
+        String  name = device.getName();
+        Long stationId = device.getStationId();
+        String stationName = StationService.selectStationById(stationId).getStationName();
+        Message message = new Message();
+        message.setContent("管理员在"+stationName+"新增了一个设备："+name);
+        //webSocket.sendMessage("管理员新增了一个站点："+name);
+        return toAjax(messageService.insertMessage(message));
+    }
+
 
     /**
      * 修改监测设备管理设备

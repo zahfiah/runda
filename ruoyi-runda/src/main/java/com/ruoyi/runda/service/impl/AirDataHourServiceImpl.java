@@ -30,6 +30,8 @@ import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -506,6 +508,16 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                     List<AirDataHour> reports = entry.getValue();
                     Map<String, Object> metrics = calculateMetrics(reports);
                     metrics.put("hour", hour);
+                    // 得到当前设备的时间 时间格式例如2019-10-16 4:00:00
+                    Date reportDate = reports.get(0).getDate();
+                    if (reportDate != null) {
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                        metrics.put("date", reportDate.toInstant().atZone(ZoneId.of("Asia/Shanghai")).format(formatter));
+                    } else {
+                        logger.warn("Date is null for hour {}", hour);
+                        metrics.put("date", "N/A");
+                    }
+
                     metrics.put("deviceName", reports.get(0).getDeviceName());
                     metrics.put("stationName", reports.get(0).getStationName());
                     //得到deviceId
@@ -623,6 +635,8 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         // 计算各项指标平均值
         Map<String, Object> metrics = calculateMetrics(hourlyData);
         metrics.put("dateTimeStr", dateTimeStr);
+        metrics.put("deviceName", hourlyData.get(0).getDeviceName());
+        metrics.put("stationName", hourlyData.get(0).getStationName());
         metrics.put("endTime", dateTimeFormat.format(endCalendar.getTime()));
         metrics.put("deviceId", deviceId);
         metrics.put("stationId", hourlyData.get(0).getStationId());

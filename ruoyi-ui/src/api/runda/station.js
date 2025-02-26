@@ -26,6 +26,15 @@ export function addStation(data) {
   })
 }
 
+//新增站点消息发送
+export function sendStation(data) {
+  return request({
+    url: '/runda/station/send',
+    method: 'post',
+    data: data
+  })
+}
+
 // 修改监测站点管理
 export function updateStation(data) {
   return request({

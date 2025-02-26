@@ -8,453 +8,215 @@ import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.core.domain.BaseEntity;
 
 /**
- * 国控数据查询对象 data_query_country
- * 
- * @author runda
- * @date 2025-01-07
+ * 国控数据对象 data_query_country
+ *
+ * @author ruoyi
+ * @date 2025-02-25
  */
 public class DataQueryCountry extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
-    /** 主键id */
+    /** 主键 */
     private Long id;
 
-    /** 站点id */
-    @Excel(name = "站点id")
-    private Long stationId;
+    /** 监测点昵称 */
+    @Excel(name = "监测点昵称")
+    private String name;
 
-    /** 站点名称 */
-    @Excel(name = "站点名称")
-    private String stationName;
-
-    /** 日期 */
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "日期", width = 30, dateFormat = "yyyy-MM-dd")
-    private Date date;
-
-    /** 空气质量指数 */
-    @Excel(name = "空气质量指数")
-    private Long aqi;
-
-    /** 温度 */
-    private Long temperature;
-
-    /** 风速 */
-    private Long windSpeed;
-
-    /** 风向 */
-    private Long windDirection;
-
-    /** 湿度 */
-    private Long humidity;
-
-    /** 压力 */
-    private Long pressure;
-
-    /** 噪音 */
-    private Long noise;
+    /** 空气质量指数aqi */
+    @Excel(name = "空气质量指数aqi")
+    private Double aqi;
 
     /** pm2.5浓度 */
     @Excel(name = "pm2.5浓度")
-    private Long pm;
+    private Double pm;
 
     /** pm10浓度 */
     @Excel(name = "pm10浓度")
-    private Long pm10;
+    private Double pm10;
 
     /** so2浓度 */
     @Excel(name = "so2浓度")
-    private Long so2Thickness;
+    private Double so2Thickness;
 
     /** no2浓度 */
     @Excel(name = "no2浓度")
-    private Long no2Thickness;
+    private Double no2Thickness;
 
     /** co浓度 */
     @Excel(name = "co浓度")
-    private Long coThickness;
+    private Double coThickness;
 
     /** o3 浓度 */
     @Excel(name = "o3 浓度")
-    private Long co3Thickness;
+    private Double co3Thickness;
 
-    /** vocs浓度 */
-    @Excel(name = "vocs浓度")
-    private Long voscThickness;
-
-    /** 粉尘pm0.3颗粒以上 */
-    private Long pm03Above;
-
-    /** 粉尘pm0.5颗粒以上 */
-    private Long pm05Above;
-
-    /** 粉尘pm1.0颗粒数 */
-    private Long pm1;
-
-    /** 粉尘pm2.5颗粒数 */
-    private Long pm25;
-
-
-
-    /** 粉尘pm1.0颗粒以上 */
-    private Long pm1Above;
-
-    /** 粉尘pm2.5颗粒以上 */
-    private Long pm25Above;
-
-    /** 粉尘pm5颗粒以上 */
-    private Long pm5Above;
-
-    /** 粉尘pm10颗粒以上 */
-    private Long pm10Above;
+    /** 更新时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "更新时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    private Date time;
 
     /** 经度 */
-    private Long longitude;
+    @Excel(name = "经度")
+    private Double longitude;
 
     /** 纬度 */
-    private Long latitude;
+    @Excel(name = "纬度")
+    private Double latitude;
 
-    /** pm100浓度 */
-    private Long tsp;
+    /** 站点编号 */
+    @Excel(name = "站点编号")
+    private Double stationId;
 
-    /** 首要污染物 */
-    private String primaryPollutant;
-
-    /** 设备_id */
-    @Excel(name = "设备_id")
+    /** 设备编号 */
+    @Excel(name = "设备编号")
     private Long deviceId;
 
-    /** 设备型号 */
-    private String sn;
-
-    public void setId(Long id) 
+    public void setId(Long id)
     {
         this.id = id;
     }
 
-    public Long getId() 
+    public Long getId()
     {
         return id;
     }
-    public void setStationId(Long stationId) 
+    public void setName(String name)
     {
-        this.stationId = stationId;
+        this.name = name;
     }
 
-    public Long getStationId() 
+    public String getName()
     {
-        return stationId;
+        return name;
     }
-    public void setStationName(String stationName) 
-    {
-        this.stationName = stationName;
-    }
-
-    public String getStationName() 
-    {
-        return stationName;
-    }
-    public void setDate(Date date) 
-    {
-        this.date = date;
-    }
-
-    public Date getDate() 
-    {
-        return date;
-    }
-    public void setAqi(Long aqi) 
+    public void setAqi(Double aqi)
     {
         this.aqi = aqi;
     }
 
-    public Long getAqi() 
+    public Double getAqi()
     {
         return aqi;
     }
-    public void setTemperature(Long temperature) 
-    {
-        this.temperature = temperature;
-    }
-
-    public Long getTemperature() 
-    {
-        return temperature;
-    }
-    public void setWindSpeed(Long windSpeed) 
-    {
-        this.windSpeed = windSpeed;
-    }
-
-    public Long getWindSpeed() 
-    {
-        return windSpeed;
-    }
-    public void setWindDirection(Long windDirection) 
-    {
-        this.windDirection = windDirection;
-    }
-
-    public Long getWindDirection() 
-    {
-        return windDirection;
-    }
-    public void setHumidity(Long humidity) 
-    {
-        this.humidity = humidity;
-    }
-
-    public Long getHumidity() 
-    {
-        return humidity;
-    }
-    public void setPressure(Long pressure) 
-    {
-        this.pressure = pressure;
-    }
-
-    public Long getPressure() 
-    {
-        return pressure;
-    }
-    public void setNoise(Long noise) 
-    {
-        this.noise = noise;
-    }
-
-    public Long getNoise() 
-    {
-        return noise;
-    }
-    public void setPm(Long pm) 
+    public void setPm(Double pm)
     {
         this.pm = pm;
     }
 
-    public Long getPm() 
+    public Double getPm()
     {
         return pm;
     }
-
-
-    public void setSo2Thickness(Long so2Thickness) 
-    {
-        this.so2Thickness = so2Thickness;
-    }
-
-    public Long getSo2Thickness() 
-    {
-        return so2Thickness;
-    }
-    public void setNo2Thickness(Long no2Thickness) 
-    {
-        this.no2Thickness = no2Thickness;
-    }
-
-    public Long getNo2Thickness() 
-    {
-        return no2Thickness;
-    }
-    public void setCoThickness(Long coThickness) 
-    {
-        this.coThickness = coThickness;
-    }
-
-    public Long getCoThickness() 
-    {
-        return coThickness;
-    }
-    public void setCo3Thickness(Long co3Thickness) 
-    {
-        this.co3Thickness = co3Thickness;
-    }
-
-    public Long getCo3Thickness() 
-    {
-        return co3Thickness;
-    }
-    public void setVoscThickness(Long voscThickness) 
-    {
-        this.voscThickness = voscThickness;
-    }
-
-    public Long getVoscThickness() 
-    {
-        return voscThickness;
-    }
-    public void setPm03Above(Long pm03Above) 
-    {
-        this.pm03Above = pm03Above;
-    }
-
-    public Long getPm03Above() 
-    {
-        return pm03Above;
-    }
-    public void setPm05Above(Long pm05Above) 
-    {
-        this.pm05Above = pm05Above;
-    }
-
-    public Long getPm05Above() 
-    {
-        return pm05Above;
-    }
-    public void setPm1(Long pm1) 
-    {
-        this.pm1 = pm1;
-    }
-
-    public Long getPm1() 
-    {
-        return pm1;
-    }
-    public void setPm25(Long pm25) 
-    {
-        this.pm25 = pm25;
-    }
-
-    public Long getPm25() 
-    {
-        return pm25;
-    }
-    public void setPm10(Long pm10) 
+    public void setPm10(Double pm10)
     {
         this.pm10 = pm10;
     }
 
-    public Long getPm10() 
+    public Double getPm10()
     {
         return pm10;
     }
-    public void setPm1Above(Long pm1Above) 
+    public void setSo2Thickness(Double so2Thickness)
     {
-        this.pm1Above = pm1Above;
+        this.so2Thickness = so2Thickness;
     }
 
-    public Long getPm1Above() 
+    public Double getSo2Thickness()
     {
-        return pm1Above;
+        return so2Thickness;
     }
-    public void setPm25Above(Long pm25Above) 
+    public void setNo2Thickness(Double no2Thickness)
     {
-        this.pm25Above = pm25Above;
-    }
-
-    public Long getPm25Above() 
-    {
-        return pm25Above;
-    }
-    public void setPm5Above(Long pm5Above) 
-    {
-        this.pm5Above = pm5Above;
+        this.no2Thickness = no2Thickness;
     }
 
-    public Long getPm5Above() 
+    public Double getNo2Thickness()
     {
-        return pm5Above;
+        return no2Thickness;
     }
-    public void setPm10Above(Long pm10Above) 
+    public void setCoThickness(Double coThickness)
     {
-        this.pm10Above = pm10Above;
+        this.coThickness = coThickness;
     }
 
-    public Long getPm10Above() 
+    public Double getCoThickness()
     {
-        return pm10Above;
+        return coThickness;
     }
-    public void setLongitude(Long longitude) 
+    public void setCo3Thickness(Double co3Thickness)
+    {
+        this.co3Thickness = co3Thickness;
+    }
+
+    public Double getCo3Thickness()
+    {
+        return co3Thickness;
+    }
+    public void setTime(Date time)
+    {
+        this.time = time;
+    }
+
+    public Date getTime()
+    {
+        return time;
+    }
+    public void setLongitude(Double longitude)
     {
         this.longitude = longitude;
     }
 
-    public Long getLongitude() 
+    public Double getLongitude()
     {
         return longitude;
     }
-    public void setLatitude(Long latitude) 
+    public void setLatitude(Double latitude)
     {
         this.latitude = latitude;
     }
 
-    public Long getLatitude() 
+    public Double getLatitude()
     {
         return latitude;
     }
-    public void setTsp(Long tsp) 
+    public void setStationId(Double stationId)
     {
-        this.tsp = tsp;
+        this.stationId = stationId;
     }
 
-    public Long getTsp() 
+    public Double getStationId()
     {
-        return tsp;
+        return stationId;
     }
-    public void setPrimaryPollutant(String primaryPollutant) 
-    {
-        this.primaryPollutant = primaryPollutant;
-    }
-
-    public String getPrimaryPollutant() 
-    {
-        return primaryPollutant;
-    }
-    public void setDeviceId(Long deviceId) 
+    public void setDeviceId(Long deviceId)
     {
         this.deviceId = deviceId;
     }
 
-    public Long getDeviceId() 
+    public Long getDeviceId()
     {
         return deviceId;
-    }
-    public void setSn(String sn) 
-    {
-        this.sn = sn;
-    }
-
-    public String getSn() 
-    {
-        return sn;
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("id", getId())
-            .append("stationId", getStationId())
-            .append("stationName", getStationName())
-            .append("date", getDate())
-            .append("aqi", getAqi())
-            .append("temperature", getTemperature())
-            .append("windSpeed", getWindSpeed())
-            .append("windDirection", getWindDirection())
-            .append("humidity", getHumidity())
-            .append("pressure", getPressure())
-            .append("noise", getNoise())
-            .append("pm", getPm())
-            .append("pm10", getPm10())
-            .append("so2Thickness", getSo2Thickness())
-            .append("no2Thickness", getNo2Thickness())
-            .append("coThickness", getCoThickness())
-            .append("co3Thickness", getCo3Thickness())
-            .append("voscThickness", getVoscThickness())
-            .append("pm03Above", getPm03Above())
-            .append("pm05Above", getPm05Above())
-            .append("pm1", getPm1())
-            .append("pm25", getPm25())
-            .append("pm10", getPm10())
-            .append("pm1Above", getPm1Above())
-            .append("pm25Above", getPm25Above())
-            .append("pm5Above", getPm5Above())
-            .append("pm10Above", getPm10Above())
-            .append("longitude", getLongitude())
-            .append("latitude", getLatitude())
-            .append("tsp", getTsp())
-            .append("primaryPollutant", getPrimaryPollutant())
-            .append("deviceId", getDeviceId())
-            .append("sn", getSn())
-            .toString();
+                .append("id", getId())
+                .append("name", getName())
+                .append("aqi", getAqi())
+                .append("pm", getPm())
+                .append("pm10", getPm10())
+                .append("so2Thickness", getSo2Thickness())
+                .append("no2Thickness", getNo2Thickness())
+                .append("coThickness", getCoThickness())
+                .append("co3Thickness", getCo3Thickness())
+                .append("time", getTime())
+                .append("longitude", getLongitude())
+                .append("latitude", getLatitude())
+                .append("stationId", getStationId())
+                .append("deviceId", getDeviceId())
+                .toString();
     }
 }
