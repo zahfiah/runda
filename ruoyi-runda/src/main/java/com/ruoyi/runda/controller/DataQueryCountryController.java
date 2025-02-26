@@ -22,10 +22,10 @@ import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.page.TableDataInfo;
 
 /**
- * 国控数据Controller
- *
- * @author ruoyi
- * @date 2025-02-25
+ * 国控数据查询Controller
+ * 
+ * @author runda
+ * @date 2025-01-07
  */
 @RestController
 @RequestMapping("/runda/country")
@@ -35,21 +35,7 @@ public class DataQueryCountryController extends BaseController
     private IDataQueryCountryService dataQueryCountryService;
 
     /**
-     *
-     * api获取国控数据
-     * @throws
-     */
-    //@PreAuthorize("@ss.hasPermi('runda:country:api')")
-    @GetMapping("/getApi")
-    //@ResponseBody
-    public String newsApi() throws Exception {
-
-        dataQueryCountryService.httpRequest();
-        return "获取国控数据成功";
-    }
-
-    /**
-     * 查询国控数据列表
+     * 查询国控数据查询列表
      */
     @PreAuthorize("@ss.hasPermi('runda:country:list')")
     @GetMapping("/list")
@@ -61,20 +47,20 @@ public class DataQueryCountryController extends BaseController
     }
 
     /**
-     * 导出国控数据列表
+     * 导出国控数据查询列表
      */
     @PreAuthorize("@ss.hasPermi('runda:country:export')")
-    @Log(title = "国控数据", businessType = BusinessType.EXPORT)
+    @Log(title = "国控数据查询", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, DataQueryCountry dataQueryCountry)
     {
         List<DataQueryCountry> list = dataQueryCountryService.selectDataQueryCountryList(dataQueryCountry);
         ExcelUtil<DataQueryCountry> util = new ExcelUtil<DataQueryCountry>(DataQueryCountry.class);
-        util.exportExcel(response, list, "国控数据数据");
+        util.exportExcel(response, list, "国控数据查询数据");
     }
 
     /**
-     * 获取国控数据详细信息
+     * 获取国控数据查询详细信息
      */
     @PreAuthorize("@ss.hasPermi('runda:country:query')")
     @GetMapping(value = "/{id}")
@@ -84,10 +70,10 @@ public class DataQueryCountryController extends BaseController
     }
 
     /**
-     * 新增国控数据
+     * 新增国控数据查询
      */
     @PreAuthorize("@ss.hasPermi('runda:country:add')")
-    @Log(title = "国控数据", businessType = BusinessType.INSERT)
+    @Log(title = "国控数据查询", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody DataQueryCountry dataQueryCountry)
     {
@@ -95,10 +81,10 @@ public class DataQueryCountryController extends BaseController
     }
 
     /**
-     * 修改国控数据
+     * 修改国控数据查询
      */
     @PreAuthorize("@ss.hasPermi('runda:country:edit')")
-    @Log(title = "国控数据", businessType = BusinessType.UPDATE)
+    @Log(title = "国控数据查询", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody DataQueryCountry dataQueryCountry)
     {
@@ -106,11 +92,11 @@ public class DataQueryCountryController extends BaseController
     }
 
     /**
-     * 删除国控数据
+     * 删除国控数据查询
      */
     @PreAuthorize("@ss.hasPermi('runda:country:remove')")
-    @Log(title = "国控数据", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @Log(title = "国控数据查询", businessType = BusinessType.DELETE)
+	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)
     {
         return toAjax(dataQueryCountryService.deleteDataQueryCountryByIds(ids));
