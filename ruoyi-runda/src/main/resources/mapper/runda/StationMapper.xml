@@ -42,20 +42,20 @@
         <result property="licensNumber"    column="licens_number"    />
         <result property="fromResource"    column="from_resource"    />
         <result property="jsdwmc"    column="jsdwmc"    />
-        <result property="jstyshxydm"    column="jstyshxydm"    />
+        <result property="jstsyhydm"    column="jstsyhydm"    />
         <result property="sgdwmc"    column="sgdwmc"    />
-        <result property="sgtyshxydm"    column="sgtyshxydm"    />
+        <result property="sgtshyhdym"    column="sgtshyhdym"    />
         <result property="jgbm"    column="jgbm"    />
-        <result property="jgzrr"    column="jgzrr"    />
-        <result property="jgzrrdh"    column="jgzrrdh"    />
-        <result property="sgjd"    column="sgjd"    />
+        <result property="jgzr"    column="jgzr"    />
+        <result property="jgzrdh"    column="jgzrdh"    />
+        <result property="sjjd"    column="sjjd"    />
         <result property="sfazjcsb"    column="sfazjcsb"    />
         <result property="jgrq"    column="jgrq"    />
         <result property="deviceId"    column="device_id"    />
     </resultMap>
 
     <sql id="selectStationVo">
-        select id, station_addr, station_name, river_name, river_code, section_name, section_code, river_level, inward_water, section_properties, monitoring_way, section_control_level, province, province_cn, city, city_cn, county, county_cn, town, town_cn, user_id, system_user_id, created_time, last_updated_time, longitude, latitude, type, remark, station_status, phone, link_man, country_name, country_id, floor_space, licens_number, from_resource, jsdwmc, jstyshxydm, sgdwmc, sgtyshxydm, jgbm, jgzrr, jgzrrdh, sgjd, sfazjcsb, jgrq, device_id from station
+        select id, station_addr, station_name, river_name, river_code, section_name, section_code, river_level, inward_water, section_properties, monitoring_way, section_control_level, province, province_cn, city, city_cn, county, county_cn, town, town_cn, user_id, system_user_id, created_time, last_updated_time, longitude, latitude, type, remark, station_status, phone, link_man, country_name, country_id, floor_space, licens_number, from_resource, jsdwmc, jstsyhydm, sgdwmc, sgtshyhdym, jgbm, jgzr, jgzrdh, sjjd, sfazjcsb, jgrq, device_id from station
     </sql>
 
     <select id="selectStationList" parameterType="Station" resultMap="StationResult">
@@ -112,13 +112,13 @@
             <if test="licensNumber != null and licensNumber != ''">licens_number,</if>
             <if test="fromResource != null">from_resource,</if>
             <if test="jsdwmc != null and jsdwmc != ''">jsdwmc,</if>
-            <if test="jstyshxydm != null and jstyshxydm != ''">jstyshxydm,</if>
+            <if test="jstsyhydm != null and jstsyhydm != ''">jstsyhydm,</if>
             <if test="sgdwmc != null and sgdwmc != ''">sgdwmc,</if>
-            <if test="sgtyshxydm != null and sgtyshxydm != ''">sgtyshxydm,</if>
+            <if test="sgtshyhdym != null and sgtshyhdym != ''">sgtshyhdym,</if>
             <if test="jgbm != null and jgbm != ''">jgbm,</if>
-            <if test="jgzrr != null and jgzrr != ''">jgzrr,</if>
-            <if test="jgzrrdh != null and jgzrrdh != ''">jgzrrdh,</if>
-            <if test="sgjd != null and sgjd != ''">sgjd,</if>
+            <if test="jgzr != null and jgzr != ''">jgzr,</if>
+            <if test="jgzrdh != null and jgzrdh != ''">jgzrdh,</if>
+            <if test="sjjd != null and sjjd != ''">sjjd,</if>
             <if test="sfazjcsb != null and sfazjcsb != ''">sfazjcsb,</if>
             <if test="jgrq != null">jgrq,</if>
             <if test="deviceId != null">device_id,</if>
@@ -161,13 +161,13 @@
             <if test="licensNumber != null and licensNumber != ''">#{licensNumber},</if>
             <if test="fromResource != null">#{fromResource},</if>
             <if test="jsdwmc != null and jsdwmc != ''">#{jsdwmc},</if>
-            <if test="jstyshxydm != null and jstyshxydm != ''">#{jstyshxydm},</if>
+            <if test="jstsyhydm != null and jstsyhydm != ''">#{jstsyhydm},</if>
             <if test="sgdwmc != null and sgdwmc != ''">#{sgdwmc},</if>
-            <if test="sgtyshxydm != null and sgtyshxydm != ''">#{sgtyshxydm},</if>
+            <if test="sgtshyhdym != null and sgtshyhdym != ''">#{sgtshyhdym},</if>
             <if test="jgbm != null and jgbm != ''">#{jgbm},</if>
-            <if test="jgzrr != null and jgzrr != ''">#{jgzrr},</if>
-            <if test="jgzrrdh != null and jgzrrdh != ''">#{jgzrrdh},</if>
-            <if test="sgjd != null and sgjd != ''">#{sgjd},</if>
+            <if test="jgzr != null and jgzr != ''">#{jgzr},</if>
+            <if test="jgzrdh != null and jgzrdh != ''">#{jgzrdh},</if>
+            <if test="sjjd != null and sjjd != ''">#{sjjd},</if>
             <if test="sfazjcsb != null and sfazjcsb != ''">#{sfazjcsb},</if>
             <if test="jgrq != null">#{jgrq},</if>
             <if test="deviceId != null">#{deviceId},</if>
@@ -213,13 +213,13 @@
             <if test="licensNumber != null and licensNumber != ''">licens_number = #{licensNumber},</if>
             <if test="fromResource != null">from_resource = #{fromResource},</if>
             <if test="jsdwmc != null and jsdwmc != ''">jsdwmc = #{jsdwmc},</if>
-            <if test="jstyshxydm != null and jstyshxydm != ''">jstyshxydm = #{jstyshxydm},</if>
+            <if test="jstsyhydm != null and jstsyhydm != ''">jstsyhydm = #{jstsyhydm},</if>
             <if test="sgdwmc != null and sgdwmc != ''">sgdwmc = #{sgdwmc},</if>
-            <if test="sgtyshxydm != null and sgtyshxydm != ''">sgtyshxydm = #{sgtyshxydm},</if>
+            <if test="sgtshyhdym != null and sgtshyhdym != ''">sgtshyhdym = #{sgtshyhdym},</if>
             <if test="jgbm != null and jgbm != ''">jgbm = #{jgbm},</if>
-            <if test="jgzrr != null and jgzrr != ''">jgzrr = #{jgzrr},</if>
-            <if test="jgzrrdh != null and jgzrrdh != ''">jgzrrdh = #{jgzrrdh},</if>
-            <if test="sgjd != null and sgjd != ''">sgjd = #{sgjd},</if>
+            <if test="jgzr != null and jgzr != ''">jgzr = #{jgzr},</if>
+            <if test="jgzrdh != null and jgzrdh != ''">jgzrdh = #{jgzrdh},</if>
+            <if test="sjjd != null and sjjd != ''">sjjd = #{sjjd},</if>
             <if test="sfazjcsb != null and sfazjcsb != ''">sfazjcsb = #{sfazjcsb},</if>
             <if test="jgrq != null">jgrq = #{jgrq},</if>
             <if test="deviceId != null">device_id = #{deviceId},</if>

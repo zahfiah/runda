@@ -1,14 +1,29 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="更新时间" prop="time">
+      <el-form-item label="创建时间" prop="time">
         <el-date-picker clearable
                         v-model="queryParams.time"
-                        type="datetime"
-                        value-format="yyyy-MM-dd HH:mm:ss"
-                        placeholder="请选择更新时间">
+                        type="date"
+                        value-format="yyyy-MM-dd"
+                        placeholder="请选择创建时间">
         </el-date-picker>
-
+      </el-form-item>
+      <el-form-item label="是否已读(0未读 1已读）" prop="isRead">
+        <el-input
+          v-model="queryParams.isRead"
+          placeholder="请输入是否已读(0未读 1已读）"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="备注" prop="remark">
+        <el-input
+          v-model="queryParams.remark"
+          placeholder="请输入备注"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -24,7 +39,7 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          v-hasPermi="['runda:country:add']"
+          v-hasPermi="['runda:message:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -35,7 +50,7 @@
           size="mini"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['runda:country:edit']"
+          v-hasPermi="['runda:message:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -46,7 +61,7 @@
           size="mini"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['runda:country:remove']"
+          v-hasPermi="['runda:message:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -56,47 +71,45 @@
           icon="el-icon-download"
           size="mini"
           @click="handleExport"
-          v-hasPermi="['runda:country:export']"
+          v-hasPermi="['runda:message:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="countryList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="messageList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" />
-      <el-table-column label="监测点昵称" align="center" prop="name" />
-      <el-table-column label="空气质量指数aqi" align="center" prop="aqi" />
-      <el-table-column label="pm2.5浓度" align="center" prop="pm" />
-      <el-table-column label="pm10浓度" align="center" prop="pm10" />
-      <el-table-column label="so2浓度" align="center" prop="so2Thickness" />
-      <el-table-column label="no2浓度" align="center" prop="no2Thickness" />
-      <el-table-column label="co浓度" align="center" prop="coThickness" />
-      <el-table-column label="o3 浓度" align="center" prop="co3Thickness" />
-      <el-table-column label="更新时间" align="center" prop="time" width="180">
+      <el-table-column label="主键id" align="center" prop="id" />
+      <el-table-column label="消息内容" align="center" prop="content" />
+      <el-table-column label="创建时间" align="center" prop="time" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.time, '{y}-{m}-{d} {h}:{i}:{s}' ) }}</span>
+          <span>{{ parseTime(scope.row.time, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="经度" align="center" prop="longitude" />
-      <el-table-column label="纬度" align="center" prop="latitude" />
-      <el-table-column label="站点编号" align="center" prop="stationId" />
-      <el-table-column label="设备编号" align="center" prop="deviceId" />
+      <el-table-column label="是否已读(0未读 1已读）" align="center" prop="isRead" />
+      <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
             size="mini"
             type="text"
+            icon="el-icon-view"
+            @click="uRead(scope.row)"
+            v-hasPermi="['runda:message:updateRead']"
+          >详情</el-button>
+          <el-button
+            size="mini"
+            type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['runda:country:edit']"
+            v-hasPermi="['runda:message:edit']"
           >修改</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['runda:country:remove']"
+            v-hasPermi="['runda:message:remove']"
           >删除</el-button>
         </template>
       </el-table-column>
@@ -110,7 +123,7 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改国控数据对话框 -->
+    <!-- 添加或修改消息通知对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
       </el-form>
@@ -119,18 +132,37 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog :title="title" :visible.sync="iR" width="500px" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <el-form-item  label="消息内容">
+          <el-input v-model="form.content"  readonly/>
+        </el-form-item>
+        <el-form-item label="时间" prop="time">
+          <el-input v-model="form.time"  readonly/>
+        </el-form-item>
+        <el-form-item label="备注" prop="remark">
+          <el-input v-model="form.remark"  readonly/>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="cl">关闭</el-button>
+      </div>
+    </el-dialog>
   </div>
+
 </template>
 
 <script>
-import { listCountry, getCountry, delCountry, addCountry, updateCountry } from "@/api/runda/country";
+import {listMessage, getMessage, delMessage, addMessage, updateMessage, updateRead} from "@/api/runda/message";
 
 export default {
-  name: "Country",
+  name: "Message",
   data() {
     return {
       // 遮罩层
       loading: true,
+      iR:false,
       // 选中数组
       ids: [],
       // 非单个禁用
@@ -141,8 +173,8 @@ export default {
       showSearch: true,
       // 总条数
       total: 0,
-      // 国控数据表格数据
-      countryList: [],
+      // 消息通知表格数据
+      messageList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -151,7 +183,10 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
+        content: null,
         time: null,
+        isRead: null,
+        remark: null
       },
       // 表单参数
       form: {},
@@ -164,11 +199,11 @@ export default {
     this.getList();
   },
   methods: {
-    /** 查询国控数据列表 */
+    /** 查询消息通知列表 */
     getList() {
       this.loading = true;
-      listCountry(this.queryParams).then(response => {
-        this.countryList = response.rows;
+      listMessage(this.queryParams).then(response => {
+        this.messageList = response.rows;
         this.total = response.total;
         this.loading = false;
       });
@@ -182,19 +217,10 @@ export default {
     reset() {
       this.form = {
         id: null,
-        name: null,
-        aqi: null,
-        pm: null,
-        pm10: null,
-        so2Thickness: null,
-        no2Thickness: null,
-        coThickness: null,
-        co3Thickness: null,
+        content: null,
         time: null,
-        longitude: null,
-        latitude: null,
-        stationId: null,
-        deviceId: null
+        isRead: null,
+        remark: null
       };
       this.resetForm("form");
     },
@@ -218,16 +244,16 @@ export default {
     handleAdd() {
       this.reset();
       this.open = true;
-      this.title = "添加国控数据";
+      this.title = "添加消息通知";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
       const id = row.id || this.ids
-      getCountry(id).then(response => {
+      getMessage(id).then(response => {
         this.form = response.data;
         this.open = true;
-        this.title = "修改国控数据";
+        this.title = "修改消息通知";
       });
     },
     /** 提交按钮 */
@@ -235,13 +261,13 @@ export default {
       this.$refs["form"].validate(valid => {
         if (valid) {
           if (this.form.id != null) {
-            updateCountry(this.form).then(response => {
+            updateMessage(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
               this.open = false;
               this.getList();
             });
           } else {
-            addCountry(this.form).then(response => {
+            addMessage(this.form).then(response => {
               this.$modal.msgSuccess("新增成功");
               this.open = false;
               this.getList();
@@ -253,8 +279,8 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除国控数据编号为"' + ids + '"的数据项？').then(function() {
-        return delCountry(ids);
+      this.$modal.confirm('是否确认删除消息通知编号为"' + ids + '"的数据项？').then(function() {
+        return delMessage(ids);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
@@ -262,9 +288,34 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport() {
-      this.download('runda/country/export', {
+      this.download('runda/message/export', {
         ...this.queryParams
-      }, `country_${new Date().getTime()}.xlsx`)
+      }, `message_${new Date().getTime()}.xlsx`)
+    },
+    //详情
+    uRead(row){
+      this.reset();
+      const id = row.id || this.ids
+      getMessage(id).then(response => {
+        this.form = response.data;
+        this.iR = true;
+        this.title = "消息详情";
+      });
+
+    },
+    //已读
+    cl() {
+      updateRead(this.form).then(response => {
+        console.log(this.form)
+        this.$modal.msgSuccess("已读");
+        //this.iR = false;
+        this.getList();
+      });
+      this.iR = false;
+
+      this.reset();
+      this.reload();
+
     }
   }
 };

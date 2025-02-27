@@ -3,10 +3,13 @@
     <template v-if="hasOneShowingChild(item.children,item) && (!onlyOneChild.children||onlyOneChild.noShowingChildren)&&!item.alwaysShow">
       <app-link v-if="onlyOneChild.meta" :to="resolvePath(onlyOneChild.path, onlyOneChild.query)">
         <el-menu-item :index="resolvePath(onlyOneChild.path)" :class="{'submenu-title-noDropdown':!isNest}">
-          <item :icon="onlyOneChild.meta.icon||(item.meta&&item.meta.icon)" :title="onlyOneChild.meta.title" />
+          <item :icon="onlyOneChild.meta.icon||(item.meta&&item.meta.icon)" :title="onlyOneChild.meta.title"
+                :num="message_num(onlyOneChild.meta)"/>
         </el-menu-item>
       </app-link>
+
     </template>
+
 
     <el-submenu v-else ref="subMenu" :index="resolvePath(item.path)" popper-append-to-body>
       <template slot="title">
@@ -22,6 +25,7 @@
       />
     </el-submenu>
   </div>
+
 </template>
 
 <script>
@@ -30,6 +34,7 @@ import { isExternal } from '@/utils/validate'
 import Item from './Item'
 import AppLink from './Link'
 import FixiOSBug from './FixiOSBug'
+import { isRead } from "@/api/runda/message";
 
 export default {
   name: 'SidebarItem',
@@ -52,9 +57,30 @@ export default {
   },
   data() {
     this.onlyOneChild = null
-    return {}
+    return {
+      num : null
+    }
   },
+  // mounted(){
+  //   this.message_num(this.onlyOneChild.meta)
+  // },
   methods: {
+    message_num(data) {
+      if (data.title == '消息通知') {//判断自己需要传入的标题，不然你标题多的时候会请求很多次
+        // console.log(data)
+        //this.loading = true;
+        isRead(this.queryParams).then(response => {
+          console.log(response)
+          this.num = response;
+          console.log(this.num);
+          //this.total = response.total;
+          //this.loading = false;
+
+        });
+        return this.num;
+      }
+    }
+    ,
     hasOneShowingChild(children = [], parent) {
       if (!children) {
         children = [];
@@ -94,6 +120,7 @@ export default {
       }
       return path.resolve(this.basePath, routePath)
     }
+
   }
 }
 </script>

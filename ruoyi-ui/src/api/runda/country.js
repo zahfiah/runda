@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 查询国控数据查询列表
+// 查询国控数据列表
 export function listCountry(query) {
   return request({
     url: '/runda/country/list',
@@ -9,7 +9,7 @@ export function listCountry(query) {
   })
 }
 
-// 查询国控数据查询详细
+// 查询国控数据详细
 export function getCountry(id) {
   return request({
     url: '/runda/country/' + id,
@@ -17,7 +17,7 @@ export function getCountry(id) {
   })
 }
 
-// 新增国控数据查询
+// 新增国控数据
 export function addCountry(data) {
   return request({
     url: '/runda/country',
@@ -26,7 +26,7 @@ export function addCountry(data) {
   })
 }
 
-// 修改国控数据查询
+// 修改国控数据
 export function updateCountry(data) {
   return request({
     url: '/runda/country',
@@ -35,7 +35,7 @@ export function updateCountry(data) {
   })
 }
 
-// 删除国控数据查询
+// 删除国控数据
 export function delCountry(id) {
   return request({
     url: '/runda/country/' + id,

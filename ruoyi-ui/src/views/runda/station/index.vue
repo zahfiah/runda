@@ -232,7 +232,7 @@
 </template>
 
 <script>
-import { listStation, getStation, delStation, addStation, updateStation } from "@/api/runda/station";
+import { listStation, getStation, delStation, addStation, sendStation,updateStation } from "@/api/runda/station";
 import { listDevice } from "@/api/runda/device";
 import { listUser } from "@/api/system/user";
 import regions from '@/assets/regions.json'; // 引入地区数据
@@ -504,7 +504,14 @@ export default {
               this.$modal.msgSuccess("新增成功");
               this.open = false;
               this.getList();
+
+              sendStation(this.form.stationName).then(response => {
+                this.$modal.msgSuccess("发送成功");
+                console.log(this.form.stationName)
+              });
+
             });
+
           }
         }
       });
