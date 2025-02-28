@@ -48,6 +48,9 @@
         <include refid="selectDataQueryCountryVo"/>
         where id = #{id}
     </select>
+    <select id="selectDataQueryCountryByName" resultType="com.ruoyi.runda.domain.DataQueryCountry">
+        select pm,pm10,time from data_query_country where name = #{name}
+    </select>
 
     <insert id="insertDataQueryCountry" parameterType="DataQueryCountry" useGeneratedKeys="true" keyProperty="id">
         insert into data_query_country

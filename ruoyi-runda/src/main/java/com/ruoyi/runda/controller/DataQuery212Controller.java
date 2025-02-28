@@ -3,6 +3,7 @@ package com.ruoyi.runda.controller;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.runda.domain.DataQuery212;
+import com.ruoyi.runda.domain.Device;
 import com.ruoyi.runda.service.DataQuery212Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -144,6 +145,12 @@ public class DataQuery212Controller extends BaseController {
             @RequestParam(value = "size", defaultValue = "10") int size) {
 
         return dataQuery212Service.selectDataQuery212ListByDateAndDeviceId(deviceId, date, page, size);
+    }
+
+    //查询设备id与设备名称
+    @GetMapping("/listDeviceIdAndName")
+    public List<Device> listDeviceIdAndName(){
+        return dataQuery212Service.listDeviceIdAndName();
     }
 }
 
