@@ -254,7 +254,8 @@ export default {
     width: 100%;
     position: relative;
     text-align: center;
-    height: 400px; /* 增加高度 */
+    height: 400px;
+    /* 增加高度 */
 
     h1 {
       font-size: 48px;
@@ -263,7 +264,8 @@ export default {
       font-family: "楷体", "STKaiti", serif;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
       position: absolute;
-      top: 20px; /* 修改为居顶 */
+      top: 20px;
+      /* 修改为居顶 */
       left: 50%;
       transform: translateX(-50%);
       z-index: 1;
@@ -554,6 +556,3 @@ export default {
   }
 }
 </style>
-
-
-
