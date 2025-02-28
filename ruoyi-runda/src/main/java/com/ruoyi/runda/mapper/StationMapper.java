@@ -65,4 +65,6 @@ public interface StationMapper
     boolean selectById(Long stationId);
     @Select("select phone from station where id = #{id}")
     String getPhoneByStationId(String stationId);
+    @Select("select link_man from station where id = #{id}")
+    String getNameByStationId(String stationId);
 }

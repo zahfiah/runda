@@ -9,7 +9,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
 
 /**
  * 监测站点管理对象 station
- *
+ * 
  * @author runda
  * @date 2025-01-10
  */
@@ -134,25 +134,25 @@ public class Station extends BaseEntity
     private String jsdwmc;
 
     /** 建设单位信用代码 */
-    private String jstsyhydm;
+    private String jstyshxydm;
 
     /** 施工单位名称 */
     private String sgdwmc;
 
     /** 施工单位统一社会信用代码 */
-    private String sgtshyhdym;
+    private String sgtyshxydm;
 
     /** 监管部门 */
     private String jgbm;
 
     /** 监管责任人 */
-    private String jgzr;
+    private String jgzrr;
 
     /** 监管电话 */
-    private String jgzrdh;
+    private String jgzrrdh;
 
     /** 施工阶段 */
-    private String sjjd;
+    private String sgjd;
 
     /** PM10是否安装 */
     private String sfazjcsb;
@@ -163,417 +163,417 @@ public class Station extends BaseEntity
     /** 设备id */
     private Long deviceId;
 
-    public void setId(Long id)
+    public void setId(Long id) 
     {
         this.id = id;
     }
 
-    public Long getId()
+    public Long getId() 
     {
         return id;
     }
-    public void setStationAddr(String stationAddr)
+    public void setStationAddr(String stationAddr) 
     {
         this.stationAddr = stationAddr;
     }
 
-    public String getStationAddr()
+    public String getStationAddr() 
     {
         return stationAddr;
     }
-    public void setStationName(String stationName)
+    public void setStationName(String stationName) 
     {
         this.stationName = stationName;
     }
 
-    public String getStationName()
+    public String getStationName() 
     {
         return stationName;
     }
-    public void setRiverName(String riverName)
+    public void setRiverName(String riverName) 
     {
         this.riverName = riverName;
     }
 
-    public String getRiverName()
+    public String getRiverName() 
     {
         return riverName;
     }
-    public void setRiverCode(String riverCode)
+    public void setRiverCode(String riverCode) 
     {
         this.riverCode = riverCode;
     }
 
-    public String getRiverCode()
+    public String getRiverCode() 
     {
         return riverCode;
     }
-    public void setSectionName(String sectionName)
+    public void setSectionName(String sectionName) 
     {
         this.sectionName = sectionName;
     }
 
-    public String getSectionName()
+    public String getSectionName() 
     {
         return sectionName;
     }
-    public void setSectionCode(String sectionCode)
+    public void setSectionCode(String sectionCode) 
     {
         this.sectionCode = sectionCode;
     }
 
-    public String getSectionCode()
+    public String getSectionCode() 
     {
         return sectionCode;
     }
-    public void setRiverLevel(Long riverLevel)
+    public void setRiverLevel(Long riverLevel) 
     {
         this.riverLevel = riverLevel;
     }
 
-    public Long getRiverLevel()
+    public Long getRiverLevel() 
     {
         return riverLevel;
     }
-    public void setInwardWater(String inwardWater)
+    public void setInwardWater(String inwardWater) 
     {
         this.inwardWater = inwardWater;
     }
 
-    public String getInwardWater()
+    public String getInwardWater() 
     {
         return inwardWater;
     }
-    public void setSectionProperties(String sectionProperties)
+    public void setSectionProperties(String sectionProperties) 
     {
         this.sectionProperties = sectionProperties;
     }
 
-    public String getSectionProperties()
+    public String getSectionProperties() 
     {
         return sectionProperties;
     }
-    public void setMonitoringWay(Long monitoringWay)
+    public void setMonitoringWay(Long monitoringWay) 
     {
         this.monitoringWay = monitoringWay;
     }
 
-    public Long getMonitoringWay()
+    public Long getMonitoringWay() 
     {
         return monitoringWay;
     }
-    public void setSectionControlLevel(Long sectionControlLevel)
+    public void setSectionControlLevel(Long sectionControlLevel) 
     {
         this.sectionControlLevel = sectionControlLevel;
     }
 
-    public Long getSectionControlLevel()
+    public Long getSectionControlLevel() 
     {
         return sectionControlLevel;
     }
-    public void setProvince(Long province)
+    public void setProvince(Long province) 
     {
         this.province = province;
     }
 
-    public Long getProvince()
+    public Long getProvince() 
     {
         return province;
     }
-    public void setProvinceCn(String provinceCn)
+    public void setProvinceCn(String provinceCn) 
     {
         this.provinceCn = provinceCn;
     }
 
-    public String getProvinceCn()
+    public String getProvinceCn() 
     {
         return provinceCn;
     }
-    public void setCity(Long city)
+    public void setCity(Long city) 
     {
         this.city = city;
     }
 
-    public Long getCity()
+    public Long getCity() 
     {
         return city;
     }
-    public void setCityCn(String cityCn)
+    public void setCityCn(String cityCn) 
     {
         this.cityCn = cityCn;
     }
 
-    public String getCityCn()
+    public String getCityCn() 
     {
         return cityCn;
     }
-    public void setCounty(Long county)
+    public void setCounty(Long county) 
     {
         this.county = county;
     }
 
-    public Long getCounty()
+    public Long getCounty() 
     {
         return county;
     }
-    public void setCountyCn(String countyCn)
+    public void setCountyCn(String countyCn) 
     {
         this.countyCn = countyCn;
     }
 
-    public String getCountyCn()
+    public String getCountyCn() 
     {
         return countyCn;
     }
-    public void setTown(Long town)
+    public void setTown(Long town) 
     {
         this.town = town;
     }
 
-    public Long getTown()
+    public Long getTown() 
     {
         return town;
     }
-    public void setTownCn(String townCn)
+    public void setTownCn(String townCn) 
     {
         this.townCn = townCn;
     }
 
-    public String getTownCn()
+    public String getTownCn() 
     {
         return townCn;
     }
-    public void setUserId(Long userId)
+    public void setUserId(Long userId) 
     {
         this.userId = userId;
     }
 
-    public Long getUserId()
+    public Long getUserId() 
     {
         return userId;
     }
-    public void setSystemUserId(Long systemUserId)
+    public void setSystemUserId(Long systemUserId) 
     {
         this.systemUserId = systemUserId;
     }
 
-    public Long getSystemUserId()
+    public Long getSystemUserId() 
     {
         return systemUserId;
     }
-    public void setCreatedTime(Date createdTime)
+    public void setCreatedTime(Date createdTime) 
     {
         this.createdTime = createdTime;
     }
 
-    public Date getCreatedTime()
+    public Date getCreatedTime() 
     {
         return createdTime;
     }
-    public void setLastUpdatedTime(Date lastUpdatedTime)
+    public void setLastUpdatedTime(Date lastUpdatedTime) 
     {
         this.lastUpdatedTime = lastUpdatedTime;
     }
 
-    public Date getLastUpdatedTime()
+    public Date getLastUpdatedTime() 
     {
         return lastUpdatedTime;
     }
-    public void setLongitude(Double longitude)
+    public void setLongitude(Double longitude) 
     {
         this.longitude = longitude;
     }
 
-    public Double getLongitude()
+    public Double getLongitude() 
     {
         return longitude;
     }
-    public void setLatitude(Double latitude)
+    public void setLatitude(Double latitude) 
     {
         this.latitude = latitude;
     }
 
-    public Double getLatitude()
+    public Double getLatitude() 
     {
         return latitude;
     }
-    public void setType(Long type)
+    public void setType(Long type) 
     {
         this.type = type;
     }
 
-    public Long getType()
+    public Long getType() 
     {
         return type;
     }
-    public void setStationStatus(Long stationStatus)
+    public void setStationStatus(Long stationStatus) 
     {
         this.stationStatus = stationStatus;
     }
 
-    public Long getStationStatus()
+    public Long getStationStatus() 
     {
         return stationStatus;
     }
-    public void setPhone(String phone)
+    public void setPhone(String phone) 
     {
         this.phone = phone;
     }
 
-    public String getPhone()
+    public String getPhone() 
     {
         return phone;
     }
-    public void setLinkMan(String linkMan)
+    public void setLinkMan(String linkMan) 
     {
         this.linkMan = linkMan;
     }
 
-    public String getLinkMan()
+    public String getLinkMan() 
     {
         return linkMan;
     }
-    public void setCountryName(String countryName)
+    public void setCountryName(String countryName) 
     {
         this.countryName = countryName;
     }
 
-    public String getCountryName()
+    public String getCountryName() 
     {
         return countryName;
     }
-    public void setCountryId(Long countryId)
+    public void setCountryId(Long countryId) 
     {
         this.countryId = countryId;
     }
 
-    public Long getCountryId()
+    public Long getCountryId() 
     {
         return countryId;
     }
-    public void setFloorSpace(Long floorSpace)
+    public void setFloorSpace(Long floorSpace) 
     {
         this.floorSpace = floorSpace;
     }
 
-    public Long getFloorSpace()
+    public Long getFloorSpace() 
     {
         return floorSpace;
     }
-    public void setLicensNumber(String licensNumber)
+    public void setLicensNumber(String licensNumber) 
     {
         this.licensNumber = licensNumber;
     }
 
-    public String getLicensNumber()
+    public String getLicensNumber() 
     {
         return licensNumber;
     }
-    public void setFromResource(Long fromResource)
+    public void setFromResource(Long fromResource) 
     {
         this.fromResource = fromResource;
     }
 
-    public Long getFromResource()
+    public Long getFromResource() 
     {
         return fromResource;
     }
-    public void setJsdwmc(String jsdwmc)
+    public void setJsdwmc(String jsdwmc) 
     {
         this.jsdwmc = jsdwmc;
     }
 
-    public String getJsdwmc()
+    public String getJsdwmc() 
     {
         return jsdwmc;
     }
-    public void setJstsyhydm(String jstsyhydm)
+    public void setJstsyhydm(String jstyshxydm)
     {
-        this.jstsyhydm = jstsyhydm;
+        this.jstyshxydm = jstyshxydm;
     }
 
     public String getJstsyhydm()
     {
-        return jstsyhydm;
+        return jstyshxydm;
     }
-    public void setSgdwmc(String sgdwmc)
+    public void setSgdwmc(String sgdwmc) 
     {
         this.sgdwmc = sgdwmc;
     }
 
-    public String getSgdwmc()
+    public String getSgdwmc() 
     {
         return sgdwmc;
     }
-    public void setSgtshyhdym(String sgtshyhdym)
+    public void setSgtshyhdym(String sgtyshxydm)
     {
-        this.sgtshyhdym = sgtshyhdym;
+        this.sgtyshxydm = sgtyshxydm;
     }
 
     public String getSgtshyhdym()
     {
-        return sgtshyhdym;
+        return sgtyshxydm;
     }
     public void setJgbm(String jgbm)
     {
         this.jgbm = jgbm;
     }
 
-    public String getJgbm()
+    public String getJgbm() 
     {
         return jgbm;
     }
-    public void setJgzr(String jgzr)
+    public void setJgzr(String jgzrr)
     {
-        this.jgzr = jgzr;
+        this.jgzrr = jgzrr;
     }
 
-    public String getJgzr()
+    public String getJgzr() 
     {
-        return jgzr;
+        return jgzrr;
     }
-    public void setJgzrdh(String jgzrdh)
+    public void setJgzrdh(String jgzrrdh)
     {
-        this.jgzrdh = jgzrdh;
-    }
-
-    public String getJgzrdh()
-    {
-        return jgzrdh;
-    }
-    public void setSjjd(String sjjd)
-    {
-        this.sjjd = sjjd;
+        this.jgzrrdh = jgzrrdh;
     }
 
-    public String getSjjd()
+    public String getJgzrdh() 
     {
-        return sjjd;
+        return jgzrrdh;
     }
-    public void setSfazjcsb(String sfazjcsb)
+    public void setSjjd(String sgjd)
+    {
+        this.sgjd = sgjd;
+    }
+
+    public String getSjjd() 
+    {
+        return sgjd;
+    }
+    public void setSfazjcsb(String sfazjcsb) 
     {
         this.sfazjcsb = sfazjcsb;
     }
 
-    public String getSfazjcsb()
+    public String getSfazjcsb() 
     {
         return sfazjcsb;
     }
-    public void setJgrq(Date jgrq)
+    public void setJgrq(Date jgrq) 
     {
         this.jgrq = jgrq;
     }
 
-    public Date getJgrq()
+    public Date getJgrq() 
     {
         return jgrq;
     }
-    public void setDeviceId(Long deviceId)
+    public void setDeviceId(Long deviceId) 
     {
         this.deviceId = deviceId;
     }
 
-    public Long getDeviceId()
+    public Long getDeviceId() 
     {
         return deviceId;
     }
@@ -581,53 +581,53 @@ public class Station extends BaseEntity
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-                .append("id", getId())
-                .append("stationAddr", getStationAddr())
-                .append("stationName", getStationName())
-                .append("riverName", getRiverName())
-                .append("riverCode", getRiverCode())
-                .append("sectionName", getSectionName())
-                .append("sectionCode", getSectionCode())
-                .append("riverLevel", getRiverLevel())
-                .append("inwardWater", getInwardWater())
-                .append("sectionProperties", getSectionProperties())
-                .append("monitoringWay", getMonitoringWay())
-                .append("sectionControlLevel", getSectionControlLevel())
-                .append("province", getProvince())
-                .append("provinceCn", getProvinceCn())
-                .append("city", getCity())
-                .append("cityCn", getCityCn())
-                .append("county", getCounty())
-                .append("countyCn", getCountyCn())
-                .append("town", getTown())
-                .append("townCn", getTownCn())
-                .append("userId", getUserId())
-                .append("systemUserId", getSystemUserId())
-                .append("createdTime", getCreatedTime())
-                .append("lastUpdatedTime", getLastUpdatedTime())
-                .append("longitude", getLongitude())
-                .append("latitude", getLatitude())
-                .append("type", getType())
-                .append("remark", getRemark())
-                .append("stationStatus", getStationStatus())
-                .append("phone", getPhone())
-                .append("linkMan", getLinkMan())
-                .append("countryName", getCountryName())
-                .append("countryId", getCountryId())
-                .append("floorSpace", getFloorSpace())
-                .append("licensNumber", getLicensNumber())
-                .append("fromResource", getFromResource())
-                .append("jsdwmc", getJsdwmc())
-                .append("jstsyhydm", getJstsyhydm())
-                .append("sgdwmc", getSgdwmc())
-                .append("sgtshyhdym", getSgtshyhdym())
-                .append("jgbm", getJgbm())
-                .append("jgzr", getJgzr())
-                .append("jgzrdh", getJgzrdh())
-                .append("sjjd", getSjjd())
-                .append("sfazjcsb", getSfazjcsb())
-                .append("jgrq", getJgrq())
-                .append("deviceId", getDeviceId())
-                .toString();
+            .append("id", getId())
+            .append("stationAddr", getStationAddr())
+            .append("stationName", getStationName())
+            .append("riverName", getRiverName())
+            .append("riverCode", getRiverCode())
+            .append("sectionName", getSectionName())
+            .append("sectionCode", getSectionCode())
+            .append("riverLevel", getRiverLevel())
+            .append("inwardWater", getInwardWater())
+            .append("sectionProperties", getSectionProperties())
+            .append("monitoringWay", getMonitoringWay())
+            .append("sectionControlLevel", getSectionControlLevel())
+            .append("province", getProvince())
+            .append("provinceCn", getProvinceCn())
+            .append("city", getCity())
+            .append("cityCn", getCityCn())
+            .append("county", getCounty())
+            .append("countyCn", getCountyCn())
+            .append("town", getTown())
+            .append("townCn", getTownCn())
+            .append("userId", getUserId())
+            .append("systemUserId", getSystemUserId())
+            .append("createdTime", getCreatedTime())
+            .append("lastUpdatedTime", getLastUpdatedTime())
+            .append("longitude", getLongitude())
+            .append("latitude", getLatitude())
+            .append("type", getType())
+            .append("remark", getRemark())
+            .append("stationStatus", getStationStatus())
+            .append("phone", getPhone())
+            .append("linkMan", getLinkMan())
+            .append("countryName", getCountryName())
+            .append("countryId", getCountryId())
+            .append("floorSpace", getFloorSpace())
+            .append("licensNumber", getLicensNumber())
+            .append("fromResource", getFromResource())
+            .append("jsdwmc", getJsdwmc())
+            .append("jstsyhydm", getJstsyhydm())
+            .append("sgdwmc", getSgdwmc())
+            .append("sgtshyhdym", getSgtshyhdym())
+            .append("jgbm", getJgbm())
+            .append("jgzr", getJgzr())
+            .append("jgzrdh", getJgzrdh())
+            .append("sjjd", getSjjd())
+            .append("sfazjcsb", getSfazjcsb())
+            .append("jgrq", getJgrq())
+            .append("deviceId", getDeviceId())
+            .toString();
     }
 }
