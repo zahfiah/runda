@@ -4,7 +4,11 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.runda.domain.AirDataHour;
 import com.ruoyi.runda.domain.DataQuery212;
+import com.ruoyi.runda.domain.Device;
+import com.ruoyi.runda.domain.HourlyAverageAirData;
 import com.ruoyi.runda.service.AirDataHourService;
+import com.ruoyi.runda.service.IHourlyAverageAirDataService;
+import com.ruoyi.runda.service.impl.HourlyAverageAirDataServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,4 +102,5 @@ public class AirDataController extends BaseController {
         }
         return dataList;
     }
+
 }

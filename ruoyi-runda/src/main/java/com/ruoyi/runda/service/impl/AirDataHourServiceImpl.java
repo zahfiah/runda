@@ -181,10 +181,47 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         saveToMysql(data);
 
 
+        // 使用校准后的数据来构建返回的 TableDataInfo 对象
+        List<Map<String, Object>> calibratedData = data.stream()
+                .map(row -> {
+                    String deviceId = (String) row.get("deviceId");
+                    // 根据 deviceId 和 dateTimeStr 查询校准后的数据
+                    HourlyAverageAirData calibratedDataRecord = hourlyAverageAirDataRepository.findByDeviceIdAndCreatedAt(deviceId, dateTime);
+                    if (calibratedDataRecord != null) {
+                        Map<String, Object> calibratedMap = new HashMap<>();
+                        calibratedMap.put("deviceId", calibratedDataRecord.getDeviceId());
+                        calibratedMap.put("stationId", calibratedDataRecord.getStationId());
+                        calibratedMap.put("deptId", calibratedDataRecord.getDeptId());
+                        calibratedMap.put("deviceName", calibratedDataRecord.getDeviceName());
+                        calibratedMap.put("stationName", calibratedDataRecord.getStationName());
+                        calibratedMap.put("controlStation", deptIdToDeptNameMap.getOrDefault(calibratedDataRecord.getDeptId(), "未知站点"));
+                        calibratedMap.put("averageAqi", calibratedDataRecord.getAverageAqi());
+                        calibratedMap.put("averageSo2", calibratedDataRecord.getAverageSo2());
+                        calibratedMap.put("averageNo2", calibratedDataRecord.getAverageNo2());
+                        calibratedMap.put("averageO3", calibratedDataRecord.getAverageO3());
+                        calibratedMap.put("averagePm2_5", calibratedDataRecord.getAveragePm25());
+                        calibratedMap.put("averagePm10", calibratedDataRecord.getAveragePm10());
+                        calibratedMap.put("level", getAqiLevel(Double.valueOf(calibratedDataRecord.getAverageAqi())));
+                        calibratedMap.put("quality", getAqiQuality(Double.valueOf(calibratedDataRecord.getAverageAqi())));
+                        calibratedMap.put("color", getAqiColor(Double.valueOf(calibratedDataRecord.getAverageAqi())));
+                        if (calibratedDataRecord.getAverageAqi() > 50) {
+                            calibratedMap.put("primaryPollutant", getPrimaryPollutant(pageReports.getContent().stream()
+                                    .filter(report -> report.getDeviceId().equals(deviceId))
+                                    .collect(Collectors.toList())));
+                        } else {
+                            calibratedMap.put("primaryPollutant", "-");
+                        }
+                        calibratedMap.put("dateTimeStr", dateTimeStr);
+                        return calibratedMap;
+                    } else {
+                        return row; // 如果没有找到校准后的数据，使用原始数据
+                    }
+                })
+                .collect(Collectors.toList());
         TableDataInfo tableDataInfo = new TableDataInfo();
         tableDataInfo.setCode(0); // Assuming success code is 0
         tableDataInfo.setMsg("success");
-        tableDataInfo.setRows(data);
+        tableDataInfo.setRows(calibratedData);
         tableDataInfo.setTotal(pageReports.getTotalElements());
         return tableDataInfo;
     }
@@ -585,8 +622,6 @@ public class AirDataHourServiceImpl implements AirDataHourService {
 
 
 
-
-
     @Override
     public TableDataInfo calculateDailyHourlyAverage(String dateStr, String deviceId) throws Exception {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -600,84 +635,42 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             throw new Exception("Invalid date format", e);
         }
 
-        Calendar startOfDay = Calendar.getInstance(TimeZone.getTimeZone("Asia/Shanghai"));
-        startOfDay.setTime(date);
-        startOfDay.set(Calendar.HOUR_OF_DAY, 0);
-        startOfDay.set(Calendar.MINUTE, 0);
-        startOfDay.set(Calendar.SECOND, 0);
-        startOfDay.set(Calendar.MILLISECOND, 0);
+        // 查询数据库中的校准数据
+        List<HourlyAverageAirData> hourlyAverages = hourlyAverageAirDataRepository.findByDateAndDeviceId(date, deviceId);
 
-        Calendar endOfDay = Calendar.getInstance(TimeZone.getTimeZone("Asia/Shanghai"));
-        endOfDay.setTime(date);
-        endOfDay.set(Calendar.HOUR_OF_DAY, 23);
-        endOfDay.set(Calendar.MINUTE, 59);
-        endOfDay.set(Calendar.SECOND, 59);
-        endOfDay.set(Calendar.MILLISECOND, 999);
-
-        long startDateMillis = startOfDay.getTimeInMillis();
-        long endDateMillis = endOfDay.getTimeInMillis();
-
-        logger.info("Fetching daily data between timestamps: {} and {}", startDateMillis, endDateMillis);
-
-        List<AirDataHour> hourlyData = airDataHourRepository.findByCreateDateBetweenAndDeviceId(startDateMillis, endDateMillis, deviceId);
-
-        if (hourlyData.isEmpty()) {
+        if (hourlyAverages.isEmpty()) {
             logger.warn("No data found for the specified device and date range.");
             return createEmptyTableDataInfo();
         } else {
-            logger.info("Found {} records in total", hourlyData.size());
-            // 打印每条记录的 deviceId 和 aqi
-//            hourlyData.forEach(report -> logger.debug("Report: deviceId={}, aqi={}, so2={}, no2={}, co={}, o3={}, pm2_5={}, pm10={}, deptId={},stationId={},deviceName={},stationName={}",
-//                    report.getDeviceId(), report.getAqi(), report.getSo2Thickness(), report.getNo2Thickness(),
-//                    report.getCo(), report.getCo3Thickness(), report.getPm25(), report.getPm10(), report.getDeptId(),report.getStationId(),report.getDeviceName(),report.getStationName()));
+            logger.info("Found {} records in total", hourlyAverages.size());
         }
 
-        // 分组按小时计算平均值，并保留 deptId
-        Map<Integer, Map<String, Object>> hourlyAverages = hourlyData.stream()
-                .collect(Collectors.groupingBy(hourlyDataPoint -> {
-                    Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Asia/Shanghai"));
-                    cal.setTimeInMillis(hourlyDataPoint.getCreateDate().getTime());
+        // 使用新的日期格式化器来包含小时信息
+        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        dateTimeFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai")); // 明确指定时区
 
-                    return cal.get(Calendar.HOUR_OF_DAY);
-                }))
-                .entrySet().stream()
-                .map(entry -> {
-                    int hour = entry.getKey();
-                    List<AirDataHour> reports = entry.getValue();
-                    Map<String, Object> metrics = calculateMetrics(reports);
-                    metrics.put("hour", hour);
-                    // 得到当前设备的时间 时间格式例如2019-10-16 4:00:00
-                    Date reportDate = reports.get(0).getDate();
-                    if (reportDate != null) {
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                        metrics.put("date", reportDate.toInstant().atZone(ZoneId.of("Asia/Shanghai")).format(formatter));
-                    } else {
-                        logger.warn("Date is null for hour {}", hour);
-                        metrics.put("date", "N/A");
-                    }
-
-                    metrics.put("deviceName", reports.get(0).getDeviceName());
-                    metrics.put("stationName", reports.get(0).getStationName());
-                    //得到经纬度信息
-                    metrics.put("longitude", reports.get(0).getLongitude());
-                    metrics.put("latitude", reports.get(0).getLatitude());
-                    //得到deviceId
-                    metrics.put("deviceId", reports.get(0).getDeviceId());
-                    // 得到stationId
-                    metrics.put("stationId", reports.get(0).getStationId());
-                    metrics.put("deptId", reports.get(0).getDeptId()); // 假设同一小时内所有数据的 deptId 相同
-                    return new AbstractMap.SimpleEntry<>(hour, metrics);
-                })
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         // 将结果转换为TableDataInfo类型
-        List<Map<String, Object>> data = hourlyAverages.values().stream()
-                .map(metrics -> {
+        List<Map<String, Object>> data = hourlyAverages.stream()
+                .map(avgData -> {
                     Map<String, Object> map = new HashMap<>();
-                    map.put("hour", metrics.get("hour"));
-                    map.put("deviceId", metrics.get("deviceId"));
-                    map.put("stationId", metrics.get("stationId"));
-                    map.put("deptId", metrics.get("deptId"));
-                    map.putAll(metrics);
+                    map.put("hour", avgData.getCreatedAt().getHours());
+                    map.put("deviceId", avgData.getDeviceId());
+                    map.put("stationId", avgData.getStationId());
+                    map.put("deptId", avgData.getDeptId());
+                    map.put("averageAqi", avgData.getAverageAqi());
+                    map.put("averageSo2", avgData.getAverageSo2());
+                    map.put("averageNo2", avgData.getAverageNo2());
+                    map.put("averageO3", avgData.getAverageO3());
+                    map.put("averagePm2_5", avgData.getAveragePm25());
+                    map.put("averagePm10", avgData.getAveragePm10());
+                    map.put("level", avgData.getAqiLevel());
+                    map.put("quality", avgData.getAqiQuality());
+                    map.put("color", avgData.getAqiColor());
+                    map.put("primaryPollutant", avgData.getPrimaryPollutant());
+                    map.put("deviceName", avgData.getDeviceName());
+                    map.put("stationName", avgData.getStationName());
+                    // 使用新的日期格式化器来包含小时信息
+                    map.put("dateTimeStr", dateTimeFormat.format(avgData.getCreatedAt()));
                     return map;
                 })
                 .collect(Collectors.toList());
@@ -686,9 +679,11 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         tableDataInfo.setCode(0); // Assuming success code is 0
         tableDataInfo.setMsg("success");
         tableDataInfo.setRows(data);
-        tableDataInfo.setTotal(hourlyData.size());
+        tableDataInfo.setTotal(hourlyAverages.size());
         return tableDataInfo;
     }
+
+
 
     private TableDataInfo createEmptyTableDataInfo() {
         TableDataInfo tableDataInfo = new TableDataInfo();
@@ -740,64 +735,47 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             throw new Exception("Invalid date format", e);
         }
 
-        // 计算开始时间和结束时间
-        Calendar startCalendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Shanghai"));
-        startCalendar.setTime(dateTime);
-        startCalendar.set(Calendar.MINUTE, 0);
-        startCalendar.set(Calendar.SECOND, 0);
-        startCalendar.set(Calendar.MILLISECOND, 0);
+        // 查询数据库中的校准数据
+        HourlyAverageAirData hourlyAverage = hourlyAverageAirDataRepository.findByDeviceIdAndCreatedAt(deviceId, dateTime);
 
-        Calendar endCalendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Shanghai"));
-        endCalendar.setTime(dateTime);
-        endCalendar.add(Calendar.HOUR_OF_DAY, 0); // 增加一小时
-        endCalendar.set(Calendar.MINUTE, 59);
-        endCalendar.set(Calendar.SECOND, 59);
-        endCalendar.set(Calendar.MILLISECOND, 999);
-
-        long startDateMillis = startCalendar.getTimeInMillis();
-        long endDateMillis = endCalendar.getTimeInMillis();
-
-        logger.info("Fetching data between timestamps: {} and {}", startDateMillis, endDateMillis);
-
-        // 查询数据库中的数据
-        List<AirDataHour> hourlyData = airDataHourRepository.findByCreateDateBetweenAndDeviceId(startDateMillis, endDateMillis, deviceId);
-
-
-        if (hourlyData.isEmpty()) {
+        if (hourlyAverage == null) {
             logger.warn("No data found for the specified device and time range.");
             return createEmptyTableDataInfo();
         } else {
-            logger.info("Found {} records in total", hourlyData.size());
-            // 打印每条记录的 deviceId 和 aqi
-//            hourlyData.forEach(report -> logger.debug("Report: deviceId={}, aqi={}, so2={}, no2={}, co={}, o3={}, pm2_5={}, pm10={}, deptId={}, stationId={}",
-//                    report.getDeviceId(), report.getAqi(), report.getSo2Thickness(), report.getNo2Thickness(),
-//                    report.getCo(), report.getCo3Thickness(), report.getPm25(), report.getPm10(), report.getDeptId(), report.getStationId()));
+            logger.info("Found record for device {} at {}", deviceId, dateTimeStr);
         }
 
-        // 计算各项指标平均值
-        Map<String, Object> metrics = calculateMetrics(hourlyData);
-        metrics.put("dateTimeStr", dateTimeStr);
-        //得到经纬度信息
-        metrics.put("longitude", hourlyData.get(0).getLongitude());
-        metrics.put("latitude", hourlyData.get(0).getLatitude());
-        metrics.put("deviceName", hourlyData.get(0).getDeviceName());
-        metrics.put("stationName", hourlyData.get(0).getStationName());
-        metrics.put("endTime", dateTimeFormat.format(endCalendar.getTime()));
-        metrics.put("deviceId", deviceId);
-        metrics.put("stationId", hourlyData.get(0).getStationId());
-        metrics.put("deptId", hourlyData.get(0).getDeptId()); // 获取第一个记录的 deptId
-
         // 将结果转换为TableDataInfo类型
+        Map<String, Object> metrics = new HashMap<>();
+        metrics.put("dateTimeStr", dateTimeStr);
+        metrics.put("deviceId", hourlyAverage.getDeviceId());
+        metrics.put("stationId", hourlyAverage.getStationId());
+        metrics.put("deptId", hourlyAverage.getDeptId());
+        metrics.put("averageAqi", hourlyAverage.getAverageAqi());
+        metrics.put("averageSo2", hourlyAverage.getAverageSo2());
+        metrics.put("averageNo2", hourlyAverage.getAverageNo2());
+        metrics.put("averageO3", hourlyAverage.getAverageO3());
+        metrics.put("averagePm2_5", hourlyAverage.getAveragePm25());
+        metrics.put("averagePm10", hourlyAverage.getAveragePm10());
+        metrics.put("level", hourlyAverage.getAqiLevel());
+        metrics.put("quality", hourlyAverage.getAqiQuality());
+        metrics.put("color", hourlyAverage.getAqiColor());
+        metrics.put("primaryPollutant", hourlyAverage.getPrimaryPollutant());
+        metrics.put("deviceName", hourlyAverage.getDeviceName());
+        metrics.put("stationName", hourlyAverage.getStationName());
+        metrics.put("endTime", dateTimeFormat.format(hourlyAverage.getUpdatedAt()));
+
         List<Map<String, Object>> data = Collections.singletonList(metrics);
         TableDataInfo tableDataInfo = new TableDataInfo();
         tableDataInfo.setCode(0); // Assuming success code is 0
         tableDataInfo.setMsg("success");
         tableDataInfo.setRows(data);
-        tableDataInfo.setTotal(hourlyData.size());
+        tableDataInfo.setTotal(1);
 
         logger.debug("Exiting calculateHourlyAverageForSpecificTime method");
         return tableDataInfo;
     }
+
 
 
     @Override
