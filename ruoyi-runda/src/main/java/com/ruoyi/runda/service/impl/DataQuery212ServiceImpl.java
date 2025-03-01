@@ -1,6 +1,8 @@
 package com.ruoyi.runda.service.impl;
 
 import com.ruoyi.runda.domain.DataQuery212;
+import com.ruoyi.runda.domain.Device;
+import com.ruoyi.runda.mapper.DeviceMapper;
 import com.ruoyi.runda.repository.DataQuery212Repository;
 import com.ruoyi.runda.service.DataQuery212Service;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -45,6 +47,8 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
     private DataQuery212Repository dataQuery212Repository; // 假设你有一个对应的仓库接口
     @Autowired
     private RedisTemplate<Object, Object> redisTemplate; // 更改为 <Object, Object>
+    @Autowired
+    private DeviceMapper deviceMapper;
     @Override
     public TableDataInfo selectDataQuery212ListByDeviceId(String deviceId, int page, int size) {
         try {
@@ -194,6 +198,12 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
         }
         workbook.close();
     }
+
+    @Override
+    public List<Device> listDeviceIdAndName() {
+        return deviceMapper.selectIdAndName();
+    }
+
     @Override
     public TableDataInfo selectDataQuery212ListByDateTimeRange(String startDateTimeStr, String endDateTimeStr, int page, int size) {
         try {

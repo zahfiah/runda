@@ -45,6 +45,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
 
+
     <insert id="insertHourlyAverageAirData" parameterType="HourlyAverageAirData" useGeneratedKeys="true" keyProperty="id">
         insert into hourly_average_air_data
         <trim prefix="(" suffix=")" suffixOverrides=",">

@@ -25,9 +25,9 @@
       <div class="announcement-container">
         <div class="announcement-header" style="display: flex; justify-content: space-between;">
           <h2>公告</h2>
-          <el-button 
-            type="primary" 
-            icon="el-icon-refresh" 
+          <el-button
+            type="primary"
+            icon="el-icon-refresh"
             @click="refreshNotices"
             :loading="loadingNotices"
             class="refresh-button">
@@ -140,8 +140,8 @@
       </div>
 
       <div class="copyright">
-        <p>© 2025 塞林智慧环保 
-          <a href="#">隐私政策</a> | 
+        <p>© 2025 塞林智慧环保
+          <a href="#">隐私政策</a> |
           <a href="#">服务条款</a>
         </p>
       </div>
@@ -184,7 +184,7 @@ export default {
       loading: false,
       totalNotices: 0,
 
-      
+
       notices: [],
       currentPage: 1,
       itemsPerPage: 3,
@@ -319,7 +319,7 @@ export default {
   align-items: center;
   justify-content: center;
   background-color: #f0f2f5;
-  padding: 20px; 
+  padding: 20px;
 
   .title-container {
     width: 100%;
@@ -335,18 +335,18 @@ export default {
 
     .el-carousel {
       border-radius: inherit;
-      
+
       // 轮播指示器美化
       ::v-deep .el-carousel__indicator {
         padding: 8px;
-        
+
         .el-carousel__button {
           width: 20px;
           border-radius: 4px;
           background: rgba(255, 255, 255, 0.6);
           transition: all 0.3s;
         }
-        
+
         &:hover .el-carousel__button {
           background: #fff;
           width: 30px;
@@ -373,7 +373,7 @@ export default {
       padding: 12px 24px;
       background: rgba(15, 42, 67, 0.85);
       border-radius: 8px;
-      
+
       &::after {
         content: none;
       }
@@ -422,7 +422,7 @@ export default {
           }
         }
       }
-      
+
       .el-carousel {
         height: 300px !important;
       }
@@ -520,7 +520,7 @@ export default {
           margin-bottom: 15px;
           position: relative;
           padding-bottom: 35px;
-        
+
           &:last-child {
             border-bottom: none;
             margin-bottom: 0;
@@ -547,7 +547,7 @@ export default {
 
           .notice-time {
             position: absolute;
-            bottom: 10px; 
+            bottom: 10px;
             left: 0;
             font-size: 14px;
             color: #909399;
@@ -570,8 +570,8 @@ export default {
             border-radius: 8px;
 
             p {
-              margin-bottom: 10px;  
-              line-height: 1.6;  
+              margin-bottom: 10px;
+              line-height: 1.6;
               max-height: unset;
             }
           }
@@ -659,7 +659,7 @@ export default {
 
   .carousel-container {
     position: relative;
-    
+
     .stats-overlay {
       position: absolute;
       top: 50%;
@@ -779,7 +779,7 @@ export default {
     margin-top: 10px;
     position: relative;
     overflow: hidden;
-    
+
     // 新增渐变背景
     &::before {
       content: '';
@@ -817,7 +817,7 @@ export default {
         color: #66b1ff;
         position: relative;
         padding-bottom: 8px;
-        
+
         &::after {
           content: '';
           position: absolute;
@@ -843,7 +843,7 @@ export default {
             transition: all 0.3s;
             display: flex;
             align-items: center;
-            
+
             &:hover {
               color: #54dfbe;
               transform: translateX(5px);
@@ -862,7 +862,7 @@ export default {
           display: flex;
           align-items: center;
           margin-bottom: 10px;
-          
+
           i {
             width: 24px;
             font-size: 16px;
@@ -880,7 +880,7 @@ export default {
       border-top: 1px solid rgba(255,255,255,0.1);
       font-size: 14px;
       color: rgba(255,255,255,0.6);
-      
+
       a {
         color: #66b1ff;
         margin: 0 5px;

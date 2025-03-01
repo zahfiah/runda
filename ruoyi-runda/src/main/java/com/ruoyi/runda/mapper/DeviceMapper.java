@@ -2,6 +2,7 @@ package com.ruoyi.runda.mapper;
 
 import java.util.List;
 import com.ruoyi.runda.domain.Device;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * 监测设备管理设备Mapper接口
@@ -58,4 +59,8 @@ public interface DeviceMapper
      * @return 结果
      */
     public int deleteDeviceByIds(Long[] ids);
+ @Select("select * from device")
+  public   List<Device> selectAllDevice();
+    @Select("select id,name from device")
+    List<Device> selectIdAndName();
 }

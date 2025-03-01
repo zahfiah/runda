@@ -65,11 +65,13 @@
             <if test="type != null "> and type = #{type}</if>
             <if test="licensNumber != null  and licensNumber != ''"> and licens_number = #{licensNumber}</if>
         </where>
+        order by created_time desc
     </select>
 
     <select id="selectStationById" parameterType="Long" resultMap="StationResult">
         <include refid="selectStationVo"/>
         where id = #{id}
+        order by created_time desc
     </select>
 
     <insert id="insertStation" parameterType="Station">

@@ -52,11 +52,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="sn != null  and sn != ''"> and sn = #{sn}</if>
             <if test="stationId != null "> and station_id = #{stationId}</if>
         </where>
+        order by created_time desc
     </select>
     
     <select id="selectDeviceById" parameterType="Long" resultMap="DeviceResult">
         <include refid="selectDeviceVo"/>
         where id = #{id}
+        order by created_time desc
     </select>
 
     <insert id="insertDevice" parameterType="Device" useGeneratedKeys="true" keyProperty="id">

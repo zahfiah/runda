@@ -2,6 +2,7 @@ package com.ruoyi.runda.mapper;
 
 import java.util.List;
 import com.ruoyi.runda.domain.HourlyAverageAirData;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * 监测小时报表Mapper接口

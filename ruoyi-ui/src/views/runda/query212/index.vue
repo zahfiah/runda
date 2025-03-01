@@ -407,6 +407,7 @@ import {
 } from "@/api/runda/query212";
 import request from "@/utils/request"; // 添加这行导入
 import { start } from "nprogress";
+import { watch } from "vue";
 export default {
   name: "Query212",
   data() {
@@ -443,7 +444,7 @@ export default {
         pageSize: 10,
         deviceId: null, // 改为 deviceId
         timeType: "date", // 默认选择日期类型
-        startDate: null,
+        startDate: new Date(2019, 9, 16).toLocaleString().replace(/\//g, "-"),
         endDate: null,
         selectedDate: null,
         startHour: null,
@@ -538,11 +539,11 @@ export default {
         const batchSize = 100;
 
         // 使用 for 循环分批发送请求
-        for (let deviceId = 1; deviceId <= 1000; deviceId += batchSize) {
+        for (let deviceId = 1; deviceId <= 100; deviceId += batchSize) {
           const batchPromises = [];
 
           // 创建这一批的请求
-          for (let i = 0; i < batchSize && deviceId + i <= 1000; i++) {
+          for (let i = 0; i < batchSize && deviceId + i <= 100; i++) {
             batchPromises.push(
               request({
                 url: "/runda/query212/listByDeviceId",
@@ -587,9 +588,9 @@ export default {
             JSON.stringify(this.deviceOptions)
           );
 
-          this.$message.success(
-            `成功获取到 ${this.deviceOptions.length} 个设备`
-          );
+          // this.$message.success(
+          //   `成功获取到 ${this.deviceOptions.length} 个设备`
+          // );
         } else {
           this.$message.warning("未找到任何可用设备");
         }
@@ -612,8 +613,7 @@ export default {
     },
 
     getList(params = this.queryParams) {
-      // this.loading = true;
-      this.loading = false;
+      // this.loading = false;
 
       // 处理设备ID查询
       if (
