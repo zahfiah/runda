@@ -42,11 +42,13 @@
             <if test="stationId != null "> and station_id = #{stationId}</if>
             <if test="deviceId != null "> and device_id = #{deviceId}</if>
         </where>
+        order by time desc
     </select>
 
     <select id="selectDataQueryCountryById" parameterType="Long" resultMap="DataQueryCountryResult">
         <include refid="selectDataQueryCountryVo"/>
         where id = #{id}
+        order by time desc
     </select>
     <select id="selectDataQueryCountryByName" resultType="com.ruoyi.runda.domain.DataQueryCountry">
         select pm,pm10,time from data_query_country where name = #{name}
