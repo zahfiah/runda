@@ -160,7 +160,7 @@ public class HourlyAverageAirData extends BaseEntity
         this.averageAqi = averageAqi;
     }
 
-    public Long getAverageAqi() 
+    public Long getAverageAqi()
     {
         return averageAqi;
     }
