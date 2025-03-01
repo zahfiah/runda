@@ -157,25 +157,25 @@
             <el-form-item label="建设单位名称" prop="jsdwmc">
               <el-input v-model="form.jsdwmc" placeholder="请输入建设单位名称" />
             </el-form-item>
-            <el-form-item label="建设单位信用代码" prop="jstsyhydm">
+            <el-form-item label="建设单位信用代码" prop="jstyshxydm">
               <el-input v-model="form.jstsyhydm" placeholder="请输入建设单位信用代码" />
             </el-form-item>
             <el-form-item label="施工单位名称" prop="sgdwmc">
               <el-input v-model="form.sgdwmc" placeholder="请输入施工单位名称" />
             </el-form-item>
-            <el-form-item label="施工单位统一社会信用代码" prop="sgtshyhdym">
+            <el-form-item label="施工单位统一社会信用代码" prop="sgtyshxydm">
               <el-input v-model="form.sgtshyhdym" placeholder="请输入施工单位统一社会信用代码" />
             </el-form-item>
             <el-form-item label="监管部门" prop="jgbm">
               <el-input v-model="form.jgbm" placeholder="请输入监管部门" />
             </el-form-item>
-            <el-form-item label="监管责任人" prop="jgzr">
+            <el-form-item label="监管责任人" prop="jgzrr">
               <el-input v-model="form.jgzr" placeholder="请输入监管责任人" />
             </el-form-item>
-            <el-form-item label="监管电话" prop="jgzrdh">
+            <el-form-item label="监管电话" prop="jgzrrdh">
               <el-input v-model="form.jgzrdh" placeholder="请输入监管电话" />
             </el-form-item>
-            <el-form-item label="施工阶段" prop="sjjd">
+            <el-form-item label="施工阶段" prop="sgjd">
               <el-select v-model="form.sjjd" placeholder="请选择施工阶段">
                 <el-option v-for="dict in dict.type.sgjd" :key="dict.value" :label="dict.label"
                   :value="dict.value"></el-option>
@@ -187,8 +187,8 @@
                   }}</el-radio>
               </el-radio-group>
             </el-form-item>
-            <el-form-item label="统计时间" prop="jgrq">
-              <el-date-picker clearable v-model="form.jgrq" type="date" value-format="yyyy-MM-dd" placeholder="请选择统计时间">
+            <el-form-item label="创建时间" prop="createdTime">
+              <el-date-picker clearable v-model="form.createdTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="请选择创建时间">
               </el-date-picker>
             </el-form-item>
           </el-form>

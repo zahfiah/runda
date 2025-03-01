@@ -134,25 +134,25 @@ public class Station extends BaseEntity
     private String jsdwmc;
 
     /** 建设单位信用代码 */
-    private String jstsyhydm;
+    private String jstyshxydm;
 
     /** 施工单位名称 */
     private String sgdwmc;
 
     /** 施工单位统一社会信用代码 */
-    private String sgtshyhdym;
+    private String sgtyshxydm;
 
     /** 监管部门 */
     private String jgbm;
 
     /** 监管责任人 */
-    private String jgzr;
+    private String jgzrr;
 
     /** 监管电话 */
-    private String jgzrdh;
+    private String jgzrrdh;
 
     /** 施工阶段 */
-    private String sjjd;
+    private String sgjd;
 
     /** PM10是否安装 */
     private String sfazjcsb;
@@ -487,14 +487,14 @@ public class Station extends BaseEntity
     {
         return jsdwmc;
     }
-    public void setJstsyhydm(String jstsyhydm)
+    public void setJstsyhydm(String jstyshxydm)
     {
-        this.jstsyhydm = jstsyhydm;
+        this.jstyshxydm = jstyshxydm;
     }
 
     public String getJstsyhydm()
     {
-        return jstsyhydm;
+        return jstyshxydm;
     }
     public void setSgdwmc(String sgdwmc)
     {
@@ -505,14 +505,14 @@ public class Station extends BaseEntity
     {
         return sgdwmc;
     }
-    public void setSgtshyhdym(String sgtshyhdym)
+    public void setSgtshyhdym(String sgtyshxydm)
     {
-        this.sgtshyhdym = sgtshyhdym;
+        this.sgtyshxydm = sgtyshxydm;
     }
 
     public String getSgtshyhdym()
     {
-        return sgtshyhdym;
+        return sgtyshxydm;
     }
     public void setJgbm(String jgbm)
     {
@@ -523,32 +523,32 @@ public class Station extends BaseEntity
     {
         return jgbm;
     }
-    public void setJgzr(String jgzr)
+    public void setJgzr(String jgzrr)
     {
-        this.jgzr = jgzr;
+        this.jgzrr = jgzrr;
     }
 
     public String getJgzr()
     {
-        return jgzr;
+        return jgzrr;
     }
-    public void setJgzrdh(String jgzrdh)
+    public void setJgzrdh(String jgzrrdh)
     {
-        this.jgzrdh = jgzrdh;
+        this.jgzrrdh = jgzrrdh;
     }
 
     public String getJgzrdh()
     {
-        return jgzrdh;
+        return jgzrrdh;
     }
-    public void setSjjd(String sjjd)
+    public void setSjjd(String sgjd)
     {
-        this.sjjd = sjjd;
+        this.sgjd = sgjd;
     }
 
     public String getSjjd()
     {
-        return sjjd;
+        return sgjd;
     }
     public void setSfazjcsb(String sfazjcsb)
     {
