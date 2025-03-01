@@ -28,6 +28,8 @@
           v-model="queryParams.deviceId"
           placeholder="请选择设备"
           clearable
+          filterable
+          allow-create
           @change="handleDeviceChange"
         >
           <el-option
@@ -444,7 +446,7 @@ export default {
         pageSize: 10,
         deviceId: null, // 改为 deviceId
         timeType: "date", // 默认选择日期类型
-        startDate: new Date(2019, 9, 16).toLocaleString().replace(/\//g, "-"),
+        startDate: new Date().toLocaleString().replace(/\//g, "-"),
         endDate: null,
         selectedDate: null,
         startHour: null,
@@ -515,82 +517,117 @@ export default {
       }
     },
 
+    // async getDeviceList() {
+    //   try {
+    //     // 从 localStorage 获取设备列表
+    //     const cachedDeviceList = localStorage.getItem("deviceList");
+
+    //     // 如果缓存中有设备数据，直接使用缓存数据
+    //     if (cachedDeviceList) {
+    //       this.deviceOptions = JSON.parse(cachedDeviceList);
+    //       console.log("从缓存中获取设备列表：", this.deviceOptions);
+
+    //       if (this.deviceOptions.length > 0) {
+    //         this.$message.success(
+    //           `成功从缓存获取到 ${this.deviceOptions.length} 个设备`
+    //         );
+    //       } else {
+    //         this.$message.warning("缓存中没有找到设备");
+    //       }
+    //       return;
+    //     }
+    //     // 创建一个数组存储所有成功的请求结果
+    //     const uniqueDevices = new Map();
+    //     const batchSize = 100;
+
+    //     // 使用 for 循环分批发送请求
+    //     for (let deviceId = 1; deviceId <= 100; deviceId += batchSize) {
+    //       const batchPromises = [];
+
+    //       // 创建这一批的请求
+    //       for (let i = 0; i < batchSize && deviceId + i <= 100; i++) {
+    //         batchPromises.push(
+    //           request({
+    //             url: "/runda/query212/listByDeviceId",
+    //             method: "get",
+    //             params: { deviceId: deviceId + i },
+    //           }).catch((error) => {
+    //             // 忽略单个请求的错误，返回 null
+    //             return null;
+    //           })
+    //         );
+    //       }
+
+    //       // 等待这一批请求完成
+    //       const responses = await Promise.all(batchPromises);
+
+    //       // 处理响应
+    //       responses.forEach((response) => {
+    //         if (
+    //           response &&
+    //           response.code === 0 &&
+    //           response.rows &&
+    //           response.rows.length > 0
+    //         ) {
+    //           const deviceData = response.rows[0];
+    //           if (!uniqueDevices.has(deviceData.deviceId)) {
+    //             uniqueDevices.set(deviceData.deviceId, {
+    //               deviceId: deviceData.deviceId,
+    //               deviceName: deviceData.deviceName,
+    //             });
+    //           }
+    //         }
+    //       });
+    //     }
+
+    //     // 转换为数组并更新设备选项
+    //     this.deviceOptions = Array.from(uniqueDevices.values());
+    //     console.log("找到的所有设备：", this.deviceOptions);
+
+    //     if (this.deviceOptions.length > 0) {
+    //       localStorage.setItem(
+    //         "deviceList",
+    //         JSON.stringify(this.deviceOptions)
+    //       );
+
+    //       // this.$message.success(
+    //       //   `成功获取到 ${this.deviceOptions.length} 个设备`
+    //       // );
+    //     } else {
+    //       this.$message.warning("未找到任何可用设备");
+    //     }
+    //   } catch (error) {
+    //     console.error("获取设备列表失败：", error);
+    //     this.$message.error("获取设备列表失败");
+    //   }
+    // },
     async getDeviceList() {
       try {
-        // 从 localStorage 获取设备列表
-        const cachedDeviceList = localStorage.getItem("deviceList");
+        // 请求新的接口获取设备列表
+        const response = await request({
+          url: "http://localhost:8080/runda/query212/listDeviceIdAndName",
+          method: "get",
+        });
 
-        // 如果缓存中有设备数据，直接使用缓存数据
-        if (cachedDeviceList) {
-          this.deviceOptions = JSON.parse(cachedDeviceList);
-          console.log("从缓存中获取设备列表：", this.deviceOptions);
+        // 打印完整的响应对象，以便调试
+        console.log("接口响应:", response);
+
+        if (Array.isArray(response) && response.length > 0) {
+          // 处理响应数据
+          this.deviceOptions = response.map((row) => ({
+            deviceId: row.id,
+            deviceName: row.name,
+          }));
+
+          console.log("找到的所有设备：", this.deviceOptions);
 
           if (this.deviceOptions.length > 0) {
             this.$message.success(
-              `成功从缓存获取到 ${this.deviceOptions.length} 个设备`
+              `成功获取到 ${this.deviceOptions.length} 个设备`
             );
           } else {
-            this.$message.warning("缓存中没有找到设备");
+            this.$message.warning("未找到任何可用设备");
           }
-          return;
-        }
-        // 创建一个数组存储所有成功的请求结果
-        const uniqueDevices = new Map();
-        const batchSize = 100;
-
-        // 使用 for 循环分批发送请求
-        for (let deviceId = 1; deviceId <= 100; deviceId += batchSize) {
-          const batchPromises = [];
-
-          // 创建这一批的请求
-          for (let i = 0; i < batchSize && deviceId + i <= 100; i++) {
-            batchPromises.push(
-              request({
-                url: "/runda/query212/listByDeviceId",
-                method: "get",
-                params: { deviceId: deviceId + i },
-              }).catch((error) => {
-                // 忽略单个请求的错误，返回 null
-                return null;
-              })
-            );
-          }
-
-          // 等待这一批请求完成
-          const responses = await Promise.all(batchPromises);
-
-          // 处理响应
-          responses.forEach((response) => {
-            if (
-              response &&
-              response.code === 0 &&
-              response.rows &&
-              response.rows.length > 0
-            ) {
-              const deviceData = response.rows[0];
-              if (!uniqueDevices.has(deviceData.deviceId)) {
-                uniqueDevices.set(deviceData.deviceId, {
-                  deviceId: deviceData.deviceId,
-                  deviceName: deviceData.deviceName,
-                });
-              }
-            }
-          });
-        }
-
-        // 转换为数组并更新设备选项
-        this.deviceOptions = Array.from(uniqueDevices.values());
-        console.log("找到的所有设备：", this.deviceOptions);
-
-        if (this.deviceOptions.length > 0) {
-          localStorage.setItem(
-            "deviceList",
-            JSON.stringify(this.deviceOptions)
-          );
-
-          // this.$message.success(
-          //   `成功获取到 ${this.deviceOptions.length} 个设备`
-          // );
         } else {
           this.$message.warning("未找到任何可用设备");
         }
@@ -599,7 +636,6 @@ export default {
         this.$message.error("获取设备列表失败");
       }
     },
-
     handleDeviceChange(deviceId) {
       // 仅更新选中的设备ID
       this.queryParams.deviceId = deviceId;
@@ -609,6 +645,9 @@ export default {
     handleQuery() {
       this.queryParams.pageNum = 1; // 重置为第一页
       console.log("查询参数：", this.queryParams);
+      if (this.queryParams.timeType && !this.queryParams.deviceId) {
+        this.queryParams.deviceId = null;
+      }
       this.getList(); // 调用获取列表的方法
     },
 
