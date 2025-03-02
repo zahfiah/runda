@@ -167,8 +167,8 @@ export default {
         pageSize: 10,
         deviceId: null,
         timeType: "hour", // 默认选择小时类型
-        selectedDate: null,
-        startHour: null,
+        selectedDate: new Date(2019, 9, 16).toLocaleDateString().replace(/\//g, "-"),
+        startHour: "03:00",
         endHour: null,
       },
 
