@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.runda.mapper.DataQueryCountryMapper;
@@ -30,6 +31,7 @@ import com.ruoyi.runda.service.IDataQueryCountryService;
  * @date 2025-02-25
  */
 @Service
+@Slf4j
 public class DataQueryCountryServiceImpl implements IDataQueryCountryService
 {
 
@@ -87,67 +89,79 @@ public class DataQueryCountryServiceImpl implements IDataQueryCountryService
     }
 
     private void processStationData(List<StationInfo> stations) {
-        List<Map<String, Object>> result = new ArrayList<>();
-
         for (StationInfo station : stations) {
             try {
                 String url = BASE_URL + "stations/" + station.id + "?AQI=CN&language=zh-Hans";
                 String response = sendGetRequest(url);
                 JSONObject res = JSON.parseObject(response);
-                Map<String, Object> data = new HashMap<>();
-                JSONArray pollutants = res.getJSONObject("current").getJSONArray("pollutants");
+
+                if (res == null || !res.containsKey("current")) {
+                    log.warn("Response does not contain 'current' key for station: {}", station.name);
+                    continue;
+                }
+
+                JSONObject current = res.getJSONObject("current");
+                if (current == null) {
+                    log.warn("Current object is null for station: {}", station.name);
+                    continue;
+                }
+
+                JSONArray pollutants = current.getJSONArray("pollutants");
+                if (pollutants == null) {
+                    log.warn("Pollutants array is null for station: {}", station.name);
+                    continue;
+                }
+
+                Map<String, Double> data = new HashMap<>();
                 for (int i = 0; i < pollutants.size(); i++) {
                     JSONObject pollutant = pollutants.getJSONObject(i);
-                    data.put(pollutant.getString("pollutantName"),
-                            pollutant.getDouble("concentration"));
+                    if (pollutant == null) {
+                        log.warn("Pollutant object at index {} is null for station: {}", i, station.name);
+                        continue;
+                    }
+
+                    String pollutantName = pollutant.getString("pollutantName");
+                    if (pollutantName == null) {
+                        log.warn("Pollutant name is null for station: {}", station.name);
+
+                        continue;
+                    }
+
+                    double concentration = pollutant.getDoubleValue("concentration");
+                    data.put(pollutantName, concentration);
                 }
-                DataQueryCountry  dataQueryCountry = new DataQueryCountry();
+
+                DataQueryCountry dataQueryCountry = new DataQueryCountry();
                 dataQueryCountry.setName(station.name);
-                dataQueryCountry.setPm(Double.parseDouble(data.get("pm25").toString()));
-                dataQueryCountry.setPm10(Double.parseDouble(data.get("pm10").toString()));
-                dataQueryCountry.setSo2Thickness(Double.parseDouble(data.get("so2").toString()));
-                dataQueryCountry.setNo2Thickness(Double.parseDouble(data.get("no2").toString()));
-                dataQueryCountry.setCoThickness(Double.parseDouble(data.get("co").toString()));
-                dataQueryCountry.setCo3Thickness(Double.parseDouble(data.get("o3").toString()));
-                dataQueryCountry.setAqi(res.getJSONObject("current").getDoubleValue("aqi"));
-                // 使用Java 8时间API处理（推荐方案）
-                String ts = res.getJSONObject("current").getString("ts");//"2025-02-28T12:00:00.000Z";
-                // 解析为Instant（UTC时间）
-                Instant instant = Instant.parse(ts);
-                // 转换为北京时间（+8时区）
-                ZonedDateTime beijingTime = instant.atZone(ZoneId.of("Asia/Shanghai"));
-                // 转换为SQL Timestamp（用于数据库存储）
-                //Timestamp sqlTimestamp = Timestamp.from(instant);
-                // 格式化为字符串（可选）
-                DateTimeFormatter formatter = DateTimeFormatter
-                        .ofPattern("yyyy-MM-dd HH:mm:ss")
-                        .withZone(ZoneId.systemDefault());
-                String formatted = formatter.format(instant);
-                dataQueryCountry.setTime(Timestamp.valueOf(formatted));
+                dataQueryCountry.setPm(data.getOrDefault("pm25", 0.0));
+                dataQueryCountry.setPm10(data.getOrDefault("pm10", 0.0));
+                dataQueryCountry.setSo2Thickness(data.getOrDefault("so2", 0.0));
+                dataQueryCountry.setNo2Thickness(data.getOrDefault("no2", 0.0));
+                dataQueryCountry.setCoThickness(data.getOrDefault("co", 0.0));
+                dataQueryCountry.setCo3Thickness(data.getOrDefault("o3", 0.0));
+                dataQueryCountry.setAqi(current.getDoubleValue("aqi"));
+
+                if (current.containsKey("ts")) {
+                    String ts = current.getString("ts");
+                    if (ts != null) {
+                        Instant instant = Instant.parse(ts);
+                        ZonedDateTime beijingTime = instant.atZone(ZoneId.of("Asia/Shanghai"));
+                        dataQueryCountry.setTime(Timestamp.from(instant));
+                    } else {
+                       log.warn("Timestamp 'ts' is null for station: {}" + station.name);
+                    }
+                } else {
+                    log.warn("Response does not contain 'ts' key for station: {}" + station.name);
+                }
+
                 dataQueryCountryMapper.insertDataQueryCountry(dataQueryCountry);
 
-
-//                Map<String, Object> data = new HashMap<>();
-//                JSONArray pollutants = res.getJSONObject("current").getJSONArray("pollutants");
-//                for (int i = 0; i < pollutants.size(); i++) {
-//                    JSONObject pollutant = pollutants.getJSONObject(i);
-//                    data.put(pollutant.getString("pollutantName"),
-//                            pollutant.getDouble("concentration"));
-//                }
-//
-//                Map<String, Object> stationData = new HashMap<>();
-//                stationData.put("name", station.name);
-//                stationData.put("data", data);
-//                stationData.put("aqi", res.getJSONObject("current").getIntValue("aqi"));
-//
-//                result.add(stationData);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.warn("Error processing station data for station: {}" + station.name+e);
             }
         }
-        //System.out.println(result);
-        //return result;
     }
+
 
     private String sendGetRequest(String urlString) throws Exception {
         HttpURLConnection conn = (HttpURLConnection) new URL(urlString).openConnection();

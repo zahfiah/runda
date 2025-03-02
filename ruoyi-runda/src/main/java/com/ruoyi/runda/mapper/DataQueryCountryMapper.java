@@ -2,6 +2,7 @@ package com.ruoyi.runda.mapper;
 
 import java.util.List;
 import com.ruoyi.runda.domain.DataQueryCountry;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * 国控数据Mapper接口
@@ -58,4 +59,6 @@ public interface DataQueryCountryMapper
      * @return 结果
      */
     public int deleteDataQueryCountryByIds(Long[] ids);
+//    @Select("select * from data_query_country where control_station = #{name}")
+  List<DataQueryCountry>   selectDataQueryCountryByName(String controlStation);
 }

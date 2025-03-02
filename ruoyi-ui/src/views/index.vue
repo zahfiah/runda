@@ -12,7 +12,7 @@
     </div>
 
     <div class="nav-container">
-      <router-link to="/runda/report/check" class="nav-link">报表</router-link>
+      <router-link to="/runda/data" class="nav-link">监测小时报表</router-link>
       <router-link to="/runda/device" class="nav-link">监测设备管理</router-link>
       <router-link to="/runda/station" class="nav-link">监测站点管理</router-link>
       <router-link to="/runda/query212" class="nav-link">大气数据查询</router-link>
@@ -25,11 +25,7 @@
       <div class="announcement-container">
         <div class="announcement-header" style="display: flex; justify-content: space-between;">
           <h2>公告</h2>
-          <el-button
-            type="primary"
-            icon="el-icon-refresh"
-            @click="refreshNotices"
-            :loading="loadingNotices"
+          <el-button type="primary" icon="el-icon-refresh" @click="refreshNotices" :loading="loadingNotices"
             class="refresh-button">
             刷新公告
           </el-button>
@@ -200,23 +196,23 @@ export default {
   },
   computed: {
     deviceStats() {
-        return [
-          { icon: 'el-icon-s-data', title: '总设备数量', value: this.statistics.totalDevices },
-          { icon: 'el-icon-success', title: '正常设备数量', value: this.statistics.normalDevices },
-          { icon: 'el-icon-warning-outline', title: '中断设备数量', value: this.statistics.interruptedDevices },
-          { icon: 'el-icon-finished', title: '竣工设备数量', value: this.statistics.completedDevices }
-        ]
-      },
-      stationStats() {
-        return [
-          { icon: 'el-icon-office-building', title: '总站点数量', value: this.Station.total },
-          { icon: 'el-icon-check', title: '正常站点数量', value: this.Station.normal },
-          { icon: 'el-icon-stopwatch', title: '停用站点数量', value: this.Station.stop },
-          { icon: 'el-icon-delete-solid', title: '删除站点数量', value: this.Station.delete }
-        ]
-      },
+      return [
+        { icon: 'el-icon-s-data', title: '总设备数量', value: this.statistics.totalDevices },
+        { icon: 'el-icon-success', title: '正常设备数量', value: this.statistics.normalDevices },
+        { icon: 'el-icon-warning-outline', title: '中断设备数量', value: this.statistics.interruptedDevices },
+        { icon: 'el-icon-finished', title: '竣工设备数量', value: this.statistics.completedDevices }
+      ]
+    },
+    stationStats() {
+      return [
+        { icon: 'el-icon-office-building', title: '总站点数量', value: this.Station.total },
+        { icon: 'el-icon-check', title: '正常站点数量', value: this.Station.normal },
+        { icon: 'el-icon-stopwatch', title: '停用站点数量', value: this.Station.stop },
+        { icon: 'el-icon-delete-solid', title: '删除站点数量', value: this.Station.delete }
+      ]
+    },
     sortedNotices() {
-        return [...this.notices].reverse(); // 倒序显示
+      return [...this.notices].reverse(); // 倒序显示
     },
     paginatedNotices() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
@@ -356,7 +352,7 @@ export default {
 
     .title-overlay {
       position: absolute;
-      top: 30%;
+      top: 10%;
       left: 50%;
       transform: translate(-50%, -50%);
       z-index: 2;
@@ -364,20 +360,20 @@ export default {
 
 
       h1 {
-      font-size: 2.8rem;
-      font-weight: 500;
-      color: #fff;
-      font-family: system-ui, -apple-system, sans-serif;
-      text-shadow: 1px 2px 3px rgba(0, 0, 0, 0.2);
-      letter-spacing: normal;
-      padding: 12px 24px;
-      background: rgba(15, 42, 67, 0.85);
-      border-radius: 8px;
+        font-size: 2.8rem;
+        font-weight: 500;
+        color: #fff;
+        font-family: system-ui, -apple-system, sans-serif;
+        text-shadow: 1px 2px 3px rgba(0, 0, 0, 0.2);
+        letter-spacing: normal;
+        padding: 12px 24px;
+        background: rgba(15, 42, 67, 0.85);
+        border-radius: 8px;
 
-      &::after {
-        content: none;
+        &::after {
+          content: none;
+        }
       }
-    }
     }
 
     .background-image {
@@ -400,13 +396,14 @@ export default {
   @keyframes titleGlow {
     from {
       text-shadow: 0 0 10px rgba(255, 255, 255, 0.5),
-                  0 0 20px rgba(255, 255, 255, 0.3),
-                  0 0 30px rgba(255, 255, 255, 0.2);
+        0 0 20px rgba(255, 255, 255, 0.3),
+        0 0 30px rgba(255, 255, 255, 0.2);
     }
+
     to {
       text-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
-                  0 0 30px rgba(255, 255, 255, 0.6),
-                  0 0 40px rgba(255, 255, 255, 0.4);
+        0 0 30px rgba(255, 255, 255, 0.6),
+        0 0 40px rgba(255, 255, 255, 0.4);
     }
   }
 
@@ -414,8 +411,10 @@ export default {
     .title-container {
       .title-overlay {
         padding: 15px 25px;
+
         h1 {
           font-size: 2.2rem;
+
           &::after {
             bottom: -6px;
             height: 2px;
@@ -432,7 +431,7 @@ export default {
   .nav-container {
     display: flex;
     justify-content: center;
-    width: 100%;
+    width: 110%;
     height: 60px;
     margin-top: 20px;
 
@@ -634,8 +633,13 @@ export default {
         }
 
         @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+          0% {
+            transform: rotate(0deg);
+          }
+
+          100% {
+            transform: rotate(360deg);
+          }
         }
       }
     }
@@ -838,7 +842,7 @@ export default {
           margin-bottom: 8px;
 
           a {
-            color: rgba(255,255,255,0.8);
+            color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
             transition: all 0.3s;
             display: flex;
@@ -877,9 +881,9 @@ export default {
       text-align: center;
       margin-top: 10px;
       padding-top: 10px;
-      border-top: 1px solid rgba(255,255,255,0.1);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
       font-size: 14px;
-      color: rgba(255,255,255,0.6);
+      color: rgba(255, 255, 255, 0.6);
 
       a {
         color: #66b1ff;

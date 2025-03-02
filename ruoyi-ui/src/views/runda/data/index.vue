@@ -167,8 +167,8 @@ export default {
         pageSize: 10,
         deviceId: null,
         timeType: "hour", // 默认选择小时类型
-        selectedDate: new Date(2019, 9, 16).toLocaleDateString().replace(/\//g, "-"),
-        startHour: "03:00",
+        selectedDate: new Date().toLocaleDateString().replace(/\//g, "-"),
+        startHour: "01:00",
         endHour: null,
       },
 
@@ -315,6 +315,8 @@ export default {
     },
 
     async fetchDailyData(date) {
+
+
       try {
         return await request({
           url: "http://localhost:8080/runda/air/daily-hourly-average",

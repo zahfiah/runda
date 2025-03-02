@@ -53,32 +53,32 @@ public class AirDataHourServiceImpl implements AirDataHourService {
     private static final Map<String, String> deptIdToDeptNameMap = new HashMap<>();
 
     static {
-        deptIdToDeptNameMap.put("3", "人民公园"); // 东城区-人民公园
-        deptIdToDeptNameMap.put("18002", "人民公园"); // 怀来县-人民公园
-        deptIdToDeptNameMap.put("18003", "五金库");//蔚县-五金库
-        deptIdToDeptNameMap.put("18070", "五金库");//蔚县-五金库
-        deptIdToDeptNameMap.put("18007", " 烟厂");//怀安县-烟厂
-        deptIdToDeptNameMap.put("18071", " 人民公园");//怀安县-人民公园
-        deptIdToDeptNameMap.put("18011", " 五金库");//桥东区-五金库
-        deptIdToDeptNameMap.put("18114", " 五金库");//桥东区-五金库
+        deptIdToDeptNameMap.put("3", "五金库"); // 东城区-五金库
+        deptIdToDeptNameMap.put("18002", "怀来北辰佳苑"); // 怀来县-怀来北辰佳苑
+        deptIdToDeptNameMap.put("18003", "蔚县玉皇阁西");//蔚县-蔚县玉皇阁西
+        deptIdToDeptNameMap.put("18070", "蔚县玉皇阁西");//蔚县-蔚县玉皇阁西
+        deptIdToDeptNameMap.put("18007", " 怀安环境分局");//怀安县-怀安环境分局
+        deptIdToDeptNameMap.put("18071", " 怀安环境分局");//怀安县-怀安环境分局
+        deptIdToDeptNameMap.put("18011", " 世纪豪园");//桥东区-世纪豪园
+        deptIdToDeptNameMap.put("18114", " 世纪豪园");//桥东区-世纪豪园
         deptIdToDeptNameMap.put("18115", " 人民公园");//桥西区-人民公园
         deptIdToDeptNameMap.put("18013", " 烟厂");//经开区-烟厂
         deptIdToDeptNameMap.put("18116", " 烟厂");//经开区-烟厂
-        deptIdToDeptNameMap.put("18014", "世纪豪园"); // 长安区 宣化区 -世纪豪园
-        deptIdToDeptNameMap.put("18016", " 人民公园");//崇礼区-人民公园
-        deptIdToDeptNameMap.put("18077", " 人民公园");//崇礼区-人民公园
-        deptIdToDeptNameMap.put("18017", "人民公园");//下花园区-人民公园
-        deptIdToDeptNameMap.put("18018", "北泵房");//涿鹿县-北泵房
-        deptIdToDeptNameMap.put("18019", "烟厂");//赤城县-烟厂
-        deptIdToDeptNameMap.put("18020", " 世纪豪园");//阳原县-世纪豪园
-        deptIdToDeptNameMap.put("18021", " 五金库");//万全县- 五金库
-        deptIdToDeptNameMap.put("18022", "五金库");//尚义县-五金库
-        deptIdToDeptNameMap.put("18023", " 烟厂");//康保县-烟厂
-        deptIdToDeptNameMap.put("18024", "北泵房");//张北县-北泵房
-        deptIdToDeptNameMap.put("18025", "世纪豪园");//沽源县-世纪豪园
-        deptIdToDeptNameMap.put("18026", " 北泵房");//察北管理区-北泵房
-        deptIdToDeptNameMap.put("18079", "北泵房");//涿鹿县-世纪豪园
-        deptIdToDeptNameMap.put("18081", " 世纪豪园");//阳原县-世纪豪园
+        deptIdToDeptNameMap.put("18014", "宣化军营凤凰城"); // 长安区 宣化区 -宣化军营凤凰城
+        deptIdToDeptNameMap.put("18016", " 崇礼梦特芳丹酒店");//崇礼区-崇礼梦特芳丹酒店
+        deptIdToDeptNameMap.put("18077", " 崇礼梦特芳丹酒店");//崇礼区-崇礼梦特芳丹酒店
+        deptIdToDeptNameMap.put("18017", "下花园环境分局");//下花园区-下花园环境分局
+        deptIdToDeptNameMap.put("18018", "涿鹿县政府");//涿鹿县-涿鹿县政府
+        deptIdToDeptNameMap.put("18019", "赤城北山");//赤城县-赤城北山
+        deptIdToDeptNameMap.put("18020", " 阳原人民政府");//阳原县-阳原人民政府
+        deptIdToDeptNameMap.put("18021", " 万全环境分局");//万全县- 万全环境分局
+        deptIdToDeptNameMap.put("18022", "尚义第二中学");//尚义县-尚义第二中学
+        deptIdToDeptNameMap.put("18023", " 康保环境分局");//康保县-康保环境分局
+        deptIdToDeptNameMap.put("18024", "张北环境分局");//张北县-张北环境分局
+        deptIdToDeptNameMap.put("18025", "沽源县人民政府办公楼");//沽源县-沽源县人民政府办公楼
+        deptIdToDeptNameMap.put("18026", " 沽源第一中学");//察北管理区-沽源第一中学
+        deptIdToDeptNameMap.put("18079", "涿鹿县政府");//涿鹿县-涿鹿县政府
+        deptIdToDeptNameMap.put("18081", " 阳原人民政府");//阳原县-阳原人民政府
     }
     @Autowired
     private AirDataHourRepository airDataHourRepository;
@@ -133,11 +133,9 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         Page<AirDataHour> pageReports = airDataHourRepository.findCustomByCreateDateBetweenTimestamps(startDateMillis, endDateMillis, pageable);
 
         if (pageReports.isEmpty()) {
-            logger.warn("No data found for the specified date time range.");
+            logger.info("No data found for the specified date and time.");
             // 如果没有数据，则通过hourlyAverageAirDataRepository.findByDateTime 方法查询数据库本身是否有存在信息如果有增返回数据并能正常展示
-//            TableDataInfo tableDataInfo = hourlyAverageAirDataRepository.findByDateTime(dateTime);
             List<HourlyAverageAirData> hourlyAverageAirDataList = hourlyAverageAirDataRepository.findByDateTime(dateTime);
-
             if (!hourlyAverageAirDataList.isEmpty()) {
                 // 处理数据
                 List<Map<String, Object>> data = hourlyAverageAirDataList.stream()
@@ -559,7 +557,11 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         Double pm10 = data.getAveragePm10();
         logger.info("PM10 before calibration: {}", pm10);
 
-        DataQueryCountry queryCountry = dataQueryCountryMapper.selectDataQueryCountryByName(controlStation);
+        List<DataQueryCountry> queryCountries = dataQueryCountryMapper.selectDataQueryCountryByName(controlStation);
+
+        DataQueryCountry queryCountry = queryCountries.stream()
+                .findFirst()
+                .orElse(null);
 
         if (queryCountry == null) {
             logger.warn("Control station {} not found in the database", controlStation);
@@ -604,6 +606,7 @@ public class AirDataHourServiceImpl implements AirDataHourService {
 
         return data;
     }
+
 
 
     private double getRandomFluctuation(double range) {
