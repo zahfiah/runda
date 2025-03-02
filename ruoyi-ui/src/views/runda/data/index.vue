@@ -198,77 +198,31 @@ export default {
     // 新增设备相关方法
     async getDeviceList() {
       try {
-        // 从 localStorage 获取设备列表
-        const cachedDeviceList = localStorage.getItem("deviceList");
+        // 请求新的接口获取设备列表
+        const response = await request({
+          url: "http://localhost:8080/runda/query212/listDeviceIdAndName",
+          method: "get",
+        });
 
-        // 如果缓存中有设备数据，直接使用缓存数据
-        if (cachedDeviceList) {
-          this.deviceOptions = JSON.parse(cachedDeviceList);
-          console.log("从缓存中获取设备列表：", this.deviceOptions);
+        // 打印完整的响应对象，以便调试
+        console.log("接口响应:", response);
+
+        if (Array.isArray(response) && response.length > 0) {
+          // 处理响应数据
+          this.deviceOptions = response.map((row) => ({
+            deviceId: row.id,
+            deviceName: row.name,
+          }));
+
+          console.log("找到的所有设备：", this.deviceOptions);
 
           if (this.deviceOptions.length > 0) {
-          } else {
-            this.$message.warning("缓存中没有找到设备");
-          }
-          return;
-        }
-        // 创建一个数组存储所有成功的请求结果
-        const uniqueDevices = new Map();
-        const batchSize = 100;
-
-        // 使用 for 循环分批发送请求
-        for (let deviceId = 1; deviceId <= 1000; deviceId += batchSize) {
-          const batchPromises = [];
-
-          // 创建这一批的请求
-          for (let i = 0; i < batchSize && deviceId + i <= 1000; i++) {
-            batchPromises.push(
-              request({
-                url: "/runda/query212/listByDeviceId",
-                method: "get",
-                params: { deviceId: deviceId + i },
-              }).catch((error) => {
-                // 忽略单个请求的错误，返回 null
-                return null;
-              })
+            this.$message.success(
+              `成功获取到 ${this.deviceOptions.length} 个设备`
             );
+          } else {
+            this.$message.warning("未找到任何可用设备");
           }
-
-          // 等待这一批请求完成
-          const responses = await Promise.all(batchPromises);
-
-          // 处理响应
-          responses.forEach((response) => {
-            if (
-              response &&
-              response.code === 0 &&
-              response.rows &&
-              response.rows.length > 0
-            ) {
-              const deviceData = response.rows[0];
-              if (!uniqueDevices.has(deviceData.deviceId)) {
-                uniqueDevices.set(deviceData.deviceId, {
-                  deviceId: deviceData.deviceId,
-                  deviceName: deviceData.deviceName,
-                });
-              }
-            }
-          });
-        }
-
-        // 转换为数组并更新设备选项
-        this.deviceOptions = Array.from(uniqueDevices.values());
-        console.log("找到的所有设备：", this.deviceOptions);
-
-        if (this.deviceOptions.length > 0) {
-          localStorage.setItem(
-            "deviceList",
-            JSON.stringify(this.deviceOptions)
-          );
-
-          this.$message.success(
-            `成功获取到 ${this.deviceOptions.length} 个设备`
-          );
         } else {
           this.$message.warning("未找到任何可用设备");
         }
@@ -372,32 +326,40 @@ export default {
       return true;
     },
 
+    async fetchHourDataWithDeviceId(hour) {
+      try {
+        return await request({
+          url: "/runda/air/hourly-average-for-specific-time",
+          params: {
+            deviceId: this.queryParams.deviceId,
+            dateTime: `${this.queryParams.selectedDate} ${hour}`,
+          }
+        });
+      } catch (error) {
+        console.error(`查询${hour}数据失败:`, error);
+        return { code: -1, rows: [] };
+      }
+    },
+
+    async fetchHourDataWithoutDeviceId(hour) {
+      try {
+        return await request({
+          url: "http://localhost:8080/runda/air/average-by-hour",
+          params: {
+            dateTime: `${this.queryParams.selectedDate} ${hour}`,
+          }
+        });
+      } catch (error) {
+        console.error(`查询${hour}数据失败:`, error);
+        return { code: -1, rows: [] };
+      }
+    },
+
     async fetchHourData(hour) {
       if (this.queryParams.deviceId) {
-        try {
-          return await request({
-            url: "/runda/air/hourly-average-for-specific-time",
-            params: {
-              deviceId: this.queryParams.deviceId,
-              dateTime: `${this.queryParams.selectedDate} ${hour}`,
-            }
-          });
-        } catch (error) {
-          console.error(`查询${hour}数据失败:`, error);
-          return { code: -1, rows: [] };
-        }
+        return await this.fetchHourDataWithDeviceId(hour);
       } else {
-        try {
-          return await request({
-            url: "http://localhost:8080/runda/air/average-by-hour",
-            params: {
-              dateTime: `${this.queryParams.selectedDate} ${hour}`,
-            }
-          });
-        } catch (error) {
-          console.error(`查询${hour}数据失败:`, error);
-          return { code: -1, rows: [] };
-        }
+        return await this.fetchHourDataWithoutDeviceId(hour);
       }
     },
 
@@ -543,3 +505,5 @@ export default {
   }
 };
 </script>
+
+
