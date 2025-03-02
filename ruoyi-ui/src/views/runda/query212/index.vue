@@ -1,13 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form
-      :model="queryParams"
-      ref="queryForm"
-      size="small"
-      :inline="true"
-      v-show="showSearch"
-      label-width="85px"
-    >
+    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="85px">
       <el-form-item label="设备" prop="deviceId">
         <!-- 改为 deviceId -->
         <!-- <el-select
@@ -24,26 +17,13 @@
           />
         </el-select>
       </el-form-item> -->
-        <el-select
-          v-model="queryParams.deviceId"
-          placeholder="请选择设备"
-          clearable
-          @change="handleDeviceChange"
-        >
-          <el-option
-            v-for="device in deviceOptions"
-            :key="device.deviceId"
-            :label="device.deviceName"
-            :value="device.deviceId"
-          />
+        <el-select v-model="queryParams.deviceId" placeholder="请选择设备" clearable @change="handleDeviceChange">
+          <el-option v-for="device in deviceOptions" :key="device.deviceId" :label="device.deviceName"
+            :value="device.deviceId" />
         </el-select>
       </el-form-item>
       <el-form-item label="时间类型" prop="timeType">
-        <el-select
-          v-model="queryParams.timeType"
-          placeholder="请选择时间类型"
-          @change="handleTimeTypeChange"
-        >
+        <el-select v-model="queryParams.timeType" placeholder="请选择时间类型" @change="handleTimeTypeChange">
           <el-option label="起止时间（日期）" value="date" />
           <el-option label="起止时间（小时）" value="hour" />
         </el-select>
@@ -53,118 +33,60 @@
       <!-- 日期类型的选择器 -->
       <template v-if="queryParams.timeType === 'date'">
         <el-form-item label="开始日期" prop="startDate">
-          <el-date-picker
-            v-model="queryParams.startDate"
-            type="date"
-            placeholder="选择开始日期"
-            value-format="yyyy-MM-dd"
-            format="yyyy-MM-dd"
-          />
+          <el-date-picker v-model="queryParams.startDate" type="date" placeholder="选择开始日期" value-format="yyyy-MM-dd"
+            format="yyyy-MM-dd" />
         </el-form-item>
         <el-form-item label="结束日期" prop="endDate">
-          <el-date-picker
-            v-model="queryParams.endDate"
-            type="date"
-            placeholder="选择结束日期"
-            value-format="yyyy-MM-dd"
-            format="yyyy-MM-dd"
-          />
+          <el-date-picker v-model="queryParams.endDate" type="date" placeholder="选择结束日期" value-format="yyyy-MM-dd"
+            format="yyyy-MM-dd" />
         </el-form-item>
       </template>
 
       <!-- 小时类型的选择器 -->
       <template v-if="queryParams.timeType === 'hour'">
         <el-form-item label="选择日期" prop="selectedDate">
-          <el-date-picker
-            v-model="queryParams.selectedDate"
-            type="date"
-            placeholder="选择日期"
-            value-format="yyyy-MM-dd"
-            format="yyyy-MM-dd"
-          />
+          <el-date-picker v-model="queryParams.selectedDate" type="date" placeholder="选择日期" value-format="yyyy-MM-dd"
+            format="yyyy-MM-dd" />
         </el-form-item>
         <el-form-item label="开始时间" prop="startHour">
-          <el-time-select
-            v-model="queryParams.startHour"
-            :picker-options="{
-              start: '00:00',
-              step: '01:00',
-              end: '23:00',
-            }"
-            placeholder="选择开始时间"
-          />
+          <el-time-select v-model="queryParams.startHour" :picker-options="{
+            start: '00:00',
+            step: '01:00',
+            end: '23:00',
+          }" placeholder="选择开始时间" />
         </el-form-item>
         <el-form-item label="结束时间" prop="endHour">
-          <el-time-select
-            v-model="queryParams.endHour"
-            :picker-options="{
-              start: '00:00',
-              step: '01:00',
-              end: '23:59',
-            }"
-            placeholder="选择结束时间"
-            :min-time="queryParams.startHour"
-          />
+          <el-time-select v-model="queryParams.endHour" :picker-options="{
+            start: '00:00',
+            step: '01:00',
+            end: '23:59',
+          }" placeholder="选择结束时间" :min-time="queryParams.startHour" />
         </el-form-item>
       </template>
 
       <el-form-item>
-        <el-button
-          type="primary"
-          icon="el-icon-search"
-          size="mini"
-          @click="handleQuery"
-          >搜索</el-button
-        >
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery"
-          >重置</el-button
-        >
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['runda:query:add']"
-          >新增</el-button
-        >
+        <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd"
+          v-hasPermi="['runda:query:add']">新增</el-button>
       </el-col>
 
       <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['runda:query:export']"
-          >导出</el-button
-        >
+        <el-button type="warning" plain icon="el-icon-download" size="mini" @click="handleExport"
+          v-hasPermi="['runda:query:export']">导出</el-button>
       </el-col>
-      <right-toolbar
-        :showSearch.sync="showSearch"
-        @queryTable="getList"
-      ></right-toolbar>
+      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table
-      v-loading="loading"
-      :data="query212List"
-      @selection-change="handleSelectionChange"
-    >
+    <el-table v-loading="loading" :data="query212List" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="35" align="center" />
       <!-- <el-table-column label="主键id" align="center" prop="id" /> -->
       <el-table-column label="设备名称" align="center" prop="deviceName" />
-      <el-table-column
-        label="日期"
-        align="center"
-        prop="createDate"
-        width="100"
-      >
+      <el-table-column label="日期" align="center" prop="createDate" width="100">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createDate) }}</span>
         </template>
@@ -173,12 +95,8 @@
       <!-- <el-table-column label="pm2.5(μg/m)" align="center" prop="pm" /> -->
       <el-table-column label="PM2.5(μg/m³)" align="center" prop="dust">
         <template slot="header">
-          <div
-            style="display: flex; flex-direction: column; align-items: center"
-          >
-            <span
-              >PM<sub style="font-size: 12px; margin-left: 1px">2.5</sub></span
-            >
+          <div style="display: flex; flex-direction: column; align-items: center">
+            <span>PM<sub style="font-size: 12px; margin-left: 1px">2.5</sub></span>
             <span style="margin-top: 2px">(μg/m³)</span>
           </div>
         </template>
@@ -186,47 +104,31 @@
       <!-- <el-table-column label="pm10浓度" align="center" prop="pm10" /> -->
       <el-table-column label="PM10(μg/m³)" align="center" prop="pm10">
         <template slot="header">
-          <div
-            style="display: flex; flex-direction: column; align-items: center"
-          >
-            <span
-              >PM<sub style="font-size: 12px; margin-left: 1px">10</sub></span
-            >
+          <div style="display: flex; flex-direction: column; align-items: center">
+            <span>PM<sub style="font-size: 12px; margin-left: 1px">10</sub></span>
             <span style="margin-top: 2px">(μg/m³)</span>
           </div>
         </template>
       </el-table-column>
       <el-table-column label="SO2浓度" align="center" prop="so2Thickness">
         <template slot="header">
-          <div
-            style="display: flex; flex-direction: column; align-items: center"
-          >
-            <span
-              >SO<sub style="font-size: 12px; margin-left: 1px">2</sub
-              >浓度</span
-            >
+          <div style="display: flex; flex-direction: column; align-items: center">
+            <span>SO<sub style="font-size: 12px; margin-left: 1px">2</sub>浓度</span>
             <span style="margin-top: 2px">(μg/m³)</span>
           </div>
         </template>
       </el-table-column>
       <el-table-column label="NO2浓度" align="center" prop="no2Thickness">
         <template slot="header">
-          <div
-            style="display: flex; flex-direction: column; align-items: center"
-          >
-            <span
-              >NO<sub style="font-size: 12px; margin-left: 1px">2</sub
-              >浓度</span
-            >
+          <div style="display: flex; flex-direction: column; align-items: center">
+            <span>NO<sub style="font-size: 12px; margin-left: 1px">2</sub>浓度</span>
             <span style="margin-top: 2px">(μg/m³)</span>
           </div>
         </template>
       </el-table-column>
       <el-table-column label="co浓度" align="center" prop="coThickness">
         <template slot="header">
-          <div
-            style="display: flex; flex-direction: column; align-items: center"
-          >
+          <div style="display: flex; flex-direction: column; align-items: center">
             <span>CO浓度</span>
             <span style="margin-top: 2px">(mg/m³)</span>
           </div>
@@ -234,24 +136,16 @@
       </el-table-column>
       <el-table-column label="O3浓度" align="center" prop="co3Thickness">
         <template slot="header">
-          <div
-            style="display: flex; flex-direction: column; align-items: center"
-          >
-            <span
-              >O<sub style="font-size: 12px; margin-left: 1px">3</sub>浓度</span
-            >
+          <div style="display: flex; flex-direction: column; align-items: center">
+            <span>O<sub style="font-size: 12px; margin-left: 1px">3</sub>浓度</span>
             <span style="margin-top: 2px">(μg/m³)</span>
           </div>
         </template>
       </el-table-column>
       <el-table-column label="vocs浓度" align="center" prop="voc">
         <template slot="header">
-          <div
-            style="display: flex; flex-direction: column; align-items: center"
-          >
-            <span
-              >VOC<sub style="font-size: 12px; margin-left: 1px">s</sub></span
-            >
+          <div style="display: flex; flex-direction: column; align-items: center">
+            <span>VOC<sub style="font-size: 12px; margin-left: 1px">s</sub></span>
             <span style="margin-top: 2px">(mg/m³)</span>
           </div>
         </template>
@@ -291,13 +185,8 @@
       </el-table-column> -->
     </el-table>
 
-    <pagination
-      v-show="total > 0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
+      @pagination="getList" />
 
     <!-- 添加或修改大气数据查询212对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
@@ -368,21 +257,13 @@
           </el-date-picker>
         </el-form-item> -->
         <el-form-item label="日期" prop="date">
-          <el-date-picker
-            clearable
-            v-model="form.date"
-            type="datetime"
-            value-format="yyyy-MM-dd HH:mm:ss"
-            placeholder="请选择日期和时间"
-          >
+          <el-date-picker clearable v-model="form.date" type="datetime" value-format="yyyy-MM-dd HH:mm:ss"
+            placeholder="请选择日期和时间">
           </el-date-picker>
         </el-form-item>
 
         <el-form-item label="首要污染物" prop="primaryPollutant">
-          <el-input
-            v-model="form.primaryPollutant"
-            placeholder="请输入首要污染物"
-          />
+          <el-input v-model="form.primaryPollutant" placeholder="请输入首要污染物" />
         </el-form-item>
         <el-form-item label="站点_id" prop="stationId">
           <el-input v-model="form.stationId" placeholder="请输入站点_id" />
@@ -948,7 +829,7 @@ export default {
           this.getList();
           this.$modal.msgSuccess("删除成功");
         })
-        .catch(() => {});
+        .catch(() => { });
     },
     // /** 导出按钮操作 */
     // handleExport() {

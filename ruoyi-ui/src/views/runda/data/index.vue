@@ -1,26 +1,10 @@
 <template>
   <div class="app-container">
-    <el-form
-      :model="queryParams"
-      ref="queryForm"
-      size="small"
-      :inline="true"
-      v-show="showSearch"
-      label-width="85px"
-    >
+    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="85px">
       <el-form-item label="设备" prop="deviceId" label-width="45px">
-        <el-select
-          v-model="queryParams.deviceId"
-          placeholder="请选择设备"
-          clearable
-          @change="handleDeviceChange"
-        >
-          <el-option
-            v-for="device in deviceOptions"
-            :key="device.deviceId"
-            :label="device.deviceName"
-            :value="device.deviceId"
-          />
+        <el-select v-model="queryParams.deviceId" placeholder="请选择设备" clearable @change="handleDeviceChange">
+          <el-option v-for="device in deviceOptions" :key="device.deviceId" :label="device.deviceName"
+            :value="device.deviceId" />
         </el-select>
       </el-form-item>
 
@@ -37,80 +21,41 @@
       <!-- 小时类型的选择器 -->
       <template v-if="queryParams.timeType === 'hour'">
         <el-form-item label="选择日期" prop="selectedDate">
-          <el-date-picker
-            v-model="queryParams.selectedDate"
-            type="date"
-            placeholder="选择日期"
-            value-format="yyyy-MM-dd"
-            format="yyyy-MM-dd"
-          />
+          <el-date-picker v-model="queryParams.selectedDate" type="date" placeholder="选择日期" value-format="yyyy-MM-dd"
+            format="yyyy-MM-dd" />
         </el-form-item>
         <el-form-item label="开始时间" prop="startHour">
-          <el-time-select
-            v-model="queryParams.startHour"
-            :picker-options="{
-              start: '00:00',
-              step: '01:00',
-              end: '23:00',
-            }"
-            placeholder="选择开始时间"
-          />
+          <el-time-select v-model="queryParams.startHour" :picker-options="{
+            start: '00:00',
+            step: '01:00',
+            end: '23:00',
+          }" placeholder="选择开始时间" />
         </el-form-item>
         <el-form-item label="结束时间" prop="endHour">
-          <el-time-select
-            v-model="queryParams.endHour"
-            :picker-options="{
-              start: '00:00',
-              step: '01:00',
-              end: '23:59',
-            }"
-            placeholder="选择结束时间"
-            :min-time="queryParams.startHour"
-          />
+          <el-time-select v-model="queryParams.endHour" :picker-options="{
+            start: '00:00',
+            step: '01:00',
+            end: '23:59',
+          }" placeholder="选择结束时间" :min-time="queryParams.startHour" />
         </el-form-item>
       </template>
 
       <el-form-item>
-        <el-button
-          type="primary"
-          icon="el-icon-search"
-          size="mini"
-          @click="handleQuery"
-          >搜索</el-button
-        >
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery"
-          >重置</el-button
-        >
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['runda:data:add']"
-          >新增</el-button
-        >
+        <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd"
+          v-hasPermi="['runda:data:add']">新增</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['runda:data:export']"
-          >导出</el-button
-        >
+        <el-button type="warning" plain icon="el-icon-download" size="mini" @click="handleExport"
+          v-hasPermi="['runda:data:export']">导出</el-button>
       </el-col>
-      <right-toolbar
-        :showSearch.sync="showSearch"
-        @queryTable="getList"
-      ></right-toolbar>
+      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
     <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
@@ -118,61 +63,47 @@
       <!-- <el-table-column label="城市名称" align="center" prop="deptId" /> -->
       <el-table-column label="站点名称" align="center" prop="stationName" />
       <el-table-column label="设备名称" align="center" prop="deviceName" />
-      <el-table-column
-        label="日期"
-        align="center"
-        :prop="queryParams.timeType === 'date' ? 'date' : 'dateTimeStr'"
-        width="100"
-      >
+      <el-table-column label="日期" align="center" :prop="queryParams.timeType === 'date' ? 'date' : 'dateTimeStr'"
+        width="100">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row[queryParams.timeType === 'date' ? 'date' : 'dateTimeStr']) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="so2浓度(μg/m³)" align="center" prop="averageSo2" >
+      <el-table-column label="so2浓度(μg/m³)" align="center" prop="averageSo2">
         <template slot="header">
-          <div
-            style="display: flex; flex-direction: column; align-items: center"
-          >
+          <div style="display: flex; flex-direction: column; align-items: center">
             <span>so2浓度</span>
             <span style="margin-top: 2px">(μg/m³)</span>
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="no2浓度(μg/m³)" align="center" prop="averageNo2" >
-      <template slot="header">
-          <div
-            style="display: flex; flex-direction: column; align-items: center"
-          >
+      <el-table-column label="no2浓度(μg/m³)" align="center" prop="averageNo2">
+        <template slot="header">
+          <div style="display: flex; flex-direction: column; align-items: center">
             <span>no2浓度</span>
             <span style="margin-top: 2px">(μg/m³)</span>
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="o3浓度(μg/m³)" align="center" prop="averageO3" >
-      <template slot="header">
-          <div
-            style="display: flex; flex-direction: column; align-items: center"
-          >
+      <el-table-column label="o3浓度(μg/m³)" align="center" prop="averageO3">
+        <template slot="header">
+          <div style="display: flex; flex-direction: column; align-items: center">
             <span>o3浓度</span>
             <span style="margin-top: 2px">(μg/m³)</span>
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="小时pm25浓度(μg/m³)" align="center" prop="averagePm2_5" >
-      <template slot="header">
-          <div
-            style="display: flex; flex-direction: column; align-items: center"
-          >
+      <el-table-column label="小时pm25浓度(μg/m³)" align="center" prop="averagePm2_5">
+        <template slot="header">
+          <div style="display: flex; flex-direction: column; align-items: center">
             <span>小时pm25</span>
             <span style="margin-top: 2px">浓度(μg/m³)</span>
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="小时pm10浓度(μg/m³)" align="center" prop="averagePm10" >
-      <template slot="header">
-          <div
-            style="display: flex; flex-direction: column; align-items: center"
-          >
+      <el-table-column label="小时pm10浓度(μg/m³)" align="center" prop="averagePm10">
+        <template slot="header">
+          <div style="display: flex; flex-direction: column; align-items: center">
             <span>小时pm10</span>
             <span style="margin-top: 2px">浓度(μg/m³)</span>
           </div>
@@ -186,14 +117,9 @@
       <el-table-column label="颜色" align="center" prop="color" />
       <el-table-column label="主要污染物" align="center" prop="primaryPollutant" />
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
+
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
+      @pagination="getList" />
 
     <!-- 添加或修改监测小时报表对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
@@ -362,7 +288,7 @@ export default {
       if (!start) return [];
       const startHour = parseInt(start.split(':')[0]);
       const endHour = end ? parseInt(end.split(':')[0]) : startHour;
-      return Array.from({ length: endHour - startHour + 1 }, (_, i) => 
+      return Array.from({ length: endHour - startHour + 1 }, (_, i) =>
         `${String(startHour + i).padStart(2, '0')}:00`
       );
     },
@@ -393,7 +319,7 @@ export default {
         return await request({
           url: "http://localhost:8080/runda/air/daily-hourly-average",
           params: {
-            
+
             date: date,
             deviceId: this.queryParams.deviceId,
           }
@@ -474,10 +400,10 @@ export default {
     },
 
     processData(responses) {
-      const allData = responses.reduce((acc, res) => 
+      const allData = responses.reduce((acc, res) =>
         res.code === 0 ? acc.concat(res.rows) : acc, []);
       console.log(responses);
-      
+
       this.total = allData.length;
       this.dataList = allData.slice(
         (this.queryParams.pageNum - 1) * this.queryParams.pageSize,
@@ -492,7 +418,7 @@ export default {
       this.$message.error("查询失败");
       this.loading = false;
     },
-  
+
     // 处理查询结果响应
     handleResponse(response) {
       if (response && response.code === 0) {
@@ -557,7 +483,7 @@ export default {
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.id)
-      this.single = selection.length!==1
+      this.single = selection.length !== 1
       this.multiple = !selection.length
     },
     /** 新增按钮操作 */
@@ -599,12 +525,12 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除监测小时报表编号为"' + ids + '"的数据项？').then(function() {
+      this.$modal.confirm('是否确认删除监测小时报表编号为"' + ids + '"的数据项？').then(function () {
         return delData(ids);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
+      }).catch(() => { });
     },
     /** 导出按钮操作 */
     handleExport() {
@@ -615,6 +541,3 @@ export default {
   }
 };
 </script>
-
-
-

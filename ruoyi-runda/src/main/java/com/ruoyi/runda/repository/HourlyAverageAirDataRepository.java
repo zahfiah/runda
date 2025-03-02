@@ -1,5 +1,6 @@
 package com.ruoyi.runda.repository;
 
+import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.runda.domain.HourlyAverageAirData;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,4 +25,9 @@ public interface HourlyAverageAirDataRepository extends JpaRepository<HourlyAver
 
         @Query("SELECT h FROM HourlyAverageAirData h WHERE h.deviceId = :deviceId AND h.createdAt = :createdAt ORDER BY h.createdAt DESC")
         HourlyAverageAirData findByDeviceIdAndCreatedAt(@Param("deviceId") String deviceId, @Param("createdAt") Date createdAt);
+
+        //根据日期条件查询数据信息
+        @Query("SELECT h FROM HourlyAverageAirData h WHERE h.createdAt = :createdAt ORDER BY h.createdAt DESC")
+        List<HourlyAverageAirData> findByDateTime(@Param("createdAt") Date dateTimeStr);
 }
+

@@ -134,7 +134,51 @@ public class AirDataHourServiceImpl implements AirDataHourService {
 
         if (pageReports.isEmpty()) {
             logger.warn("No data found for the specified date time range.");
-            return createEmptyTableDataInfo();
+            // 如果没有数据，则通过hourlyAverageAirDataRepository.findByDateTime 方法查询数据库本身是否有存在信息如果有增返回数据并能正常展示
+//            TableDataInfo tableDataInfo = hourlyAverageAirDataRepository.findByDateTime(dateTime);
+            List<HourlyAverageAirData> hourlyAverageAirDataList = hourlyAverageAirDataRepository.findByDateTime(dateTime);
+
+            if (!hourlyAverageAirDataList.isEmpty()) {
+                // 处理数据
+                List<Map<String, Object>> data = hourlyAverageAirDataList.stream()
+                        .map(avgData -> {
+                            Map<String, Object> map = new HashMap<>();
+                            map.put("deviceId", avgData.getDeviceId());
+                            map.put("stationId", avgData.getStationId());
+                            map.put("deptId", avgData.getDeptId());
+                            map.put("deviceName", avgData.getDeviceName());
+                            map.put("stationName", avgData.getStationName());
+                            map.put("controlStation", deptIdToDeptNameMap.getOrDefault(avgData.getDeptId(), "未知站点"));
+                            map.put("averageAqi", avgData.getAverageAqi());
+                            map.put("averageSo2", avgData.getAverageSo2());
+                            map.put("averageNo2", avgData.getAverageNo2());
+                            map.put("averageO3", avgData.getAverageO3());
+                            map.put("averagePm2_5", avgData.getAveragePm25());
+                            map.put("averagePm10", avgData.getAveragePm10());
+                            map.put("level", getAqiLevel(Double.valueOf(avgData.getAverageAqi())));
+                            map.put("quality", getAqiQuality(Double.valueOf(avgData.getAverageAqi())));
+                            map.put("color", getAqiColor(Double.valueOf(avgData.getAverageAqi())));
+                            if (avgData.getAverageAqi() > 50) {
+                                map.put("primaryPollutant", getPrimaryPollutant(pageReports.getContent().stream()
+                                        .filter(report -> report.getDeviceId().equals(avgData.getDeviceId()))
+                                        .collect(Collectors.toList())));
+                            } else {
+                                map.put("primaryPollutant", "-");
+                            }
+                            map.put("dateTimeStr", dateTimeStr);
+                            return map;
+                        })
+                        .collect(Collectors.toList());
+
+                TableDataInfo resultTableDataInfo = new TableDataInfo();
+                resultTableDataInfo.setCode(0); // Assuming success code is 0
+                resultTableDataInfo.setMsg("success");
+                resultTableDataInfo.setRows(data);
+                resultTableDataInfo.setTotal(hourlyAverageAirDataList.size());
+                return resultTableDataInfo;
+            } else {
+                return createEmptyTableDataInfo();
+            }
         } else {
             logger.info("Found {} records in total", pageReports.getTotalElements());
             // 打印每条记录的 deviceId 和 aqi
@@ -142,7 +186,6 @@ public class AirDataHourServiceImpl implements AirDataHourService {
 //                    report.getDeviceId(), report.getAqi(), report.getSo2Thickness(), report.getNo2Thickness(),
 //                    report.getCo(), report.getCo3Thickness(), report.getPm25(), report.getPm10(), report.getDeptId(), report.getStationId(),report.getDeviceName(),report.getStationName(),report.getDeptId()));
         }
-
 
         // 计算每个设备指定日期时间内的各项指标平均值
         Map<String, Map<String, Object>> averages = pageReports.getContent().stream()
@@ -176,10 +219,8 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         // 添加日志信息以确认 stationId 是否存在
 //        data.forEach(row -> logger.debug("Row data: {}", row));
 
-
         // 将平均数据保存到MySQL数据库中
         saveToMysql(data);
-
 
         // 使用校准后的数据来构建返回的 TableDataInfo 对象
         List<Map<String, Object>> calibratedData = data.stream()
@@ -225,6 +266,7 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         tableDataInfo.setTotal(pageReports.getTotalElements());
         return tableDataInfo;
     }
+
 
     private Map.Entry<String, Map<String, Object>> calculateMetrics(Map.Entry<String, List<AirDataHour>> entry) {
         String deviceId = entry.getKey();
