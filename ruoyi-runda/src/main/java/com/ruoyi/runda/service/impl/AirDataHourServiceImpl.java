@@ -7,6 +7,8 @@ import com.ruoyi.runda.mapper.AlarmRemindMapper;
 import com.ruoyi.runda.mapper.DataQueryCountryMapper;
 import com.ruoyi.runda.mapper.StationMapper;
 import com.ruoyi.runda.repository.AirDataHourRepository;
+import com.ruoyi.runda.repository.DataQuery212OVRepository;
+import com.ruoyi.runda.repository.DataQuery212Repository;
 import com.ruoyi.runda.repository.HourlyAverageAirDataRepository;
 import com.ruoyi.runda.service.AirDataHourService;
 import org.apache.poi.ss.usermodel.Cell;
@@ -94,6 +96,9 @@ public class AirDataHourServiceImpl implements AirDataHourService {
 
     @Autowired
     private DataQueryCountryMapper dataQueryCountryMapper;
+    @Autowired
+    private DataQuery212OVRepository dataQuery212OVRepository;
+
 
 
 
@@ -130,9 +135,31 @@ public class AirDataHourServiceImpl implements AirDataHourService {
 
         // 添加 Pageable 参数
         PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE); // 使用默认分页参数，可以根据需求调整
-        Page<AirDataHour> pageReports = airDataHourRepository.findCustomByCreateDateBetweenTimestamps(startDateMillis, endDateMillis, pageable);
+        Page<DataQuery212> dataPage = dataQuery212OVRepository.findByCreateDateBetween(startDateMillis, endDateMillis, pageable);
+//        Page<AirDataHour> pageReports = airDataHourRepository.findCustomByCreateDateBetweenTimestamps(startDateMillis, endDateMillis, pageable);
 
-        if (pageReports.isEmpty()) {
+        // 合并 DataQuery212 和 AirDataHour 数据
+        List<AirDataHour> combinedData = new ArrayList<>();
+//        combinedData.addAll(pageReports.getContent());
+        combinedData.addAll(dataPage.getContent().stream().map(dataQuery212 -> {
+            AirDataHour airDataHour = new AirDataHour();
+            airDataHour.setDeviceId(dataQuery212.getDeviceId());
+            airDataHour.setStationId(String.valueOf(dataQuery212.getStationId()));
+            airDataHour.setDeptId(String.valueOf(dataQuery212.getDeptId()));
+            airDataHour.setDeviceName(dataQuery212.getDeviceName());
+            airDataHour.setStationName(dataQuery212.getStationName());
+            airDataHour.setAqi(dataQuery212.getAqi());
+            airDataHour.setSo2Thickness(dataQuery212.getSo2Thickness());
+            airDataHour.setNo2Thickness(dataQuery212.getNo2Thickness());
+            airDataHour.setCoThickness(dataQuery212.getCoThickness());
+            airDataHour.setCo3Thickness(dataQuery212.getCo3Thickness());
+            airDataHour.setPm25(dataQuery212.getPm2_5());
+            airDataHour.setPm10(dataQuery212.getPm10());
+//            airDataHour.setCreateDate(new Timestamp(dataQuery212.getDate()));
+            return airDataHour;
+        }).collect(Collectors.toList()));
+
+        if (combinedData.isEmpty()) {
             logger.info("No data found for the specified date and time.");
             // 如果没有数据，则通过hourlyAverageAirDataRepository.findByDateTime 方法查询数据库本身是否有存在信息如果有增返回数据并能正常展示
             List<HourlyAverageAirData> hourlyAverageAirDataList = hourlyAverageAirDataRepository.findByDateTime(dateTime);
@@ -157,7 +184,7 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                             map.put("quality", getAqiQuality(Double.valueOf(avgData.getAverageAqi())));
                             map.put("color", getAqiColor(Double.valueOf(avgData.getAverageAqi())));
                             if (avgData.getAverageAqi() > 50) {
-                                map.put("primaryPollutant", getPrimaryPollutant(pageReports.getContent().stream()
+                                map.put("primaryPollutant", getPrimaryPollutant(combinedData.stream()
                                         .filter(report -> report.getDeviceId().equals(avgData.getDeviceId()))
                                         .collect(Collectors.toList())));
                             } else {
@@ -178,7 +205,7 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                 return createEmptyTableDataInfo();
             }
         } else {
-            logger.info("Found {} records in total", pageReports.getTotalElements());
+            logger.info("Found {} records in total", combinedData.size());
             // 打印每条记录的 deviceId 和 aqi
 //            pageReports.getContent().forEach(report -> logger.debug("Report: deviceId={}, aqi={}, so2={}, no2={}, co={}, o3={}, pm2_5={}, pm10={}, deptId={}, stationId={},deviceName={},stationName={},deptId={}",
 //                    report.getDeviceId(), report.getAqi(), report.getSo2Thickness(), report.getNo2Thickness(),
@@ -186,7 +213,7 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         }
 
         // 计算每个设备指定日期时间内的各项指标平均值
-        Map<String, Map<String, Object>> averages = pageReports.getContent().stream()
+        Map<String, Map<String, Object>> averages = combinedData.stream()
                 .collect(Collectors.groupingBy(AirDataHour::getDeviceId))
                 .entrySet().stream()
                 .map(this::calculateMetrics)
@@ -244,7 +271,7 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                         calibratedMap.put("quality", getAqiQuality(Double.valueOf(calibratedDataRecord.getAverageAqi())));
                         calibratedMap.put("color", getAqiColor(Double.valueOf(calibratedDataRecord.getAverageAqi())));
                         if (calibratedDataRecord.getAverageAqi() > 50) {
-                            calibratedMap.put("primaryPollutant", getPrimaryPollutant(pageReports.getContent().stream()
+                            calibratedMap.put("primaryPollutant", getPrimaryPollutant(combinedData.stream()
                                     .filter(report -> report.getDeviceId().equals(deviceId))
                                     .collect(Collectors.toList())));
                         } else {
@@ -261,9 +288,10 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         tableDataInfo.setCode(0); // Assuming success code is 0
         tableDataInfo.setMsg("success");
         tableDataInfo.setRows(calibratedData);
-        tableDataInfo.setTotal(pageReports.getTotalElements());
+        tableDataInfo.setTotal(combinedData.size());
         return tableDataInfo;
     }
+
 
 
     private Map.Entry<String, Map<String, Object>> calculateMetrics(Map.Entry<String, List<AirDataHour>> entry) {
