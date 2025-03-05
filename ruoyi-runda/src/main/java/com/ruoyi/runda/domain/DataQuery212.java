@@ -3,7 +3,6 @@ package com.ruoyi.runda.domain;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.core.domain.BaseEntity;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Date;
@@ -14,7 +13,6 @@ import java.util.Date;
  * @author runda
  * @date 2025-01-07
  */
-@Document(collection = "devicedata")
 public class DataQuery212 extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
@@ -67,7 +65,7 @@ public class DataQuery212 extends BaseEntity {
 
     /** 粉尘pm2.5 */
     @Field("dust")
-    private Double dust;//粉尘pm2.5
+    private Double pm2_5;//粉尘pm2.5
 
     /** pm10浓度 */
     @Field("pm10")
@@ -171,7 +169,7 @@ public class DataQuery212 extends BaseEntity {
 
     /** 设备_id */
     @Field("deviceId")
-    private Long deviceId;
+    private String deviceId;
 
     /** 设备名称 */
     private String deviceName;
@@ -183,7 +181,7 @@ public class DataQuery212 extends BaseEntity {
         // TODO Auto-generated constructor stub
     }
 
-    public void DeviceData(Long deviceId, String mn, String deviceName,
+    public void DeviceData(String deviceId, String mn, String deviceName,
                            Integer status, Long deptId, String path, Long stationId,
                            String stationName, Date createDate, Date date,
                            Double longitude, Double latitude) {
@@ -201,6 +199,12 @@ public class DataQuery212 extends BaseEntity {
     }
 
     // Getters and Setters
+    public void setId(String id){
+        this.id = id;
+    }
+    public String getId() {
+        return id;
+    }
 
     public String getPm03above() {
         return pm03above;
@@ -269,10 +273,10 @@ public class DataQuery212 extends BaseEntity {
     public void setStationId(Long stationId) {
         this.stationId = stationId;
     }
-    public Long getDeviceId() {
+    public String getDeviceId() {
         return deviceId;
     }
-    public void setDeviceId(Long deviceId) {
+    public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
     }
 
@@ -344,11 +348,11 @@ public class DataQuery212 extends BaseEntity {
     public void setWindDirection(Double windDirection){
         this.windDirection=windDirection;
     }
-    public Double getDust(){
-        return this.dust;
+    public Double getPm2_5(){
+        return this.pm2_5;
     }
-    public void setDust(Double dust){
-        this.dust=dust;
+    public void setPm2_5(Double dust){
+        this.pm2_5=dust;
     }
     public Double getHumidity(){
         return this.humidity;

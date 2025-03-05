@@ -12,7 +12,6 @@ public interface DataQuery212Service {
 
     TableDataInfo selectDataQuery212ListByDeviceId(String deviceId, int page, int size);
 
-
     TableDataInfo selectDataQuery212ListByDate(String date, int page, int size);
 
     TableDataInfo selectDataQuery212ListByDateTimeRange(String startDateTimeStr, String endDateTimeStr, int page, int size);
@@ -21,9 +20,9 @@ public interface DataQuery212Service {
 
     TableDataInfo selectDataQuery212ListByDateTimeRangeAndDeviceId(String deviceId, String startDateTime, String endDateTime, int page, int size);
 
-    TableDataInfo selectDataQuery212ListByDateAndDeviceId(String deviceId, String date, int page, int size);
 
     void exportToExcel(HttpServletResponse response, List<DataQuery212> dataList) throws IOException;
 
     List<Device> listDeviceIdAndName();
+
 }

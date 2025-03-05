@@ -45,7 +45,7 @@ spring:
 
     data:
         mongodb:
-            uri: mongodb://localhost:27017/mongodb
+            uri: mongodb://zytlpure:1QUazLZU@112.126.94.158:28028/?authSource=envcloud_zjk
             options:
                 maxConnectionsPerHost: 100
                 connectTimeoutMS: 10000  # 10秒
@@ -73,3 +73,4 @@ mybatis-plus:
 logging:
     level:
         com.ruoyi.system.mapper: debug
+

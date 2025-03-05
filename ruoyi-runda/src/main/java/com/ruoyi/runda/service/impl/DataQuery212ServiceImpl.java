@@ -1,11 +1,12 @@
 package com.ruoyi.runda.service.impl;
 
+import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.runda.domain.DataQuery212;
 import com.ruoyi.runda.domain.Device;
 import com.ruoyi.runda.mapper.DeviceMapper;
+import com.ruoyi.runda.repository.DataQuery212OVRepository;
 import com.ruoyi.runda.repository.DataQuery212Repository;
 import com.ruoyi.runda.service.DataQuery212Service;
-import com.ruoyi.common.core.page.TableDataInfo;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -18,7 +19,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -29,13 +29,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-
 
 @Service
 public class DataQuery212ServiceImpl implements DataQuery212Service {
@@ -43,43 +40,32 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private static final Logger logger = LoggerFactory.getLogger(DataQuery212ServiceImpl.class);
-    @Autowired
-    private DataQuery212Repository dataQuery212Repository; // 假设你有一个对应的仓库接口
-    @Autowired
-    private RedisTemplate<Object, Object> redisTemplate; // 更改为 <Object, Object>
+
     @Autowired
     private DeviceMapper deviceMapper;
+
+    @Autowired
+    private DataQuery212OVRepository dataQuery212OVRepository;
+
+
     @Override
     public TableDataInfo selectDataQuery212ListByDeviceId(String deviceId, int page, int size) {
         try {
-            // 创建 Pageable 对象时使用正确的类
-            Pageable pageable = PageRequest.of(page - 1, size); // 注意：Spring Data 是0索引的
-
-            // 打印查询条件
-            logger.debug("deviceId: {}", deviceId);
-
-            // 确保 findByStationId 方法签名正确使用 org.springframework.data.domain.Pageable
-            Page<DataQuery212> dataPage = dataQuery212Repository.findByDeviceId(deviceId, pageable);
-
-            // 打印查询到的数据条数
-            logger.debug("Total number of records found: {}", dataPage.getTotalElements());
-
-            // 打印查询到的数据
-            if (logger.isDebugEnabled()) {
-                for (DataQuery212 data : dataPage.getContent()) {
-                    logger.debug("DataQuery212: {}", data);
-                }
-            }
-
+            // 创建分页对象
+            Pageable pageable = PageRequest.of(page - 1, size);
+            logger.debug("Device ID: {}, Page: {}, Size: {}", deviceId, page, size);
+            // 调用 DataQuery212Overwrite 接口的 findByDeviceId 方法，获取转换后的 DataQuery212 数据
+            Page<DataQuery212> dataQuery212Page = dataQuery212OVRepository.findByDeviceId(deviceId, pageable);
+            // 封装返回结果
             TableDataInfo result = new TableDataInfo();
             result.setCode(0);
             result.setMsg("ok");
-            result.setTotal(dataPage.getTotalElements());
-            result.setRows(dataPage.getContent());
+            result.setTotal(dataQuery212Page.getTotalElements());
+            result.setRows(dataQuery212Page.getContent());
 
             return result;
         } catch (Exception e) {
-            logger.error("Error while fetching data", e);
+            // 异常处理
             TableDataInfo errorResult = new TableDataInfo();
             errorResult.setCode(-1);
             errorResult.setMsg(e.getMessage());
@@ -87,37 +73,38 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
         }
     }
 
+
+
     @Cacheable(value = "dataQuery212Cache", key = "#dateStr + '_' + #page + '_' + #size")
-    public TableDataInfo getCachedDataQuery212ListByDate(String dateStr, int page, int size) throws ParseException {
-        return selectDataQuery212ListByDate(dateStr, page, size);
+    public TableDataInfo getCachedDataQuery212ListByDate(String dateStr, int page, int size) {
+        try {
+            long startTimestamp = parseDateToTimestamp(dateStr);
+            long endTimestamp = startTimestamp + 86400000L; // 24小时
+            Page<DataQuery212> dataQuery212Page = dataQuery212OVRepository.findByCreateDateBetween(startTimestamp, endTimestamp, PageRequest.of(page - 1, size));
+            return buildTableDataInfo(dataQuery212Page);
+        } catch (Exception e) {
+            return buildErrorResult(e.getMessage());
+        }
     }
 
     @Override
     public TableDataInfo selectDataQuery212ListByDate(String dateStr, int page, int size) {
         try {
-            // 解析日期字符串
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Date startDate = dateFormat.parse(dateStr);
             long startTimestamp = startDate.getTime();
-
-            // 计算结束时间（当天的最后一毫秒）
             long endTimestamp = startTimestamp + 24 * 60 * 60 * 1000L - 1;
-
-            // 创建 Pageable 对象时使用正确的类
-            Pageable pageable = PageRequest.of(page - 1, size); // 注意：Spring Data 是0索引的
-
-            // 打印查询条件
+            Pageable pageable = PageRequest.of(page - 1, size);
             logger.debug("startTimestamp: {}, endTimestamp: {}", startTimestamp, endTimestamp);
 
-            // 确保 findByCreateDateBetween 方法签名正确使用 org.springframework.data.domain.Pageable
-            Page<DataQuery212> dataPage = dataQuery212Repository.findByCreateDateBetween(startTimestamp, endTimestamp, pageable);
+            // 查询 AirDataResult 数据
+            Page<DataQuery212> dataQuery212Page = dataQuery212OVRepository.findByCreateDateBetween(startTimestamp, endTimestamp, pageable);
 
-            // 打印查询到的数据条数
-            logger.debug("Total number of records found: {}", dataPage.getTotalElements());
 
-            // 打印查询到的数据
+
+            logger.debug("Total number of records found: {}", dataQuery212Page.getTotalElements());
             if (logger.isDebugEnabled()) {
-                for (DataQuery212 data : dataPage.getContent()) {
+                for (DataQuery212 data : dataQuery212Page.getContent()) {
                     logger.debug("DataQuery212: {}", data);
                 }
             }
@@ -125,9 +112,8 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
             TableDataInfo result = new TableDataInfo();
             result.setCode(0);
             result.setMsg("ok");
-            result.setTotal(dataPage.getTotalElements());
-            result.setRows(dataPage.getContent());
-
+            result.setTotal(dataQuery212Page.getTotalElements());
+            result.setRows(dataQuery212Page.getContent());
             return result;
         } catch (ParseException e) {
             logger.error("Error parsing date", e);
@@ -144,14 +130,15 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
         }
     }
 
+
     public void exportToExcel(HttpServletResponse response, List<DataQuery212> dataList) throws IOException {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Data");
 
         // 创建标题行
         Row headerRow = sheet.createRow(0);
-        String[] headers = {"DeviceId", "DeviceName","StationId","StationName", "sn","temperature","humidity","windSpeed","windDirectionString",
-                "pressure","dust","pm10","longitude","latitude","aqi","primaryPollutant","CreateDate","DeptId"};
+        String[] headers = {"DeviceId", "DeviceName", "StationId", "StationName", "sn", "temperature", "humidity", "windSpeed", "windDirectionString",
+                "pressure", "dust", "pm10", "longitude", "latitude", "aqi", "primaryPollutant", "CreateDate", "DeptId"};
         for (int i = 0; i < headers.length; i++) {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(headers[i]);
@@ -171,7 +158,7 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
             row.createCell(7).setCellValue(data.getWindSpeed() != null ? data.getWindSpeed().toString() : "");
             row.createCell(8).setCellValue(data.getWindDirectionString() != null ? data.getWindDirectionString() : "");
             row.createCell(9).setCellValue(data.getPressure() != null ? data.getPressure().toString() : "");
-            row.createCell(10).setCellValue(data.getDust() != null ? data.getDust().toString() : "");
+            row.createCell(10).setCellValue(data.getPm2_5() != null ? data.getPm2_5().toString() : "");
             row.createCell(11).setCellValue(data.getPm10() != null ? data.getPm10().toString() : "");
             row.createCell(12).setCellValue(data.getLongitude() != null ? data.getLongitude().toString() : "");
             row.createCell(13).setCellValue(data.getLatitude() != null ? data.getLatitude().toString() : "");
@@ -179,8 +166,6 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
             row.createCell(15).setCellValue(data.getPrimaryPollutant() != null ? data.getPrimaryPollutant() : "");
             row.createCell(16).setCellValue(data.getCreateDate() != null ? data.getCreateDate().toString() : "");
             row.createCell(17).setCellValue(data.getDeptId());
-
-
         }
 
         // 自动调整列宽
@@ -204,6 +189,7 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
         return deviceMapper.selectIdAndName();
     }
 
+
     @Override
     public TableDataInfo selectDataQuery212ListByDateTimeRange(String startDateTimeStr, String endDateTimeStr, int page, int size) {
         try {
@@ -214,21 +200,17 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
             long startTimestamp = startDate.getTime();
             long endTimestamp = endDate.getTime();
 
-            // 创建 Pageable 对象时使用正确的类
-            Pageable pageable = PageRequest.of(page - 1, size); // 注意：Spring Data 是0索引的
-
-            // 打印查询条件
+            Pageable pageable = PageRequest.of(page - 1, size);
             logger.debug("startTimestamp: {}, endTimestamp: {}", startTimestamp, endTimestamp);
 
-            // 确保 findByCreateDateBetween 方法签名正确使用 org.springframework.data.domain.Pageable
-            Page<DataQuery212> dataPage = dataQuery212Repository.findByCreateDateBetween(startTimestamp, endTimestamp, pageable);
 
-            // 打印查询到的数据条数
-            logger.debug("Total number of records found: {}", dataPage.getTotalElements());
+            Page<DataQuery212> dataQuery212Page = dataQuery212OVRepository.findByCreateDateBetween(startTimestamp, endTimestamp, pageable);
 
-            // 打印查询到的数据
+
+
+            logger.debug("Total number of records found: {}", dataQuery212Page.getTotalElements());
             if (logger.isDebugEnabled()) {
-                for (DataQuery212 data : dataPage.getContent()) {
+                for (DataQuery212 data : dataQuery212Page.getContent()) {
                     logger.debug("DataQuery212: {}", data);
                 }
             }
@@ -236,9 +218,8 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
             TableDataInfo result = new TableDataInfo();
             result.setCode(0);
             result.setMsg("ok");
-            result.setTotal(dataPage.getTotalElements());
-            result.setRows(dataPage.getContent());
-
+            result.setTotal(dataQuery212Page.getTotalElements());
+            result.setRows(dataQuery212Page.getContent());
             return result;
         } catch (ParseException e) {
             logger.error("Error parsing date time", e);
@@ -255,28 +236,24 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
         }
     }
 
+
     @Override
     public List<DataQuery212> fetchLatestData() {
         try {
             Instant now = Instant.now();
             Instant fiveMinutesAgo = now.minus(Duration.ofMinutes(5));
 
-            // 设置每页大小
-            int pageSize = 10; // 每页10条数据
-            int pageNumber = 0; // 从第一页开始
+            int pageSize = 10;
+            int pageNumber = 0;
 
             List<DataQuery212> newData = new ArrayList<>();
 
             while (true) {
-                // 创建 Pageable 对象
                 Pageable pageable = PageRequest.of(pageNumber, pageSize);
+                Page<DataQuery212> dataQuery212Page = dataQuery212OVRepository.findByCreateDateBetween(fiveMinutesAgo.toEpochMilli(), now.toEpochMilli(), pageable);
 
-                // 查询最近5分钟的数据
-                Page<DataQuery212> newDataPage = dataQuery212Repository.findByCreateDateBetween(fiveMinutesAgo.toEpochMilli(), now.toEpochMilli(), pageable);
-                newData.addAll(newDataPage.getContent());
 
-                // 检查是否有更多数据
-                if (!newDataPage.hasNext()) {
+                if (!dataQuery212Page.hasNext()) {
                     break;
                 }
                 pageNumber++;
@@ -289,14 +266,17 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
                 latestData.addAll(newData);
             }
 
-            return new ArrayList<>(latestData); // 返回一个新的列表副本，避免外部修改
+            return new ArrayList<>(latestData);
         } catch (Exception e) {
             logger.error("Error fetching latest data", e);
-            return Collections.emptyList(); // 返回空列表以避免脏数据
+            return Collections.emptyList();
         }
     }
 
-    @Scheduled(fixedRate = 300000) // 每5分钟执行一次
+
+
+
+    @Scheduled(fixedRate = 300000)
     public void scheduledFetchAndAppendData() {
         try {
             logger.info("Starting scheduled fetch and append data task...");
@@ -307,6 +287,7 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
         }
     }
 
+    @Override
     public TableDataInfo selectDataQuery212ListByDateTimeRangeAndDeviceId(
             String deviceId,
             String startDateTimeStr,
@@ -322,21 +303,18 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
             long startTimestamp = startDate.getTime();
             long endTimestamp = endDate.getTime();
 
-            // 创建 Pageable 对象时使用正确的类
-            Pageable pageable = PageRequest.of(page - 1, size); // 注意：Spring Data 是0索引的
-
-            // 打印查询条件
+            Pageable pageable = PageRequest.of(page - 1, size);
             logger.debug("deviceId: {}, startTimestamp: {}, endTimestamp: {}", deviceId, startTimestamp, endTimestamp);
 
-            // 调用新增的组合查询方法
-            Page<DataQuery212> dataPage = dataQuery212Repository.findByDeviceIdAndCreateDateBetween(deviceId, startTimestamp, endTimestamp, pageable);
+
+            Page<DataQuery212> dataQuery212Page = dataQuery212OVRepository.findByDeviceIdAndCreateDateBetween(deviceId, startTimestamp, endTimestamp, pageable);
 
             // 打印查询到的数据条数
-            logger.debug("Total number of records found: {}", dataPage.getTotalElements());
+            logger.debug("Total number of records found: {}", dataQuery212Page.getTotalElements());
 
             // 打印查询到的数据
             if (logger.isDebugEnabled()) {
-                for (DataQuery212 data : dataPage.getContent()) {
+                for (DataQuery212 data : dataQuery212Page.getContent()) {
                     logger.debug("DataQuery212: {}", data);
                 }
             }
@@ -344,15 +322,15 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
             TableDataInfo result = new TableDataInfo();
             result.setCode(0);
             result.setMsg("ok");
-            result.setTotal(dataPage.getTotalElements());
-            result.setRows(dataPage.getContent());
+            result.setTotal(dataQuery212Page.getTotalElements());
+            result.setRows(dataQuery212Page.getContent());
 
             return result;
         } catch (ParseException e) {
-            logger.error("Error parsing date time", e);
+            logger.error("Error parsing date", e);
             TableDataInfo errorResult = new TableDataInfo();
             errorResult.setCode(-1);
-            errorResult.setMsg("Invalid date time format. Please use yyyy-MM-dd HH:mm.");
+            errorResult.setMsg("Invalid date format. Please use yyyy-MM-dd HH:mm.");
             return errorResult;
         } catch (Exception e) {
             logger.error("Error while fetching data", e);
@@ -363,60 +341,28 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
         }
     }
 
-    public TableDataInfo selectDataQuery212ListByDateAndDeviceId(
-            String deviceId,
-            String dateStr,
-            int page,
-            int size) {
+    // 构建成功响应
+    private TableDataInfo buildTableDataInfo(Page<DataQuery212> dataQuery212Page) {
+        TableDataInfo result = new TableDataInfo();
+        result.setCode(0);
+        result.setMsg("ok");
+        result.setTotal(dataQuery212Page.getTotalElements());
+        result.setRows(dataQuery212Page.getContent());
+        return result;
+    }
 
-        try {
-            // 解析日期字符串
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            Date startDate = dateFormat.parse(dateStr);
-            long startTimestamp = startDate.getTime();
+    // 构建错误响应
+    private TableDataInfo buildErrorResult(String errorMessage) {
+        TableDataInfo result = new TableDataInfo();
+        result.setCode(-1);
+        result.setMsg(errorMessage);
+        return result;
+    }
 
-            // 计算结束时间（当天的最后一毫秒）
-            long endTimestamp = startTimestamp + 24 * 60 * 60 * 1000L - 1;
-
-            // 创建 Pageable 对象时使用正确的类
-            Pageable pageable = PageRequest.of(page - 1, size); // 注意：Spring Data 是0索引的
-
-            // 打印查询条件
-            logger.debug("deviceId: {}, startTimestamp: {}, endTimestamp: {}", deviceId, startTimestamp, endTimestamp);
-
-            // 调用新增的组合查询方法
-            Page<DataQuery212> dataPage = dataQuery212Repository.findByDeviceIdAndCreateDateBetween(deviceId, startTimestamp, endTimestamp, pageable);
-
-            // 打印查询到的数据条数
-            logger.debug("Total number of records found: {}", dataPage.getTotalElements());
-
-            // 打印查询到的数据
-            if (logger.isDebugEnabled()) {
-                for (DataQuery212 data : dataPage.getContent()) {
-                    logger.debug("DataQuery212: {}", data);
-                }
-            }
-
-            TableDataInfo result = new TableDataInfo();
-            result.setCode(0);
-            result.setMsg("ok");
-            result.setTotal(dataPage.getTotalElements());
-            result.setRows(dataPage.getContent());
-
-            return result;
-        } catch (ParseException e) {
-            logger.error("Error parsing date", e);
-            TableDataInfo errorResult = new TableDataInfo();
-            errorResult.setCode(-1);
-            errorResult.setMsg("Invalid date format. Please use yyyy-MM-dd.");
-            return errorResult;
-        } catch (Exception e) {
-            logger.error("Error while fetching data", e);
-            TableDataInfo errorResult = new TableDataInfo();
-            errorResult.setCode(-1);
-            errorResult.setMsg(e.getMessage());
-            return errorResult;
-        }
+    // 将日期字符串解析为时间戳
+    private long parseDateToTimestamp(String dateStr) {
+        // 实现日期解析逻辑
+        return 0L;
     }
 }
 

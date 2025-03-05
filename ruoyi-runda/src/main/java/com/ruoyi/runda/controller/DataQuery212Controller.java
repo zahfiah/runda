@@ -137,21 +137,13 @@ public class DataQuery212Controller extends BaseController {
         dataQuery212Service.exportToExcel(response, dataList);
     }
 
-    @GetMapping("/listByDateAndDeviceId")
-    public TableDataInfo listByDateAndDeviceId(
-            @RequestParam("deviceId") String deviceId,
-            @RequestParam("date") String date,
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) {
 
-        return dataQuery212Service.selectDataQuery212ListByDateAndDeviceId(deviceId, date, page, size);
-    }
 
-    //查询设备id与设备名称
     @GetMapping("/listDeviceIdAndName")
     public List<Device> listDeviceIdAndName(){
         return dataQuery212Service.listDeviceIdAndName();
     }
+
 }
 
 

@@ -8,13 +8,14 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * 大气环境监测数据实体类
  */
-@Document(collection = "devicedata")
-public class AirDataHour {
+@Document(collection = "deviceairdata")
+public class AirDataHour implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id

@@ -2,21 +2,12 @@
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="85px">
       <el-form-item label="设备" prop="deviceId" label-width="45px">
-        <el-select v-model="queryParams.deviceId" placeholder="请选择设备" clearable @change="handleDeviceChange">
+        <el-select v-model="queryParams.deviceId" placeholder="请选择设备" clearable @change="handleDeviceChange" filterable>
           <el-option v-for="device in deviceOptions" :key="device.deviceId" :label="device.deviceName"
             :value="device.deviceId" />
         </el-select>
       </el-form-item>
 
-      <!-- 删除: <el-form-item label="时间类型" prop="timeType">
-        <el-select
-          v-model="queryParams.timeType"
-          placeholder="请选择时间类型"
-          @change="handleTimeTypeChange"
-        >
-          <el-option label="起止时间（小时）" value="hour" />
-        </el-select>
-      </el-form-item> -->
 
       <!-- 小时类型的选择器 -->
       <template v-if="queryParams.timeType === 'hour'">
@@ -505,5 +496,3 @@ export default {
   }
 };
 </script>
-
-
