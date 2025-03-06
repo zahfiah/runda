@@ -25,4 +25,5 @@ public interface DataQuery212Service {
 
     List<Device> listDeviceIdAndName();
 
+    TableDataInfo selectDataQuery212ListByDateAndDeviceId(String deviceId, String date, int page, int size);
 }

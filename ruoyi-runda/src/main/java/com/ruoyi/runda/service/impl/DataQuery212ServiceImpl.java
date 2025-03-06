@@ -189,7 +189,61 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
         return deviceMapper.selectIdAndName();
     }
 
+    @Override
+    public TableDataInfo selectDataQuery212ListByDateAndDeviceId(String deviceId, String date, int page, int size) {
+        try {
+            // 检查 page 和 size 的有效性
+            if (page <= 0 || size <= 0) {
+                return createErrorResult("Invalid page or size parameters");
+            }
 
+            // 使用线程安全的日期时间类
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate localDate = LocalDate.parse(date, formatter);
+            LocalDate startDate = localDate.atStartOfDay().toLocalDate();
+            LocalDate endDate = localDate.plusDays(1).atStartOfDay().toLocalDate();
+
+            long startTimestamp = startDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
+            long endTimestamp = endDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
+
+            Pageable pageable = PageRequest.of(page - 1, size);
+            logger.debug("deviceId: {}, startTimestamp: {}, endTimestamp: {}", deviceId, startTimestamp, endTimestamp);
+
+            Page<DataQuery212> dataQuery212Page = dataQuery212OVRepository.findByDeviceIdAndCreateDateBetween(deviceId, startTimestamp, endTimestamp, pageable);
+
+            // 打印查询到的数据条数
+            logger.debug("Total number of records found: {}", dataQuery212Page.getTotalElements());
+
+            // 打印查询到的数据
+            if (logger.isDebugEnabled()) {
+                for (DataQuery212 data : dataQuery212Page.getContent()) {
+                    logger.debug("DataQuery212: {}", data);
+                }
+            }
+
+            TableDataInfo result = new TableDataInfo();
+            result.setCode(0);
+            result.setMsg("ok");
+            result.setTotal(dataQuery212Page.getTotalElements());
+            result.setRows(dataQuery212Page.getContent());
+
+            return result;
+        } catch (DateTimeParseException e) {
+            logger.error("Error parsing date", e);
+            return createErrorResult("Invalid date format. Please use yyyy-MM-dd.");
+        } catch (Exception e) {
+            logger.error("Error while fetching data", e);
+            return createErrorResult(e.getMessage());
+        }
+
+    }
+
+    private TableDataInfo createErrorResult(String msg) {
+        TableDataInfo errorResult = new TableDataInfo();
+        errorResult.setCode(-1);
+        errorResult.setMsg(msg);
+        return errorResult;
+    }
     @Override
     public TableDataInfo selectDataQuery212ListByDateTimeRange(String startDateTimeStr, String endDateTimeStr, int page, int size) {
         try {
