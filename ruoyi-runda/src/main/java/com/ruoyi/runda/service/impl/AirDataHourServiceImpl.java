@@ -104,6 +104,8 @@ public class AirDataHourServiceImpl implements AirDataHourService {
 
     @Override
     @Transactional
+    //每小时自动执行一次
+//    @Scheduled(cron = "0 0 * * * ?")
     public TableDataInfo calculateAverageForSpecificDateTime(String dateTimeStr) throws Exception {
         SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         dateTimeFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai")); // 明确指定时区
@@ -500,6 +502,7 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             hourlyAverageAirData.setPrimaryPollutant((String) row.get("primaryPollutant"));
             hourlyAverageAirData.setDeviceName((String) row.get("deviceName"));
             hourlyAverageAirData.setStationName((String) row.get("stationName"));
+//            hourlyAverageAirData.setCreatedAt(createAt);
 
             // 数据校准逻辑
             String deptId = (String) row.get("deptId");
@@ -584,7 +587,7 @@ public class AirDataHourServiceImpl implements AirDataHourService {
 
         Double pm10 = data.getAveragePm10();
         logger.info("PM10 before calibration: {}", pm10);
-
+//        Date date =data.getCreatedAt();
         List<DataQueryCountry> queryCountries = dataQueryCountryMapper.selectDataQueryCountryByName(controlStation);
 
         DataQueryCountry queryCountry = queryCountries.stream()

@@ -77,6 +77,8 @@ public class DataQuery212OverwriteImpl implements DataQuery212OVRepository {
         dataQuery212.setDeviceId(airDataResult.getDeviceId());
         dataQuery212.setDeviceName(airDataResult.getDeviceName());
         dataQuery212.setStationName(airDataResult.getStationName());
+        dataQuery212.setLatitude(airDataResult.getLatitude());
+        dataQuery212.setLongitude(airDataResult.getLongitude());
 
         // 处理 cp 字段
         Map<String, String> cpMap = parseCp(airDataResult.getCp());
