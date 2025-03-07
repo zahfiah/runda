@@ -27,9 +27,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -91,6 +89,7 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
     public TableDataInfo selectDataQuery212ListByDate(String dateStr, int page, int size) {
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai")); // 明确指定时区
             Date startDate = dateFormat.parse(dateStr);
             long startTimestamp = startDate.getTime();
             long endTimestamp = startTimestamp + 24 * 60 * 60 * 1000L - 1;
@@ -198,13 +197,14 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
             }
 
             // 使用线程安全的日期时间类
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate localDate = LocalDate.parse(date, formatter);
-            LocalDate startDate = localDate.atStartOfDay().toLocalDate();
-            LocalDate endDate = localDate.plusDays(1).atStartOfDay().toLocalDate();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.of("Asia/Shanghai"));
+            LocalDate localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            ZonedDateTime startOfDay = localDate.atStartOfDay(ZoneId.of("Asia/Shanghai"));
+            ZonedDateTime endOfDay = localDate.plusDays(1).atStartOfDay(ZoneId.of("Asia/Shanghai"));
 
-            long startTimestamp = startDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
-            long endTimestamp = endDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
+            long startTimestamp = startOfDay.toInstant().toEpochMilli();
+            long endTimestamp = endOfDay.toInstant().toEpochMilli();
+
 
             Pageable pageable = PageRequest.of(page - 1, size);
             logger.debug("deviceId: {}, startTimestamp: {}, endTimestamp: {}", deviceId, startTimestamp, endTimestamp);
@@ -248,6 +248,7 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
     public TableDataInfo selectDataQuery212ListByDateTimeRange(String startDateTimeStr, String endDateTimeStr, int page, int size) {
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai")); // 明确指定时区
             Date startDate = dateFormat.parse(startDateTimeStr);
             Date endDate = dateFormat.parse(endDateTimeStr);
 
@@ -351,6 +352,7 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
 
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai")); // 明确指定时区
             Date startDate = dateFormat.parse(startDateTimeStr);
             Date endDate = dateFormat.parse(endDateTimeStr);
 

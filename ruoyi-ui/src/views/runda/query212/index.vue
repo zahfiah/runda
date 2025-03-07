@@ -124,7 +124,7 @@
       </el-form-item>
     </el-form>
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="primary"
           plain
@@ -134,7 +134,7 @@
           v-hasPermi="['runda:query:add']"
           >新增</el-button
         >
-      </el-col>
+      </el-col> -->
 
       <el-col :span="1.5">
         <el-button
@@ -161,19 +161,14 @@
       <el-table-column type="selection" width="35" align="center" />
       <!-- <el-table-column label="主键id" align="center" prop="id" /> -->
       <el-table-column label="设备名称" align="center" prop="deviceName" />
-      <el-table-column
-        label="日期"
-        align="center"
-        prop="createDate"
-        width="100"
-      >
+      <el-table-column label="日期" align="center" prop="date" width="100">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.createDate) }}</span>
+          <span>{{ parseTime(scope.row.date) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="空气质量指数" align="center" prop="aqi" />
+      <el-table-column label="aqi" align="center" prop="aqi" />
       <!-- <el-table-column label="pm2.5(μg/m)" align="center" prop="pm" /> -->
-      <el-table-column label="PM2.5(μg/m³)" align="center" prop="dust">
+      <el-table-column label="PM2.5(μg/m³)" align="center" prop="pm2_5">
         <template slot="header">
           <div
             style="display: flex; flex-direction: column; align-items: center"
@@ -246,7 +241,7 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="vocs浓度" align="center" prop="voc">
+      <!-- <el-table-column label="vocs浓度" align="center" prop="voc">
         <template slot="header">
           <div
             style="display: flex; flex-direction: column; align-items: center"
@@ -257,7 +252,7 @@
             <span style="margin-top: 2px">(mg/m³)</span>
           </div>
         </template>
-      </el-table-column>
+      </el-table-column> -->
 
       <el-table-column label="噪音" align="center" prop="noise" />
       <el-table-column label="风速(m/s)" align="scenter" prop="windSpeed" />
@@ -618,6 +613,8 @@ export default {
             deviceId: row.id,
             deviceName: row.name,
           }));
+          // 对设备列表进行倒序排序
+          this.deviceOptions.sort((a, b) => b.deviceId - a.deviceId);
 
           console.log("找到的所有设备：", this.deviceOptions);
 
@@ -709,6 +706,7 @@ export default {
           },
         })
           .then((response) => {
+            console.log("查询结果:", response);
             this.handleResponse(response);
           })
           .catch((error) => {
