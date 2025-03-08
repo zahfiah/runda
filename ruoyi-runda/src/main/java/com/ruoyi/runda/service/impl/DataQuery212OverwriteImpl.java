@@ -63,6 +63,7 @@ public class DataQuery212OverwriteImpl implements DataQuery212OVRepository {
         List<DataQuery212> dataQuery212List = airDataResultPage.getContent().stream()
                 .map(this::convertAirDataResultToDataQuery212)
                 .collect(Collectors.toList());
+        getAqiDeviceDataExtends(dataQuery212List);
         return new PageImpl<>(dataQuery212List, pageable, airDataResultPage.getTotalElements());
     }
 
@@ -409,5 +410,462 @@ public class DataQuery212OverwriteImpl implements DataQuery212OVRepository {
             return null;
         }
     }
+    public final static List<PollutantLimits> list=new ArrayList<PollutantLimits>();
+    static{
+        PollutantLimits p1=new PollutantLimits(0,0,0,0,0,0,0,0,0,0,0);
+        PollutantLimits p2=new PollutantLimits(50,50,150,40,100,50,2,5,160,100,35);
+        PollutantLimits p3=new PollutantLimits(100,150,500,80,200,150,4,10,200,160,75);
+        PollutantLimits p4=new PollutantLimits(150,475,650,180,700,250,14,35,300,215,115);
+        PollutantLimits p5=new PollutantLimits(200,800,800,280,1200,350,24,60,400,265,150);
+        PollutantLimits p6=new PollutantLimits(300,1600,null,565,2340,420,36,90,800,800,250);
+        PollutantLimits p7=new PollutantLimits(400,2100,null,750,3090,500,48,120,1000,null,350);
+        PollutantLimits p8=new PollutantLimits(500,2620,null,940,3840,600,60,150,1200,null,500);
+        list.add(p1);list.add(p2);list.add(p3);list.add(p4);
+        list.add(p5);list.add(p6);list.add(p7);list.add(p8);
+    }
+
+    public static void getAqiDeviceDataExtends(List<DataQuery212> data) {
+        if (data == null || data.isEmpty() || list == null || list.isEmpty()) {
+            return;
+        }
+        for (DataQuery212 devicedate : data) {
+            //臭氧8小时浓度
+            Integer o38 =  0;//已算
+            //臭氧1小时浓度
+            Double o3 = devicedate.getCo3Thickness();//已算
+            //一氧化碳浓度
+            Double co = devicedate.getCoThickness();  //已算
+            //pm10 浓度
+            Double pm10 = devicedate.getPm10();      //已算
+            //pm25浓度
+            Double pm25 = devicedate.getPm2_5();      //已算
+            //二氧化硫1小时浓度
+            Double so2 = devicedate.getSo2Thickness();   //已算
+            //二氧化硫24小时浓度
+            Integer so2_24h = 0;//so2 24小时浓度
+            //二氧化氮浓度
+            Double no2 = devicedate.getNo2Thickness();    //已算
+
+            Double so2iaqi = 0d, so2_24iaqi = 0d, no2iaqi = 0d, coiaqi = 0d, pm25iaqi = 0d, pm10iaqi = 0d, o3iaqi = 0d, o31iaqi = 0d;
+            Double maxV = 0d;//最大的aqi值
+            String primaryPollutant = "";//首要污染物
+            String excessivePollutant = "";//超标污染污
+            int size = list.size();
+            for (int i = 1; i < size; i++) {
+                PollutantLimits limitMax = list.get(size - 1);
+                PollutantLimits limitMin = list.get(size - 2);
+                PollutantLimits limits = list.get(i);
+                PollutantLimits prelimits = list.get(i - 1);
+                if (so2_24h != 0 && so2_24iaqi == 0) {
+                    if (so2_24h > limitMax.getSo224()) {
+                        limits = limitMax;
+                        prelimits = limitMin;
+                        so2_24iaqi = (limits.getIaqi() - prelimits.getIaqi()) / (limits.getSo224() * 1.00 - prelimits.getSo224() * 1.00) * (so2_24h - prelimits.getSo224()) + prelimits.getIaqi();
+                    }
+                    if (limits.getSo224() >= so2_24h) {
+                        so2_24iaqi = (limits.getIaqi() - prelimits.getIaqi()) / (limits.getSo224() * 1.00 - prelimits.getSo224() * 1.00) * (so2_24h - prelimits.getSo224()) + prelimits.getIaqi();
+                    }
+                    if (so2 > 800) {
+                        if (so2_24iaqi > maxV) {
+                            primaryPollutant = "SO2,";
+                            maxV = so2_24iaqi;
+                        } else if (so2_24iaqi == maxV) {
+                            primaryPollutant += "SO2,";
+                        }
+                        if (so2_24iaqi > 100) {
+                            excessivePollutant += "SO2,";
+                        }
+                    }
+                }
+                if (so2 != 0 && so2 <= 800 && limits.getSo21() != null && so2iaqi == 0) {
+                    so2iaqi = (limits.getIaqi() - prelimits.getIaqi()) / (limits.getSo21() * 1.00 - prelimits.getSo21() * 1.00) * (so2 - prelimits.getSo21()) + prelimits.getIaqi();
+                    if (so2iaqi > maxV) {
+                        primaryPollutant = "SO2,";
+                        maxV = so2iaqi;
+                    } else if (so2iaqi == maxV) {
+                        primaryPollutant += "SO2,";
+                    }
+                    if (so2iaqi > 100) {
+                        excessivePollutant += "SO2,";
+                    }
+                }
+                if (no2 != 0 && limits.getNo21() != null && no2iaqi == 0) {
+                    if (no2 > limitMax.getNo21()) {
+                        limits = limitMax;
+                        prelimits = limitMin;
+                        no2iaqi = (limits.getIaqi() - prelimits.getIaqi()) / (limits.getNo21() * 1.00 - prelimits.getNo21() * 1.00) * (no2 - prelimits.getNo21()) + prelimits.getIaqi();
+                    }
+                    if (limits.getNo21() >= no2) {
+                        no2iaqi = (limits.getIaqi() - prelimits.getIaqi()) / (limits.getNo21() * 1.00 - prelimits.getNo21() * 1.00) * (no2 - prelimits.getNo21()) + prelimits.getIaqi();
+                    }
+
+                    if (no2iaqi > maxV) {
+                        primaryPollutant = "NO2,";
+                        maxV = no2iaqi;
+                    } else if (no2iaqi == maxV) {
+                        primaryPollutant += "NO2,";
+                    }
+                    if (no2iaqi > 100) {
+                        excessivePollutant += "NO2,";
+                    }
+                }
+                if (co != 0 && limits.getCo1() != null && coiaqi == 0) {
+                    if (co > limitMax.getCo1()) {
+                        limits = limitMax;
+                        prelimits = limitMin;
+                        coiaqi = (limits.getIaqi() - prelimits.getIaqi()) / (limits.getCo1() * 1.00 - prelimits.getCo1() * 1.00) * (co - prelimits.getCo1()) + prelimits.getIaqi();
+                    }
+                    if (limits.getCo1() >= co) {
+                        coiaqi = (limits.getIaqi() - prelimits.getIaqi()) / (limits.getCo1() * 1.00 - prelimits.getCo1() * 1.00) * (co - prelimits.getCo1()) + prelimits.getIaqi();
+                    }
+
+                    if (coiaqi > maxV) {
+                        primaryPollutant = "CO,";
+                        maxV = coiaqi;
+                    } else if (coiaqi == maxV) {
+                        primaryPollutant += "CO,";
+                    }
+                    if (coiaqi > 100) {
+                        excessivePollutant += "CO,";
+                    }
+                }
+                if (pm25 != 0 && limits.getPm25() != null && pm25iaqi == 0) {
+
+                    if (pm25 > limitMax.getPm25()) {
+                        limits = limitMax;
+                        prelimits = limitMin;
+                        pm25iaqi = (limits.getIaqi() - prelimits.getIaqi()) / (limits.getPm25() * 1.00 - prelimits.getPm25() * 1.00) * (pm25 - prelimits.getPm25()) + prelimits.getIaqi();
+                    }
+                    if (limits.getPm25() >= pm25) {
+                        pm25iaqi = (limits.getIaqi() - prelimits.getIaqi()) / (limits.getPm25() * 1.00 - prelimits.getPm25() * 1.00) * (pm25 - prelimits.getPm25()) + prelimits.getIaqi();
+                    }
+                    if (pm25iaqi > maxV) {
+                        primaryPollutant = "PM25,";
+                        maxV = pm25iaqi;
+                    } else if (pm25iaqi == maxV) {
+                        primaryPollutant += "PM25,";
+                    }
+                    if (pm25iaqi > 100) {
+                        excessivePollutant += "PM25,";
+                    }
+                }
+                if (pm10 != 0 && limits.getPm10() != null && pm10iaqi == 0) {
+                    if (pm10 > limitMax.getPm10()) {
+                        limits = limitMax;
+                        prelimits = limitMin;
+                        pm10iaqi = (limits.getIaqi() - prelimits.getIaqi()) / (limits.getPm10() * 1.00 - prelimits.getPm10() * 1.00) * (pm10 - prelimits.getPm10()) + prelimits.getIaqi();
+                    }
+                    if (limits.getPm10() >= pm10) {
+                        pm10iaqi = (limits.getIaqi() - prelimits.getIaqi()) / (limits.getPm10() * 1.00 - prelimits.getPm10() * 1.00) * (pm10 - prelimits.getPm10()) + prelimits.getIaqi();
+                    }
+                    if (pm10iaqi > maxV) {
+                        primaryPollutant = "PM10,";
+                        maxV = pm10iaqi;
+                    } else if (pm10iaqi == maxV) {
+                        primaryPollutant += "PM10,";
+                    }
+                    if (pm10iaqi > 100) {
+                        excessivePollutant += "PM10,";
+                    }
+                }
+                if (o3 != 0 && limits.getO31() != null && o31iaqi == 0) {
+                    if (o3 > limitMax.getO31()) {
+                        limits = limitMax;
+                        prelimits = limitMin;
+                        o31iaqi = (limits.getIaqi() - prelimits.getIaqi()) / (limits.getO31() * 1.00 - prelimits.getO31() * 1.00) * (o3 - prelimits.getO31()) + prelimits.getIaqi();
+                    }
+                    if (limits.getO31() >= o3) {
+                        o31iaqi = (limits.getIaqi() - prelimits.getIaqi()) / (limits.getO31() * 1.00 - prelimits.getO31() * 1.00) * (o3 - prelimits.getO31()) + prelimits.getIaqi();
+                    }
+
+                    if (o31iaqi > maxV) {
+                        primaryPollutant = "O3,";
+                        maxV = o31iaqi;
+                    } else if (o31iaqi == maxV) {
+                        primaryPollutant += "O3,";
+                    }
+                    if (o31iaqi > 100) {
+                        excessivePollutant += "O3,";
+                    }
+
+                }
+                if (o38 != 0 && o38 <= 800 && limits.getO38() != null && limits.getO38() >= o38 && o3iaqi == 0) {
+                    o3iaqi = (limits.getIaqi() - prelimits.getIaqi()) / (limits.getO38() * 1.00 - prelimits.getO38() * 1.00) * (o38 - prelimits.getO38()) + prelimits.getIaqi();
+                }
+            }
+            devicedate.setAqi(maxV);
+        }
+    }
+
+
 }
 
+class PollutantLimits implements java.io.Serializable {
+    /** 版本号 */
+    private static final long serialVersionUID = 7788062090935260781L;
+
+    public PollutantLimits() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+    public PollutantLimits(Integer iaqi, Integer so224, Integer so21,
+                           Integer no224, Integer no21, Integer pm10, Integer co24,
+                           Integer co1, Integer o31, Integer o38, Integer pm25) {
+        super();
+        this.iaqi = iaqi;
+        this.so224 = so224;
+        this.so21 = so21;
+        this.no224 = no224;
+        this.no21 = no21;
+        this.pm10 = pm10;
+        this.co24 = co24;
+        this.co1 = co1;
+        this.o31 = o31;
+        this.o38 = o38;
+        this.pm25 = pm25;
+    }
+
+
+    /** 空气质量分指数 */
+    private Integer iaqi;
+
+    /** 二氧化硫24小时限值 */
+    private Integer so224;
+
+    /** 二氧化硫1小时限值 */
+    private Integer so21;
+
+    /** 二氧化氮24小时限值 */
+    private Integer no224;
+
+    /** 二氧化氮1小时限值 */
+    private Integer no21;
+
+    /** pm10限值 */
+    private Integer pm10;
+
+    /** 一氧化碳24小时限值 */
+    private Integer co24;
+
+    /** 一氧化碳1小时限值 */
+    private Integer co1;
+
+    /** 臭氧1小时限值 */
+    private Integer o31;
+
+    /** 臭氧8小时限值 */
+    private Integer o38;
+
+    /** pm2.5限值 */
+    private Integer pm25;
+
+    /**
+     * 获取空气质量分指数
+     *
+     * @return 空气质量分指数
+     */
+    public Integer getIaqi() {
+        return this.iaqi;
+    }
+
+    /**
+     * 设置空气质量分指数
+     *
+     * @param iaqi
+     *          空气质量分指数
+     */
+    public void setIaqi(Integer iaqi) {
+        this.iaqi = iaqi;
+    }
+
+    /**
+     * 获取二氧化硫24小时限值
+     *
+     * @return 二氧化硫24小时限值
+     */
+    public Integer getSo224() {
+        return this.so224;
+    }
+
+    /**
+     * 设置二氧化硫24小时限值
+     *
+     * @param so224
+     *          二氧化硫24小时限值
+     */
+    public void setSo224(Integer so224) {
+        this.so224 = so224;
+    }
+
+    /**
+     * 获取二氧化硫1小时限值
+     *
+     * @return 二氧化硫1小时限值
+     */
+    public Integer getSo21() {
+        return this.so21;
+    }
+
+    /**
+     * 设置二氧化硫1小时限值
+     *
+     * @param so21
+     *          二氧化硫1小时限值
+     */
+    public void setSo21(Integer so21) {
+        this.so21 = so21;
+    }
+
+    /**
+     * 获取二氧化氮24小时限值
+     *
+     * @return 二氧化氮24小时限值
+     */
+    public Integer getNo224() {
+        return this.no224;
+    }
+
+    /**
+     * 设置二氧化氮24小时限值
+     *
+     * @param no224
+     *          二氧化氮24小时限值
+     */
+    public void setNo224(Integer no224) {
+        this.no224 = no224;
+    }
+
+    /**
+     * 获取二氧化氮1小时限值
+     *
+     * @return 二氧化氮1小时限值
+     */
+    public Integer getNo21() {
+        return this.no21;
+    }
+
+    /**
+     * 设置二氧化氮1小时限值
+     *
+     * @param no21
+     *          二氧化氮1小时限值
+     */
+    public void setNo21(Integer no21) {
+        this.no21 = no21;
+    }
+
+    /**
+     * 获取pm10限值
+     *
+     * @return pm10限值
+     */
+    public Integer getPm10() {
+        return this.pm10;
+    }
+
+    /**
+     * 设置pm10限值
+     *
+     * @param pm10
+     *          pm10限值
+     */
+    public void setPm10(Integer pm10) {
+        this.pm10 = pm10;
+    }
+
+    /**
+     * 获取一氧化碳24小时限值
+     *
+     * @return 一氧化碳24小时限值
+     */
+    public Integer getCo24() {
+        return this.co24;
+    }
+
+    /**
+     * 设置一氧化碳24小时限值
+     *
+     * @param co24
+     *          一氧化碳24小时限值
+     */
+    public void setCo24(Integer co24) {
+        this.co24 = co24;
+    }
+
+    /**
+     * 获取一氧化碳1小时限值
+     *
+     * @return 一氧化碳1小时限值
+     */
+    public Integer getCo1() {
+        return this.co1;
+    }
+
+    /**
+     * 设置一氧化碳1小时限值
+     *
+     * @param co1
+     *          一氧化碳1小时限值
+     */
+    public void setCo1(Integer co1) {
+        this.co1 = co1;
+    }
+
+    /**
+     * 获取臭氧1小时限值
+     *
+     * @return 臭氧1小时限值
+     */
+    public Integer getO31() {
+        return this.o31;
+    }
+
+    /**
+     * 设置臭氧1小时限值
+     *
+     * @param o31
+     *          臭氧1小时限值
+     */
+    public void setO31(Integer o31) {
+        this.o31 = o31;
+    }
+
+    /**
+     * 获取臭氧8小时限值
+     *
+     * @return 臭氧8小时限值
+     */
+    public Integer getO38() {
+        return this.o38;
+    }
+
+    /**
+     * 设置臭氧8小时限值
+     *
+     * @param o38
+     *          臭氧8小时限值
+     */
+    public void setO38(Integer o38) {
+        this.o38 = o38;
+    }
+
+    /**
+     * 获取pm2.5限值
+     *
+     * @return pm2
+     */
+    public Integer getPm25() {
+        return this.pm25;
+    }
+
+    /**
+     * 设置pm2.5限值
+     *
+     * @param pm25
+     *          pm2.5限值
+     */
+    public void setPm25(Integer pm25) {
+        this.pm25 = pm25;
+    }
+}
