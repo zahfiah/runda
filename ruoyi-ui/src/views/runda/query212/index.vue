@@ -552,7 +552,7 @@ export default {
 
     getList(params = this.queryParams) {
       // this.loading = false;
-      const date = "2025-03-08"
+      const date = new Date().toISOString().slice(0, 10);
       // 处理设备ID查询
       if (
         this.queryParams.deviceId &&
