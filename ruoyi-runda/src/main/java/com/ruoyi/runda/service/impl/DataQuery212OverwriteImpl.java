@@ -593,7 +593,8 @@ public class DataQuery212OverwriteImpl implements DataQuery212OVRepository {
                     o3iaqi = (limits.getIaqi() - prelimits.getIaqi()) / (limits.getO38() * 1.00 - prelimits.getO38() * 1.00) * (o38 - prelimits.getO38()) + prelimits.getIaqi();
                 }
             }
-            devicedate.setAqi(maxV);
+            devicedate.setAqi(Double.valueOf(maxV.intValue())); // 显式转换为 Double
+
         }
     }
 

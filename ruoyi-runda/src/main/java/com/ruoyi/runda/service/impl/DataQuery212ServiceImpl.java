@@ -27,9 +27,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -191,20 +189,18 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
 
     @Override
     public TableDataInfo selectDataQuery212ListByDateAndDeviceId(String deviceId, String date, int page, int size) {
+        // 使用线程安全的日期时间类
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        // 时区
+        ZoneId zoneId = ZoneId.of("Asia/Shanghai");
+
         try {
-            // 检查 page 和 size 的有效性
-            if (page <= 0 || size <= 0) {
-                return createErrorResult("Invalid page or size parameters");
-            }
-
-            // 使用线程安全的日期时间类
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             LocalDate localDate = LocalDate.parse(date, formatter);
-            LocalDate startDate = localDate.atStartOfDay().toLocalDate();
-            LocalDate endDate = localDate.plusDays(1).atStartOfDay().toLocalDate();
+            ZonedDateTime startDateTime = localDate.atStartOfDay(zoneId);
+            ZonedDateTime endDateTime = localDate.plusDays(1).atStartOfDay(zoneId);
 
-            long startTimestamp = startDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
-            long endTimestamp = endDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
+            long startTimestamp = startDateTime.toInstant().toEpochMilli();
+            long endTimestamp = endDateTime.toInstant().toEpochMilli();
 
             Pageable pageable = PageRequest.of(page - 1, size);
             logger.debug("deviceId: {}, startTimestamp: {}, endTimestamp: {}", deviceId, startTimestamp, endTimestamp);
@@ -235,8 +231,8 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
             logger.error("Error while fetching data", e);
             return createErrorResult(e.getMessage());
         }
-
     }
+
 
     private TableDataInfo createErrorResult(String msg) {
         TableDataInfo errorResult = new TableDataInfo();
