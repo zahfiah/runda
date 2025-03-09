@@ -342,8 +342,8 @@ export default {
         pageSize: 10,
         deviceId: null, // 改为 deviceId
         timeType: "date", // 默认选择日期类型
-        startDate: new Date().toLocaleString().replace(/\//g, "-"),
-        date: new Date().toLocaleDateString().replace(/\//g, "-"),
+        //只到年月日
+        startDate: new Date().toISOString().split('T')[0],
         endDate: null,
         selectedDate: null,
         startHour: null,
@@ -414,90 +414,6 @@ export default {
       }
     },
 
-    // async getDeviceList() {
-    //   try {
-    //     // 从 localStorage 获取设备列表
-    //     const cachedDeviceList = localStorage.getItem("deviceList");
-
-    //     // 如果缓存中有设备数据，直接使用缓存数据
-    //     if (cachedDeviceList) {
-    //       this.deviceOptions = JSON.parse(cachedDeviceList);
-    //       console.log("从缓存中获取设备列表：", this.deviceOptions);
-
-    //       if (this.deviceOptions.length > 0) {
-    //         this.$message.success(
-    //           `成功从缓存获取到 ${this.deviceOptions.length} 个设备`
-    //         );
-    //       } else {
-    //         this.$message.warning("缓存中没有找到设备");
-    //       }
-    //       return;
-    //     }
-    //     // 创建一个数组存储所有成功的请求结果
-    //     const uniqueDevices = new Map();
-    //     const batchSize = 100;
-
-    //     // 使用 for 循环分批发送请求
-    //     for (let deviceId = 1; deviceId <= 100; deviceId += batchSize) {
-    //       const batchPromises = [];
-
-    //       // 创建这一批的请求
-    //       for (let i = 0; i < batchSize && deviceId + i <= 100; i++) {
-    //         batchPromises.push(
-    //           request({
-    //             url: "/runda/query212/listByDeviceId",
-    //             method: "get",
-    //             params: { deviceId: deviceId + i },
-    //           }).catch((error) => {
-    //             // 忽略单个请求的错误，返回 null
-    //             return null;
-    //           })
-    //         );
-    //       }
-
-    //       // 等待这一批请求完成
-    //       const responses = await Promise.all(batchPromises);
-
-    //       // 处理响应
-    //       responses.forEach((response) => {
-    //         if (
-    //           response &&
-    //           response.code === 0 &&
-    //           response.rows &&
-    //           response.rows.length > 0
-    //         ) {
-    //           const deviceData = response.rows[0];
-    //           if (!uniqueDevices.has(deviceData.deviceId)) {
-    //             uniqueDevices.set(deviceData.deviceId, {
-    //               deviceId: deviceData.deviceId,
-    //               deviceName: deviceData.deviceName,
-    //             });
-    //           }
-    //         }
-    //       });
-    //     }
-
-    //     // 转换为数组并更新设备选项
-    //     this.deviceOptions = Array.from(uniqueDevices.values());
-    //     console.log("找到的所有设备：", this.deviceOptions);
-
-    //     if (this.deviceOptions.length > 0) {
-    //       localStorage.setItem(
-    //         "deviceList",
-    //         JSON.stringify(this.deviceOptions)
-    //       );
-
-    //       // this.$message.success(
-    //       //   `成功获取到 ${this.deviceOptions.length} 个设备`
-    //       // );
-    //     } else {
-    //       this.$message.warning("未找到任何可用设备");
-    //     }
-    //   } catch (error) {
-    //     console.error("获取设备列表失败：", error);
-    //     this.$message.error("获取设备列表失败");
-    //   }
-    // },
     async getDeviceList() {
       try {
         // 请求新的接口获取设备列表
@@ -550,9 +466,10 @@ export default {
       this.getList(); // 调用获取列表的方法
     },
 
+
     getList(params = this.queryParams) {
-      // this.loading = false;
-      const date = new Date().toISOString().slice(0, 10);
+      this.loading = true;
+
       // 处理设备ID查询
       if (
         this.queryParams.deviceId &&
@@ -563,11 +480,10 @@ export default {
         !this.queryParams.endHour
       ) {
         request({
-          url: "/runda/query212/listByDateAndDeviceId",
+          url: "/runda/query212/listByDeviceId",
           method: "get",
           params: {
             deviceId: this.queryParams.deviceId,
-            date,
             page: this.queryParams.pageNum,
             size: this.queryParams.pageSize,
           },
@@ -592,27 +508,19 @@ export default {
         this.queryParams.deviceId == null
       ) {
         const date = `${this.queryParams.startDate}`;
-        const endDate = this.queryParams.endDate
-          ? `${this.queryParams.endDate} 23:59:59`
-          : `${this.queryParams.startDate} 23:59:59`;
-
         request({
           // url: "http://192.168.124.9:81/dev-api/runda/query212/listByDate",
           url: "/runda/query212/listByDate",
           method: "get",
           params: {
             date: date,
-            endDateTime: endDate,
-            deviceId: this.queryParams.deviceId,
             page: this.queryParams.pageNum,
             size: this.queryParams.pageSize,
           },
         })
           .then((response) => {
             console.log("查询结果:", response);
-
             this.handleResponse(response);
-            this.queryParams.startDate = null;
           })
           .catch((error) => {
             console.error("查询日期数据失败：", error);
@@ -639,7 +547,6 @@ export default {
           },
         })
           .then((response) => {
-            console.log(response); // 打印返回的数据
             this.handleResponse(response);
           })
           .catch((error) => {
@@ -828,7 +735,7 @@ export default {
         pageSize: 10,
         deviceId: null,
         timeType: "date",
-        startDate: null,
+        startDate: new Date().toISOString().split('T')[0],
         endDate: null,
         selectedDate: null,
         startHour: null,

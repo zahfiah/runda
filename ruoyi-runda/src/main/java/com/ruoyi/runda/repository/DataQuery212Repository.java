@@ -22,6 +22,6 @@ public interface DataQuery212Repository extends MongoRepository<AirDataResult, S
     // 根据 deviceId 和时间范围联合查询，按 deviceId 升序和 dateTime 降序排序
     @Query(value = "{ deviceId: ?0, dataTime: { $gte: ?1, $lte: ?2 } }", sort = "{ deviceId: 1, dataTime: -1 }")
     Page<AirDataResult> findByDeviceIdAndCreateDateBetween(String deviceId, long startTimestamp, long endTimestamp, Pageable pageable);
-    //查询数据库中的设备名字
+
 
 }
