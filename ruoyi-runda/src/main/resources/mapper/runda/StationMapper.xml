@@ -6,7 +6,7 @@
 
     <resultMap type="Station" id="StationResult">
         <result property="id"    column="id"    />
-        <result property="stationAddr"    column="station_addr"    />
+<!--        <result property="stationAddr"    column="station_addr"    />-->
         <result property="stationName"    column="station_name"    />
         <result property="riverName"    column="river_name"    />
         <result property="riverCode"    column="river_code"    />
@@ -26,14 +26,14 @@
         <result property="town"    column="town"    />
         <result property="townCn"    column="town_cn"    />
         <result property="userId"    column="user_id"    />
-        <result property="systemUserId"    column="system_user_id"    />
+<!--        <result property="systemUserId"    column="system_user_id"    />-->
         <result property="createdTime"    column="created_time"    />
         <result property="lastUpdatedTime"    column="last_updated_time"    />
         <result property="longitude"    column="longitude"    />
         <result property="latitude"    column="latitude"    />
         <result property="type"    column="type"    />
         <result property="remark"    column="remark"    />
-        <result property="stationStatus"    column="station_status"    />
+        <result property="status"    column="status"    />
         <result property="phone"    column="phone"    />
         <result property="linkMan"    column="link_man"    />
         <result property="countryName"    column="country_name"    />
@@ -51,11 +51,11 @@
         <result property="sgjd"    column="sgjd"    />
         <result property="sfazjcsb"    column="sfazjcsb"    />
         <result property="jgrq"    column="jgrq"    />
-        <result property="deviceId"    column="device_id"    />
+<!--        <result property="deviceId"    column="device_id"    />-->
     </resultMap>
 
     <sql id="selectStationVo">
-        select id, station_addr, station_name, river_name, river_code, section_name, section_code, river_level, inward_water, section_properties, monitoring_way, section_control_level, province, province_cn, city, city_cn, county, county_cn, town, town_cn, user_id, system_user_id, created_time, last_updated_time, longitude, latitude, type, remark, station_status, phone, link_man, country_name, country_id, floor_space, licens_number, from_resource, jsdwmc, jstyshxydm, sgdwmc, sgtyshxydm, jgbm, jgzrr, jgzrrdh, sgjd, sfazjcsb, jgrq, device_id from station
+        select id,  station_name, river_name, river_code, section_name, section_code, river_level, inward_water, section_properties, monitoring_way, section_control_level, province, province_cn, city, city_cn, county, county_cn, town, town_cn,  system_user_id, created_time, last_updated_time, longitude, latitude, type, remark, status, phone, link_man, country_name, country_id, floor_space, licens_number, from_resource, jsdwmc, jstyshxydm, sgdwmc, sgtyshxydm, jgbm, jgzrr, jgzrrdh, sgjd, sfazjcsb, jgrq from station
     </sql>
 
     <select id="selectStationList" parameterType="Station" resultMap="StationResult">
@@ -78,7 +78,7 @@
         insert into station
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null">id,</if>
-            <if test="stationAddr != null">station_addr,</if>
+--             <if test="stationAddr != null">station_addr,</if>
             <if test="stationName != null and stationName != ''">station_name,</if>
             <if test="riverName != null">river_name,</if>
             <if test="riverCode != null">river_code,</if>
@@ -97,7 +97,7 @@
             <if test="countyCn != null">county_cn,</if>
             <if test="town != null">town,</if>
             <if test="townCn != null">town_cn,</if>
-            <if test="userId != null">user_id,</if>
+--             <if test="userId != null">user_id,</if>
             <if test="systemUserId != null">system_user_id,</if>
             <if test="createdTime != null">created_time,</if>
             <if test="lastUpdatedTime != null">last_updated_time,</if>
@@ -105,7 +105,7 @@
             <if test="latitude != null">latitude,</if>
             <if test="type != null">type,</if>
             <if test="remark != null">remark,</if>
-            <if test="stationStatus != null">station_status,</if>
+            <if test="status != null">status,</if>
             <if test="phone != null and phone != ''">phone,</if>
             <if test="linkMan != null">link_man,</if>
             <if test="countryName != null">country_name,</if>
@@ -123,11 +123,11 @@
             <if test="sgjd != null and sgjd != ''">sgjd,</if>
             <if test="sfazjcsb != null and sfazjcsb != ''">sfazjcsb,</if>
             <if test="jgrq != null">jgrq,</if>
-            <if test="deviceId != null">device_id,</if>
+--             <if test="deviceId != null">device_id,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">#{id},</if>
-            <if test="stationAddr != null">#{stationAddr},</if>
+--             <if test="stationAddr != null">#{stationAddr},</if>
             <if test="stationName != null and stationName != ''">#{stationName},</if>
             <if test="riverName != null">#{riverName},</if>
             <if test="riverCode != null">#{riverCode},</if>
@@ -146,7 +146,7 @@
             <if test="countyCn != null">#{countyCn},</if>
             <if test="town != null">#{town},</if>
             <if test="townCn != null">#{townCn},</if>
-            <if test="userId != null">#{userId},</if>
+--             <if test="userId != null">#{userId},</if>
             <if test="systemUserId != null">#{systemUserId},</if>
             <if test="createdTime != null">#{createdTime},</if>
             <if test="lastUpdatedTime != null">#{lastUpdatedTime},</if>
@@ -154,7 +154,7 @@
             <if test="latitude != null">#{latitude},</if>
             <if test="type != null">#{type},</if>
             <if test="remark != null">#{remark},</if>
-            <if test="stationStatus != null">#{stationStatus},</if>
+            <if test="status != null">#{status},</if>
             <if test="phone != null and phone != ''">#{phone},</if>
             <if test="linkMan != null">#{linkMan},</if>
             <if test="countryName != null">#{countryName},</if>
@@ -172,14 +172,14 @@
             <if test="sgjd != null and sgjd != ''">#{sgjd},</if>
             <if test="sfazjcsb != null and sfazjcsb != ''">#{sfazjcsb},</if>
             <if test="jgrq != null">#{jgrq},</if>
-            <if test="deviceId != null">#{deviceId},</if>
+--             <if test="deviceId != null">#{deviceId},</if>
         </trim>
     </insert>
 
     <update id="updateStation" parameterType="Station">
         update station
         <trim prefix="SET" suffixOverrides=",">
-            <if test="stationAddr != null">station_addr = #{stationAddr},</if>
+--             <if test="stationAddr != null">station_addr = #{stationAddr},</if>
             <if test="stationName != null and stationName != ''">station_name = #{stationName},</if>
             <if test="riverName != null">river_name = #{riverName},</if>
             <if test="riverCode != null">river_code = #{riverCode},</if>
@@ -198,7 +198,7 @@
             <if test="countyCn != null">county_cn = #{countyCn},</if>
             <if test="town != null">town = #{town},</if>
             <if test="townCn != null">town_cn = #{townCn},</if>
-            <if test="userId != null">user_id = #{userId},</if>
+--             <if test="userId != null">user_id = #{userId},</if>
             <if test="systemUserId != null">system_user_id = #{systemUserId},</if>
             <if test="createdTime != null">created_time = #{createdTime},</if>
             <if test="lastUpdatedTime != null">last_updated_time = #{lastUpdatedTime},</if>
@@ -206,7 +206,7 @@
             <if test="latitude != null">latitude = #{latitude},</if>
             <if test="type != null">type = #{type},</if>
             <if test="remark != null">remark = #{remark},</if>
-            <if test="stationStatus != null">station_status = #{stationStatus},</if>
+            <if test="status != null">status = #{status},</if>
             <if test="phone != null and phone != ''">phone = #{phone},</if>
             <if test="linkMan != null">link_man = #{linkMan},</if>
             <if test="countryName != null">country_name = #{countryName},</if>
@@ -224,7 +224,7 @@
             <if test="sgjd != null and sgjd != ''">sgjd = #{sgjd},</if>
             <if test="sfazjcsb != null and sfazjcsb != ''">sfazjcsb = #{sfazjcsb},</if>
             <if test="jgrq != null">jgrq = #{jgrq},</if>
-            <if test="deviceId != null">device_id = #{deviceId},</if>
+--             <if test="deviceId != null">device_id = #{deviceId},</if>
         </trim>
         where id = #{id}
     </update>

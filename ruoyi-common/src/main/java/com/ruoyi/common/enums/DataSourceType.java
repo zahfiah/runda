@@ -16,4 +16,10 @@ public enum DataSourceType
      * 从库
      */
     SLAVE
+
+    ,
+    /**
+     * 测试库
+     */
+    TARGET
 }
