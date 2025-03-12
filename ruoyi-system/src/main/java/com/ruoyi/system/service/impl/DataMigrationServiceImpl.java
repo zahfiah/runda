@@ -72,7 +72,8 @@ public class DataMigrationServiceImpl implements DataMigrationService {
     public String migrateStateData() {
         // 1. 定义需要迁移的表和目标表
         String sourceTable = "station"; // 源表
-        String targetTable = "t_d_site_state";//目标表
+        String targetTable = "t_d_site_state"; // 目标表
+
         // 2. 迁移数据
         migrateStateData(sourceTable, targetTable);
         return "数据迁移完成！";
@@ -153,34 +154,83 @@ public class DataMigrationServiceImpl implements DataMigrationService {
      * @param targetTable 目标表名
      */
     private void migrateStateData(String sourceTable, String targetTable) {
-        // 1. 从源表和设备表联合查询数据
+        // 1. 从源表查询数据
+        String selectSql = "SELECT station_name, licens_number, created_time, last_updated_time, status, from_resource FROM " + sourceTable;
+        List<Map<String, Object>> sourceDataList = jdbcTemplateA.queryForList(selectSql);
 
-        String selectSql = "select station_name, licens_number, created_time, last_updated_time, status, from_resource from " + sourceTable;
-//
+        // 2. 遍历源表数据
+        for (Map<String, Object> sourceRow : sourceDataList) {
+            // 获取唯一标识（假设 station_name 是唯一标识）
+            String stationName = (String) sourceRow.get("station_name");
 
-        List<Map<String, Object>> dataList = jdbcTemplateA.queryForList(selectSql);
+            // 3. 查询目标表中是否存在对应的记录
+            String selectTargetSql = "SELECT SGZT FROM " + targetTable + " WHERE GDMC = ?";
+            List<Map<String, Object>> targetDataList = jdbcTemplateB.queryForList(selectTargetSql, stationName);
 
-        // 2. 过滤掉已经存在的数据
-        List<Map<String, Object>> newDataList = filterExistingStateData(targetTable, dataList);
+            // 4. 如果目标表中存在对应的记录
+            if (!targetDataList.isEmpty()) {
+                Map<String, Object> targetRow = targetDataList.get(0);
+                String targetStatus = (String) targetRow.get("SGZT");
 
-        // 3. 将新数据插入到目标表
-        if (!newDataList.isEmpty()) {
-            for (Map<String, Object> row : newDataList) {
-                try {
-                    // 构建插入 SQL 和参数
-                    Object[] params = buildInsertStateParams(targetTable, row);
-                    if (params != null) {
-                        // 执行插入
-                        jdbcTemplateB.update(params[0].toString(), (Object[]) params[1]);
-                    }
-                } catch (Exception e) {
-                    // 记录错误并继续迁移
-                    System.err.println("Error migrating row: " + row + ", Error: " + e.getMessage());
+                // 5. 比较源表和目标表的 status 字段
+                String sourceStatus = mapStatusValue(sourceRow.get("status"));
+                if (!sourceStatus.equals(targetStatus)) {
+                    // 如果 status 不一致，则更新目标表中的 SGZT 字段
+                    updateTargetStatus(targetTable, stationName, sourceStatus);
                 }
+            } else {
+                // 6. 如果目标表中不存在对应的记录，则插入新数据
+                insertNewData(targetTable, sourceRow);
             }
         }
     }
+    /**
+     * 构建插入 SQL 和参数
+     *
+     * @param targetTable 目标表名
+     * @param row        源数据行
+     * @return 包含 SQL 和参数的数组，第一个元素是 SQL，第二个元素是参数数组
+     */
+    private Object[] buildInsertStateParams(String targetTable, Map<String, Object> row) {
+        StringBuilder columns = new StringBuilder();
+        StringBuilder values = new StringBuilder();
+        List<Object> paramsList = new ArrayList<>();
 
+        addColumn(columns, values, paramsList, "GDMC", row.get("station_name"), "");
+        addColumn(columns, values, paramsList, "SGXKZBH", row.get("licens_number"), null);
+        addColumn(columns, values, paramsList, "XGRQSJ", row.get("created_time"), null);
+        addColumn(columns, values, paramsList, "REPORT_TIME", row.get("last_updated_time"), null);
+
+        String statusValue = mapStatusValue(row.get("status"));
+        addColumn(columns, values, paramsList, "SGZT", statusValue, "长期停工");
+
+        addColumn(columns, values, paramsList, "EEMP_FLAG", row.get("fromResource"), "");
+
+        String sql = "INSERT INTO " + targetTable + " (" + columns + ") VALUES (" + values + ")";
+        return new Object[]{sql, paramsList.toArray()};
+    }
+
+    /**
+     * 添加列和值到 SQL 中
+     *
+     * @param columns     SQL 列名
+     * @param values      SQL 值
+     * @param paramsList  参数列表
+     * @param columnName  列名
+     * @param value       列值
+     * @param defaultValue 默认值
+     */
+    private void addColumn(StringBuilder columns, StringBuilder values, List<Object> paramsList, String columnName, Object value, Object defaultValue) {
+        if (value != null || defaultValue != null) {
+            if (columns.length() > 0) {
+                columns.append(", ");
+                values.append(", ");
+            }
+            columns.append(columnName);
+            values.append("?");
+            paramsList.add(value != null ? value : defaultValue);
+        }
+    }
 
     /**
      * 迁移 t_d_monitor_state 表的数据
@@ -189,39 +239,39 @@ public class DataMigrationServiceImpl implements DataMigrationService {
      * @param targetTable 目标表名
      */
     private void migrateMonitorData(String sourceTable, String targetTable) {
-
+        // 1. 从源表查询数据
         String selectSql = "SELECT d.name, s.licens_number, d.created_time, d.last_updated_time, d.fromResource, d.status, d.sn " +
                 "FROM " + sourceTable + " d " +
                 "LEFT JOIN station s ON d.name LIKE CONCAT(s.station_name, '%')";
+        List<Map<String, Object>> sourceDataList = jdbcTemplateA.queryForList(selectSql);
 
-        List<Map<String, Object>> dataList = jdbcTemplateA.queryForList(selectSql);
+        // 2. 遍历源表数据
+        for (Map<String, Object> sourceRow : sourceDataList) {
+            // 获取唯一标识（假设 name 是唯一标识）
+            String nameValue = (String) sourceRow.get("name");
 
-        // 2. 过滤掉已经存在的数据
-        List<Map<String, Object>> newDataList = filterExistingMonitorData(targetTable, dataList);
+            // 3. 查询目标表中是否存在对应的记录
+            String selectTargetSql = "SELECT YXZT FROM " + targetTable + " WHERE JCDMC = ?";
+            List<Map<String, Object>> targetDataList = jdbcTemplateB.queryForList(selectTargetSql, nameValue);
 
-        // 3. 将新数据插入到目标表
-        if (!newDataList.isEmpty()) {
-            for (Map<String, Object> row : newDataList) {
-                try {
-                    // 检查 SGXKZBH 是否为空
-                    String licensNumberValue = (String) row.get("licens_number");
-                    if (licensNumberValue == null || licensNumberValue.isEmpty()) {
-                        continue;
-                    }
+            // 4. 如果目标表中存在对应的记录
+            if (!targetDataList.isEmpty()) {
+                Map<String, Object> targetRow = targetDataList.get(0);
+                String targetStatus = (String) targetRow.get("YXZT");
 
-                    // 构建插入 SQL 和参数
-                    Object[] params = buildInsertMonitorParams(targetTable, row);
-                    if (params != null) {
-                        // 执行插入
-                        jdbcTemplateB.update(params[0].toString(), (Object[]) params[1]);
-                    }
-                } catch (Exception e) {
-                    // 记录错误并继续迁移
-                    System.err.println("Error migrating row: " + row + ", Error: " + e.getMessage());
+                // 5. 比较源表和目标表的 status 字段
+                String sourceStatus = mapStatusToYXZT(sourceRow.get("status"));
+                if (!sourceStatus.equals(targetStatus)) {
+                    // 如果 status 不一致，则更新目标表中的 YXZT 字段
+                    updateTargetMonitorStatus(targetTable, nameValue, sourceStatus);
                 }
+            } else {
+                // 6. 如果目标表中不存在对应的记录，则插入新数据
+                buildInsertMonitorParams(targetTable, sourceRow);
             }
         }
     }
+
     /**
      * 迁移 t_b_monitor_info表的数据
      *
@@ -236,8 +286,8 @@ public class DataMigrationServiceImpl implements DataMigrationService {
 
         List<Map<String, Object>> dataList = jdbcTemplateA.queryForList(selectSql);
 
-//        // 2. 过滤掉已经存在的数据
-//        List<Map<String, Object>> newDataList = filterExistingMonitorInfoData(targetTable, dataList);
+        // 2. 过滤掉已经存在的数据
+        List<Map<String, Object>> newDataList = filterExistingMonitorInfoData(targetTable, dataList);
 
         // 3. 将新数据插入到目标表
         if (!dataList.isEmpty()) {
@@ -331,30 +381,6 @@ public class DataMigrationServiceImpl implements DataMigrationService {
                 System.err.println("Error inserting row: " + row + ", Error: " + e.getMessage());
             }
         }
-    }
-    /**
-     * 过滤掉 t_d_site_state 表中已经存在的数据
-     *
-     * @param targetTable 目标表名
-     * @param dataList    源数据列表
-     * @return 需要插入的新数据列表
-     */
-    private List<Map<String, Object>> filterExistingStateData(String targetTable, List<Map<String, Object>> dataList) {
-        List<Map<String, Object>> newDataList = new ArrayList<>();
-
-        // 查询目标表中已经存在的唯一字段值（XMMC）
-        String checkSql = "SELECT GDMC FROM " + targetTable;
-        Set<String> existingValues = new HashSet<>(jdbcTemplateB.queryForList(checkSql, String.class));
-
-        // 过滤掉已经存在的数据
-        for (Map<String, Object> row : dataList) {
-            String uniqueValue = (String) row.get("station_name");
-            if (!existingValues.contains(uniqueValue)) {
-                newDataList.add(row);
-            }
-        }
-
-        return newDataList;
     }
 
     /**
@@ -510,208 +536,84 @@ public class DataMigrationServiceImpl implements DataMigrationService {
         String sql = "INSERT INTO " + targetTable + " (" + columns + ") VALUES (" + values + ")";
         return new Object[]{sql, paramsList.toArray()};
     }
+
     /**
-     * 构建 t_d_site_state 插入 SQL 和参数
+     * 更新目标表中的 SGZT 字段
      *
-     * @param targetTable 目标表名
-     * @param row         源数据行
-     * @return 包含 SQL 和参数的数组，第一个元素是 SQL，第二个元素是参数数组
+     * @param targetTable  目标表名
+     * @param stationName  站点名称（唯一标识）
+     * @param sourceStatus 源表中的状态值
      */
-    private Object[] buildInsertStateParams(String targetTable, Map<String, Object> row) {
-        StringBuilder columns = new StringBuilder();
-        StringBuilder values = new StringBuilder();
-        List<Object> paramsList = new ArrayList<>();
-
-        // 1. 处理 GDMC（station_name）
-        String stationNameValue = (String) row.get("station_name");
-        if (stationNameValue == null) {
-            stationNameValue = ""; // 如果 station_name 为空，使用空字符串作为默认值
+    private void updateTargetStatus(String targetTable, String stationName, String sourceStatus) {
+        String updateSql = "UPDATE " + targetTable + " SET SGZT = ? WHERE GDMC = ?";
+        try {
+            jdbcTemplateB.update(updateSql, sourceStatus, stationName);
+//            System.out.println("更新成功：站点 " + stationName + " 的状态已更新为 " + sourceStatus);
+        } catch (Exception e) {
+//            System.err.println("更新失败：站点 " + stationName + "，错误信息：" + e.getMessage());
         }
-        columns.append("GDMC");
-        values.append("?");
-        paramsList.add(stationNameValue);
-
-        // 2. 处理 SGXKZBH（licens_number）
-        String licensNumberValue = (String) row.get("licens_number");
-        if (licensNumberValue != null) {
-            columns.append(", SGXKZBH");
-            values.append(", ?");
-            paramsList.add(licensNumberValue);
-        }
-
-        // 3. 处理 XGRQSJ（created_time）
-        Object createdTimeValue = row.get("created_time");
-        if (createdTimeValue != null) {
-            columns.append(", XGRQSJ");
-            values.append(", ?");
-            paramsList.add(createdTimeValue);
-        }
-
-        // 4. 处理 REPORT_TIME（last_updated_time）
-        Object lastUpdatedTimeValue = row.get("last_updated_time");
-        if (lastUpdatedTimeValue != null) {
-            columns.append(", REPORT_TIME");
-            values.append(", ?");
-            paramsList.add(lastUpdatedTimeValue);
-        }
-        // 5. 处理 SGZT（status）
-        Object statusObj = row.get("status");
-        String statusValue = "施工"; // 默认值
-
-        if (statusObj != null) {
-            if (statusObj instanceof Integer) {
-                // 如果 status 是 Integer 类型，转换为 String
-                int statusInt = (Integer) statusObj;
-                statusValue = String.valueOf(statusInt);
-            } else if (statusObj instanceof String) {
-                // 如果 status 是 String 类型，直接使用
-                statusValue = (String) statusObj;
-            }
-
-            // 映射状态值：1 -> 施工，2 -> 停工，3 -> 竣工，4 -> 竣工
-            switch (statusValue) {
-                case "1":
-                    statusValue = "施工";
-                    break;
-                case "2":
-                    statusValue = "停工";
-                    break;
-                case "3":
-                    statusValue = "竣工";
-                    break;
-                case "4":
-                    statusValue = "竣工";
-                    break;
-                default:
-                    statusValue = "长期停工"; // 默认值
-                    break;
-            }
-        }
-
-
-        columns.append(", SGZT");
-        values.append(", ?");
-        paramsList.add(statusValue);
-
-        // 6. 处理 EEMP_FLAG（fromResource）
-        Object fromResourceObj = row.get("fromResource");
-        if (fromResourceObj != null) {
-            String fromResourceValue;
-            if (fromResourceObj instanceof Integer) {
-                // 如果 fromResource 是 Integer 类型，转换为 String
-                int fromResourceInt = (Integer) fromResourceObj;
-                fromResourceValue = String.valueOf(fromResourceInt);
-            } else if (fromResourceObj instanceof String) {
-                // 如果 fromResource 是 String 类型，直接使用
-                fromResourceValue = (String) fromResourceObj;
-            } else {
-                // 其他类型，设置为空字符串
-                fromResourceValue = "";
-            }
-            columns.append(", EEMP_FLAG");
-            values.append(", ?");
-            paramsList.add(fromResourceValue);
-        }
-
-        String sql = "INSERT INTO " + targetTable + " (" + columns + ") VALUES (" + values + ")";
-        return new Object[]{sql, paramsList.toArray()};
     }
 
     /**
-     * 构建 t_d_monitor_state 插入 SQL 和参数
+     * 更新目标表中的 SGZT 字段
+     *
+     * @param targetTable  目标表名
+     * @param stationName  站点名称（唯一标识）
+     * @param sourceStatus 源表中的状态值
+     */
+    private void updateTargetMonitorStatus(String targetTable, String stationName, String sourceStatus) {
+        String updateSql = "UPDATE " + targetTable + " SET YXZT = ? WHERE JCDMC = ?";
+        try {
+            jdbcTemplateB.update(updateSql, sourceStatus, stationName);
+//            System.out.println("更新成功：站点 " + stationName + " 的状态已更新为 " + sourceStatus);
+        } catch (Exception e) {
+//            System.err.println("更新失败：站点 " + stationName + "，错误信息：" + e.getMessage());
+        }
+    }
+    /**
+     * 插入新数据到目标表
      *
      * @param targetTable 目标表名
-     * @param row         源数据行
-     * @return 包含 SQL 和参数的数组，第一个元素是 SQL，第二个元素是参数数组
+     * @param sourceRow   源表数据行
      */
-    private Object[] buildInsertMonitorParams(String targetTable, Map<String, Object> row) {
-        StringBuilder columns = new StringBuilder();
-        StringBuilder values = new StringBuilder();
-        List<Object> paramsList = new ArrayList<>();
-        Set<String> addedColumns = new HashSet<>(); // 用于跟踪已添加的字段
-
-        // 1. 处理 JCDMC（name）
-        String nameValue = (String) row.get("name");
-        if (nameValue == null) {
-            nameValue = ""; // 如果 name 为空，使用空字符串作为默认值
-        }
-        columns.append("JCDMC");
-        values.append("?");
-        paramsList.add(nameValue);
-        addedColumns.add("JCDMC");
-
-        // 2. 处理 YXZT（status）
-        String statusValue = mapStatusToYXZT(row.get("status"));
-        columns.append(", YXZT");
-        values.append(", ?");
-        paramsList.add(statusValue);
-        addedColumns.add("YXZT");
-
-        // 3. 处理其他字段
-        for (Map.Entry<String, String> entry : FIELD_MAPPING_DEVICE.entrySet()) {
-            String sourceField = entry.getKey();
-            String targetField = entry.getValue();
-
-            // 跳过已经处理的字段和 created_time 字段
-            if (addedColumns.contains(targetField)) {
-                continue;
+    private void insertNewData(String targetTable, Map<String, Object> sourceRow) {
+        Object[] params = buildInsertStateParams(targetTable, sourceRow);
+        if (params != null) {
+            try {
+                jdbcTemplateB.update(params[0].toString(), (Object[]) params[1]);
+                System.out.println("插入成功：站点 " + sourceRow.get("station_name") + " 的数据已插入");
+            } catch (Exception e) {
+                System.err.println("插入失败：站点 " + sourceRow.get("station_name") + "，错误信息：" + e.getMessage());
             }
-
-            Object value = row.get(sourceField);
-            if (value == null) {
-                // 如果目标字段不允许为空，跳过该字段
-                if (isFieldRequired(targetTable, targetField)) {
-                    continue;
-                }
-                value = ""; // 如果值为空，使用空字符串作为默认值
-            }
-
-            // 截断过长的数据
-            if (targetField.equals("YXZT") && value instanceof String) {
-                String stringValue = (String) value;
-                int maxLength = 10; // 假设最大长度为10，根据实际情况调整
-                if (stringValue.length() > maxLength) {
-                    value = stringValue.substring(0, maxLength);
-                }
-            }
-
-            if (columns.length() > 0) {
-                columns.append(", ");
-                values.append(", ");
-            }
-            columns.append(targetField);
-            values.append("?");
-            paramsList.add(value);
-            addedColumns.add(targetField);
         }
-
-        // 4. 处理 SGXKZBH（licens_number）
-        String licensNumberValue = (String) row.get("licens_number");
-        if (licensNumberValue == null) {
-            licensNumberValue = ""; // 提供一个默认值
-        }
-        if (!addedColumns.contains("SGXKZBH")) {
-            columns.append(", SGXKZBH");
-            values.append(", ?");
-            paramsList.add(licensNumberValue);
-            addedColumns.add("SGXKZBH");
-        }
-
-        // 5. 处理 XGRQSJ（created_time）
-        Object createdTimeValue = row.get("created_time");
-        if (createdTimeValue != null && !addedColumns.contains("XGRQSJ")) {
-            columns.append(", XGRQSJ");
-            values.append(", ?");
-            paramsList.add(createdTimeValue);
-            addedColumns.add("XGRQSJ");
-        }
-
-        String sql = "INSERT INTO " + targetTable + " (" + columns + ") VALUES (" + values + ")";
-        return new Object[]{sql, paramsList.toArray()};
     }
 
+
     /**
-     * 将 status 映射为 YXZT 字段的值
+     * 映射源表中的 status 字段值到目标表的 SGZT 字段值
+     *
+     * @param statusObj 源表中的 status 字段值
+     * @return 映射后的状态值
+     */
+    private String mapStatusValue(Object statusObj) {
+        if (statusObj == null) {
+            return "长期停工";
+        }
+
+        String statusValue = statusObj instanceof Integer ? String.valueOf(statusObj) : (String) statusObj;
+
+        switch (statusValue) {
+            case "1": return "施工";
+            case "2": return "停工";
+            case "3":
+            case "4": return "竣工";
+            default: return "长期停工";
+        }
+    }
+
+
+    /**
+     * 将 status 映射为 SGZT 字段的值
      *
      * @param status 源数据中的 status 值
      * @return 映射后的 YXZT 值
@@ -909,6 +811,99 @@ public class DataMigrationServiceImpl implements DataMigrationService {
             values.append(", ?");
             paramsList.add(0.0); // 提供一个默认值
             addedColumns.add("ZXWD");
+        }
+
+        String sql = "INSERT INTO " + targetTable + " (" + columns + ") VALUES (" + values + ")";
+        return new Object[]{sql, paramsList.toArray()};
+    }
+
+    /**
+     * 构建 t_d_monitor_state 插入 SQL 和参数
+     *
+     * @param targetTable 目标表名
+     * @param row        源数据行
+     * @return 包含 SQL 和参数的数组，第一个元素是 SQL，第二个元素是参数数组
+     */
+    private Object[] buildInsertMonitorParams(String targetTable, Map<String, Object> row) {
+        StringBuilder columns = new StringBuilder();
+        StringBuilder values = new StringBuilder();
+        List<Object> paramsList = new ArrayList<>();
+        Set<String> addedColumns = new HashSet<>(); // 用于跟踪已添加的字段
+
+        // 1. 处理 JCDMC（name）
+        String nameValue = (String) row.get("name");
+        if (nameValue == null) {
+            nameValue = ""; // 如果 name 为空，使用空字符串作为默认值
+        }
+        columns.append("JCDMC"); // 目标表字段名是 JCDMC
+        values.append("?");
+        paramsList.add(nameValue);
+        addedColumns.add("JCDMC");
+
+        // 2. 处理 YXZT（status）
+        String statusValue = mapStatusToYXZT(row.get("status"));
+        columns.append(", YXZT");
+        values.append(", ?");
+        paramsList.add(statusValue);
+        addedColumns.add("YXZT");
+
+        // 3. 处理其他字段
+        for (Map.Entry<String, String> entry : FIELD_MAPPING_DEVICE.entrySet()) {
+            String sourceField = entry.getKey();
+            String targetField = entry.getValue();
+
+            // 跳过已经处理的字段
+            if (addedColumns.contains(targetField)) {
+                continue;
+            }
+
+            Object value = row.get(sourceField);
+            if (value == null) {
+                // 如果目标字段不允许为空，跳过该字段
+                if (isFieldRequired(targetTable, targetField)) {
+                    continue;
+                }
+                value = ""; // 如果值为空，使用空字符串作为默认值
+            }
+
+            // 截断过长的数据
+            if (targetField.equals("YXZT") && value instanceof String) {
+                String stringValue = (String) value;
+                int maxLength = 10; // 假设最大长度为10，根据实际情况调整
+                if (stringValue.length() > maxLength) {
+                    value = stringValue.substring(0, maxLength);
+                }
+            }
+
+            if (columns.length() > 0) {
+                columns.append(", ");
+                values.append(", ");
+            }
+            columns.append(targetField);
+            values.append("?");
+            paramsList.add(value);
+            addedColumns.add(targetField);
+        }
+
+        // 4. 处理 SGXKZBH（licens_number）
+        String licensNumberValue = (String) row.get("licens_number");
+        if (licensNumberValue == null) {
+            licensNumberValue = ""; // 提供一个默认值
+        }
+        if (!addedColumns.contains("SGXKZBH")) {
+            columns.append(", SGXKZBH");
+            values.append(", ?");
+            paramsList.add(licensNumberValue);
+            addedColumns.add("SGXKZBH");
+        }
+
+        // 5. 处理 XGRQSJ（created_time）
+        Object createdTimeValue = row.get("created_time");
+        if (createdTimeValue != null && !addedColumns.contains("XGRQSJ")) {
+            columns.append(", XGRQSJ");
+            values.append(", ?");
+            paramsList.add(createdTimeValue);
+            addedColumns.add("XGRQSJ");
         }
 
         String sql = "INSERT INTO " + targetTable + " (" + columns + ") VALUES (" + values + ")";

@@ -179,17 +179,7 @@
     <update id="updateStation" parameterType="Station">
         update station
         <trim prefix="SET" suffixOverrides=",">
---             <if test="stationAddr != null">station_addr = #{stationAddr},</if>
             <if test="stationName != null and stationName != ''">station_name = #{stationName},</if>
-            <if test="riverName != null">river_name = #{riverName},</if>
-            <if test="riverCode != null">river_code = #{riverCode},</if>
-            <if test="sectionName != null">section_name = #{sectionName},</if>
-            <if test="sectionCode != null">section_code = #{sectionCode},</if>
-            <if test="riverLevel != null">river_level = #{riverLevel},</if>
-            <if test="inwardWater != null">inward_water = #{inwardWater},</if>
-            <if test="sectionProperties != null">section_properties = #{sectionProperties},</if>
-            <if test="monitoringWay != null">monitoring_way = #{monitoringWay},</if>
-            <if test="sectionControlLevel != null">section_control_level = #{sectionControlLevel},</if>
             <if test="province != null">province = #{province},</if>
             <if test="provinceCn != null">province_cn = #{provinceCn},</if>
             <if test="city != null">city = #{city},</if>
@@ -198,8 +188,6 @@
             <if test="countyCn != null">county_cn = #{countyCn},</if>
             <if test="town != null">town = #{town},</if>
             <if test="townCn != null">town_cn = #{townCn},</if>
---             <if test="userId != null">user_id = #{userId},</if>
-            <if test="systemUserId != null">system_user_id = #{systemUserId},</if>
             <if test="createdTime != null">created_time = #{createdTime},</if>
             <if test="lastUpdatedTime != null">last_updated_time = #{lastUpdatedTime},</if>
             <if test="longitude != null">longitude = #{longitude},</if>
@@ -209,11 +197,8 @@
             <if test="status != null">status = #{status},</if>
             <if test="phone != null and phone != ''">phone = #{phone},</if>
             <if test="linkMan != null">link_man = #{linkMan},</if>
-            <if test="countryName != null">country_name = #{countryName},</if>
-            <if test="countryId != null">country_id = #{countryId},</if>
             <if test="floorSpace != null">floor_space = #{floorSpace},</if>
             <if test="licensNumber != null and licensNumber != ''">licens_number = #{licensNumber},</if>
-            <if test="fromResource != null">from_resource = #{fromResource},</if>
             <if test="jsdwmc != null and jsdwmc != ''">jsdwmc = #{jsdwmc},</if>
             <if test="jstyshxydm != null and jstyshxydm != ''">jstyshxydm = #{jstyshxydm},</if>
             <if test="sgdwmc != null and sgdwmc != ''">sgdwmc = #{sgdwmc},</if>
@@ -224,10 +209,10 @@
             <if test="sgjd != null and sgjd != ''">sgjd = #{sgjd},</if>
             <if test="sfazjcsb != null and sfazjcsb != ''">sfazjcsb = #{sfazjcsb},</if>
             <if test="jgrq != null">jgrq = #{jgrq},</if>
---             <if test="deviceId != null">device_id = #{deviceId},</if>
         </trim>
         where id = #{id}
     </update>
+
 
     <delete id="deleteStationById" parameterType="Long">
         delete from station where id = #{id}
