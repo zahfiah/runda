@@ -1,11 +1,9 @@
 package com.ruoyi.runda.service.impl;
 
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.runda.domain.*;
-import com.ruoyi.runda.mapper.AlarmInfoMapper;
-import com.ruoyi.runda.mapper.AlarmRemindMapper;
-import com.ruoyi.runda.mapper.DataQueryCountryMapper;
-import com.ruoyi.runda.mapper.StationMapper;
+import com.ruoyi.runda.mapper.*;
 import com.ruoyi.runda.repository.AirDataHourRepository;
 import com.ruoyi.runda.repository.DataQuery212OVRepository;
 import com.ruoyi.runda.repository.DataQuery212Repository;
@@ -16,6 +14,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.bson.BsonRegularExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,26 +22,46 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
 public class AirDataHourServiceImpl implements AirDataHourService {
-@Autowired
+
+// 在类顶部添加以下成员变量
+//    private final ConcurrentHashMap<String, LinkedBlockingDeque<Double>> pm25Windows = new ConcurrentHashMap<>();
+//    private final ConcurrentHashMap<String, LinkedBlockingDeque<Double>> pm10Windows = new ConcurrentHashMap<>();
+//    private final ConcurrentHashMap<String, Double> pm25SumMap = new ConcurrentHashMap<>();
+//    private final ConcurrentHashMap<String, Double> pm10SumMap = new ConcurrentHashMap<>();
+//
+//    private final Map<String, NavigableMap<Long, Double>> pm25History = new ConcurrentHashMap<>();
+//    private final Map<String, NavigableMap<Long, Double>> pm10History = new ConcurrentHashMap<>();
+//    private final Map  pm25Locks = new ConcurrentHashMap();
+
 
     private static final Logger logger = LoggerFactory.getLogger(AirDataHourServiceImpl.class);
     // 定义并初始化 SimpleDateFormat 对象
@@ -91,6 +110,10 @@ public class AirDataHourServiceImpl implements AirDataHourService {
     @Autowired
     private AlarmInfoMapper alarmInfoMapper;
 
+
+     @Autowired
+     private HourlyAverageAirDataMapper hourlyAverageAirDataMapper;
+
     @Autowired
     private  StationMapper stationMapper;
 
@@ -99,6 +122,12 @@ public class AirDataHourServiceImpl implements AirDataHourService {
     @Autowired
     private DataQuery212OVRepository dataQuery212OVRepository;
 
+    @Autowired
+   private RedisCache redisCache;
+
+
+
+    // 在方法开头增加时间参数转换
 
 
 
@@ -132,6 +161,8 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         long endDateMillis = endCalendar.getTimeInMillis();
 
         logger.info("Fetching data between timestamps: {} and {}", startDateMillis, endDateMillis);
+
+
 
         // 添加 Pageable 参数
         PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE); // 使用默认分页参数，可以根据需求调整
@@ -174,6 +205,8 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                             map.put("deviceName", avgData.getDeviceName());
                             map.put("stationName", avgData.getStationName());
                             map.put("controlStation", deptIdToDeptNameMap.getOrDefault(avgData.getDeptId(), "未知站点"));
+                            map.put("averagePm25_24", avgData.getAveragePm25_24()); //pm2.524
+                            map.put("averagePm10_24", avgData.getAveragePm10_24()); //pm10.24
                             map.put("averageAqi", avgData.getAverageAqi());
                             map.put("averageSo2", avgData.getAverageSo2());
                             map.put("averageNo2", avgData.getAverageNo2());
@@ -183,6 +216,7 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                             map.put("level", getAqiLevel(Double.valueOf(avgData.getAverageAqi())));
                             map.put("quality", getAqiQuality(Double.valueOf(avgData.getAverageAqi())));
                             map.put("color", getAqiColor(Double.valueOf(avgData.getAverageAqi())));
+
                             if (avgData.getAverageAqi() > 50) {
                                 map.put("primaryPollutant", getPrimaryPollutant(combinedData.stream()
                                         .filter(report -> report.getDeviceId().equals(avgData.getDeviceId()))
@@ -212,12 +246,27 @@ public class AirDataHourServiceImpl implements AirDataHourService {
 //                    report.getCo(), report.getCo3Thickness(), report.getPm25(), report.getPm10(), report.getDeptId(), report.getStationId(),report.getDeviceName(),report.getStationName(),report.getDeptId()));
         }
 
+
+
+        // 直接使用Calendar获取时间戳
+
+       // Instant endTimestamp = shanghaiCalendar.toInstant();
+
+
+
+
+
+
+
+
         // 计算每个设备指定日期时间内的各项指标平均值
         Map<String, Map<String, Object>> averages = combinedData.stream()
                 .collect(Collectors.groupingBy(AirDataHour::getDeviceId))
                 .entrySet().stream()
-                .map(this::calculateMetrics)
+                .map(entry -> calculateMetrics(entry, dateTime))  // 传入endTime参数
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+
 
         // 根据AQI平均值进行排名（AQI值越低，排名越高）
         List<Map.Entry<String, Map<String, Object>>> rankedList = averages.entrySet().stream()
@@ -261,6 +310,8 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                         calibratedMap.put("deviceName", calibratedDataRecord.getDeviceName());
                         calibratedMap.put("stationName", calibratedDataRecord.getStationName());
                         calibratedMap.put("controlStation", deptIdToDeptNameMap.getOrDefault(calibratedDataRecord.getDeptId(), "未知站点"));
+                        calibratedMap.put("averagePm25_24",calibratedDataRecord.getAveragePm25_24());
+                        calibratedMap.put("averagePm10_24", calibratedDataRecord.getAveragePm10_24());
                         calibratedMap.put("averageAqi", calibratedDataRecord.getAverageAqi());
                         calibratedMap.put("averageSo2", calibratedDataRecord.getAverageSo2());
                         calibratedMap.put("averageNo2", calibratedDataRecord.getAverageNo2());
@@ -294,7 +345,11 @@ public class AirDataHourServiceImpl implements AirDataHourService {
 
 
 
-    private Map.Entry<String, Map<String, Object>> calculateMetrics(Map.Entry<String, List<AirDataHour>> entry) {
+
+
+
+
+    private Map.Entry<String, Map<String, Object>> calculateMetrics(Map.Entry<String, List<AirDataHour>> entry, Date endTime){
         String deviceId = entry.getKey();
         List<AirDataHour> reports = entry.getValue();
 
@@ -346,6 +401,12 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         String controlStation = deptIdToDeptNameMap.getOrDefault(deptId, "未知站点");
 
 
+
+
+        Map<String, Double> slidingAvg = calculate24HourSlidingAverage(reports, endTime);
+
+
+
         Map<String, Object> metrics = new HashMap<>();
 
         metrics.put("deviceId", deviceId);
@@ -363,10 +424,12 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         metrics.put("averageO3", round(calculateAverage(reports, AirDataHour::getCo3Thickness)));
         metrics.put("averagePm2_5", round(calculateAverage(reports, AirDataHour::getPm25)));
         metrics.put("averagePm10", round(calculateAverage(reports, AirDataHour::getPm10)));
-        Double averageAqi = (Double) metrics.get("averageAqi");
+        metrics.put("averagePm25_24", slidingAvg.get("pm2_5_24h"));
+        metrics.put("averagePm10_24", slidingAvg.get("pm10_24h"));
+        Double averageAqi =  (Double) metrics.put("averageAqi",slidingAvg.get("pm2_5_24h"));//aqi同pm25
         metrics.put("level", getAqiLevel(averageAqi));
-        metrics.put("quality", getAqiQuality(averageAqi));
-        metrics.put("color", getAqiColor(averageAqi));
+        metrics.put("quality", //AqiQuality(averageAqi));
+        metrics.put("color", getAqiColor(averageAqi)));
         if (averageAqi > 50) {
             metrics.put("primaryPollutant", getPrimaryPollutant(reports));
         } else {
@@ -383,6 +446,168 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                 .average()
                 .orElse(Double.NaN);
     }
+
+    // 新增方法：计算24小时滑动平均值
+    // 新增方法：基于内存计算的24小时滑动平均
+    private Map<String, Double> calculate24HourSlidingAverage(List<AirDataHour> reports, Date endTime) {
+        Date startTime = new Date(endTime.getTime() - 1000L * 60 * 60 * 24);//获取当前时间 前24小时
+        Map<String, Double> result = new HashMap<>();
+        List<Map<String, Object>> avg =  hourlyAverageAirDataMapper.calculateDailyHourlyAverage(reports.get(0).getDeviceId(),startTime,endTime);
+        if (avg == null || avg.isEmpty() || avg.get(0) == null) {
+            result.put("pm2_5_24h", Double.NaN);
+            result.put("pm10_24h", Double.NaN);
+            return result;
+        }else{
+           Double avg25_24 = roundDouble((Double) avg.get(0).get("avg25"));
+           Double avg10_24 = roundDouble((Double) avg.get(0).get("avg10"));
+
+
+           result.put("pm2_5_24h",avg25_24 );
+           result.put("pm10_24h", avg10_24);
+           logger.info("deviceId:{},pm2_5_24h:{},pm10_24h{}",reports.get(0).getDeviceId(),avg25_24,avg10_24);
+       }
+
+        return result;
+    }
+//    private Map<String, Double> calculate24HourSlidingAverage(List<AirDataHour> reports, Date endTime) {
+//         //获取设备ID（假设当前分组处理的是单个设备）
+//         String deviceId = reports.get(0).getDeviceId();
+//        // 获取时间范围（上海时区）
+////
+//        Date firstTime = new Date(endTime.getTime() - 1000L * 60 * 60 * 1);//获取当前时间 前1小时
+//
+//        HourlyAverageAirData hourlyAverageAirData = hourlyAverageAirDataRepository.findByDeviceIdAndCreatedAt(deviceId,firstTime);
+//        Map<String, Double> result = new HashMap<>();
+//        if (hourlyAverageAirData != null) {
+//
+//            result.put("pm2_5_24h", hourlyAverageAirData.getAveragePm25_24().doubleValue()*24);
+//            result.put("pm10_24h", hourlyAverageAirData.getAveragePm10_24().doubleValue()*24);
+//        }
+//        Date secondTime = new Date(endTime.getTime() - 1000L * 60 * 60 * 25); //获取当前时间 前25小时
+//        DataQuery212 dataQuery212 = dataQuery212OVRepository.findByDeviceIdAndCreateDate(deviceId,secondTime);
+//        if (dataQuery212 != null) {
+//            result.put("pm2_5_24h", result.get("pm2_5_24h")-dataQuery212.getPm2_5());
+//            result.put("pm10_24h", result.get("pm10_24h")-dataQuery212.getPm10());
+//        }
+//        DataQuery212 current= dataQuery212OVRepository.findByDeviceIdAndCreateDate(deviceId,endTime);
+//        if (current != null) {
+//            result.put("pm2_5_24h", (result.get("pm2_5_24h")+current.getPm2_5())/24);
+//            result.put("pm10_24h", (result.get("pm10_24h")+current.getPm10())/24);
+//        }
+//        return result;
+//
+//    }
+//    public Map<String, Double> calculate24HourSlidingAverage(List<AirDataHour> reports, Date endTime) {
+//        // 获取设备ID（假设当前分组处理的是单个设备）
+//        String deviceId = reports.get(0).getDeviceId();
+//
+//        // 获取时间范围（上海时区）
+//        Calendar endCalendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Shanghai"));
+//        endCalendar.setTime(endTime);
+//        long endMillis = endCalendar.getTimeInMillis();
+//        long startMillis = endMillis - 86_400_000L; // 24小时前
+//
+//        // 1. 查询原始数据（按时间升序排列）
+//        Page<DataQuery212> allData = dataQuery212OVRepository.findByDeviceIdAndCreateDateBetween(
+//                deviceId,
+//                startMillis,
+//                endMillis,
+//                PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Direction.ASC, "createTime")) // 明确按时间升序
+//        );
+//        List<DataQuery212> dataList = allData.getContent();
+//        logger.info("原始数据条数：" + dataList.size());
+//        // 2. 构建滑动窗口队列
+//        LinkedList<DataQuery212> window = new LinkedList<>();
+//        Map<String, Double> result = new HashMap<>();
+//        int count = 0;
+//        for (DataQuery212 current : dataList) {
+//            count++;
+//            if(count%12==0){ //取每隔一小时取一次滑动平均（一个小时12条数据
+//                window.addLast(current);
+//            }
+//        }
+//        logger.info("滑动窗口大小:{}", window.size());
+//        if (window.size() >= 24) {
+//            double pm25Sum = window.stream().mapToDouble(DataQuery212::getPm2_5).sum();
+//            double pm10Sum = window.stream().mapToDouble(DataQuery212::getPm10).sum();
+//
+//            result.put("pm2_5_24h", roundDouble(pm25Sum / window.size()));
+//            result.put("pm10_24h", roundDouble(pm10Sum / window.size()));
+//        }// 4. 当窗口有足够数据时计算（至少覆盖24小时）
+//        // 处理边界情况（数据不足24小时）
+//        if (result.isEmpty() && !window.isEmpty()) {
+//            double pm25Avg = window.stream().mapToDouble(DataQuery212::getPm2_5).average().orElse(0);
+//            double pm10Avg = window.stream().mapToDouble(DataQuery212::getPm10).average().orElse(0);
+//            result.put("pm2_5_24h", roundDouble(pm25Avg));
+//            result.put("pm10_24h", roundDouble(pm10Avg));
+//        }
+//
+//        return result;
+//    }
+
+    // 辅助方法：四舍五入保留两位小数
+    private double roundDouble(double value) {
+        return BigDecimal.valueOf(value)
+                .setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
+    }
+
+
+    // 安全获取Double值的方法
+    private Double safeGetDouble(Map<String, Object> map, String key) {
+        try {
+            Object value = map.get(key);
+            if (value instanceof Number) {
+                return ((Number) value).doubleValue();
+            }
+            return null;
+        } catch (Exception e) {
+            logger.warn("字段 {} 转换异常: {}", key, e.getMessage());
+            return null;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+//    public Map<String, Double> calculate24HourSlidingAverage(String deviceId, Date endTime) {
+//        // 创建上海时区Calendar对象
+//        Calendar endCalendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Shanghai"));
+//        endCalendar.setTime(endTime);
+//
+//        // 克隆结束日历对象来计算开始时间
+//        Calendar startCalendar = (Calendar) endCalendar.clone();
+//        startCalendar.add(Calendar.HOUR_OF_DAY, -24); // 减去24小时
+//
+//        // 获取时间戳数值
+//        long startMillis = startCalendar.getTimeInMillis();
+//        long endMillis = endCalendar.getTimeInMillis();
+//
+//        Map<String, Double> result = dataQuery212OVRepository.calculate24HAverages(
+//                deviceId,
+//                startMillis,
+//                endMillis
+//        );
+//
+//        return Collections.unmodifiableMap(new HashMap<String, Double>() {{
+//            put("pm2_5_24h", formatDouble(result.getOrDefault("avgPm25", 0.0)));
+//            put("pm10_24h", formatDouble(result.getOrDefault("avgPm10", 0.0)));
+//        }});
+//    }
+
+
+    private double formatDouble(double value) {
+        return Double.isNaN(value) ? 0.0d :
+                new BigDecimal(value).setScale(2, RoundingMode.HALF_UP).doubleValue();
+    }
+
 
     private Double round(Double value) {
         return Double.valueOf(Math.round(value));
@@ -494,6 +719,8 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             hourlyAverageAirData.setAverageO3(((Number) row.get("averageO3")).longValue());
             hourlyAverageAirData.setAveragePm25((double) ((Number) row.get("averagePm2_5")).longValue());
             hourlyAverageAirData.setAveragePm10((double) ((Number) row.get("averagePm10")).longValue());
+            hourlyAverageAirData.setAveragePm25_24((double) ((Number) row.get("averagePm25_24")).longValue());
+            hourlyAverageAirData.setAveragePm10_24((double) ((Number) row.get("averagePm10_24")).longValue());
             hourlyAverageAirData.setAqiLevel((String) row.get("level"));
             hourlyAverageAirData.setAqiQuality((String) row.get("quality"));
             hourlyAverageAirData.setAqiColor((String) row.get("color"));
@@ -809,6 +1036,7 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         }
 
         // 查询数据库中的校准数据
+
         HourlyAverageAirData hourlyAverage = hourlyAverageAirDataRepository.findByDeviceIdAndCreatedAt(deviceId, dateTime);
 
         if (hourlyAverage == null) {
@@ -933,8 +1161,8 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                     .orElse(null);
 
             if (existingRecord != null) {
-                existingRecord.setAveragePm25_24(((Number) result.get("averagePm2_5_24")).longValue());
-                existingRecord.setAveragePm10_24(((Number) result.get("averagePm10_24")).longValue());
+                existingRecord.setAveragePm25_24(((Number) result.get("averagePm2_5_24")).doubleValue());
+                existingRecord.setAveragePm10_24(((Number) result.get("averagePm10_24")).doubleValue());
                 hourlyAverageAirDataRepository.save(existingRecord);
             } else {
                 logger.warn("No existing record found for deviceId: {}", deviceId);

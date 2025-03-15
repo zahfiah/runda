@@ -1,6 +1,10 @@
 package com.ruoyi.runda.service.impl;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.runda.mapper.HourlyAverageAirDataMapper;
@@ -33,15 +37,22 @@ public class HourlyAverageAirDataServiceImpl implements IHourlyAverageAirDataSer
 
     /**
      * 查询监测小时报表列表
+     * @return 监测小时报表
      * 
      * @param hourlyAverageAirData 监测小时报表
-     * @return 监测小时报表
      */
     @Override
     public List<HourlyAverageAirData> selectHourlyAverageAirDataList(HourlyAverageAirData hourlyAverageAirData)
     {
         return hourlyAverageAirDataMapper.selectHourlyAverageAirDataList(hourlyAverageAirData);
     }
-
+    @Override
+    public List<Map<String, Object>> calculateDailyHourlyAverage(
+            @Param("deviceId") String deviceId,
+            @Param("startDate") Date startDate,
+            @Param("endDate") Date endDate
+    ) {
+        return hourlyAverageAirDataMapper.calculateDailyHourlyAverage(deviceId, startDate, endDate );
+    }
 
 }

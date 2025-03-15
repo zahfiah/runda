@@ -64,7 +64,7 @@ public class HourlyAverageAirData extends BaseEntity
     /** 平均pm25/24 */
     @Excel(name = "平均pm25/24")
     @Column(name = "average_pm2_5_24")
-    private Long averagePm25_24;
+    private Double averagePm25_24;
 
     /** 平均pm10 */
     @Excel(name = "平均pm10")
@@ -74,7 +74,7 @@ public class HourlyAverageAirData extends BaseEntity
     /** 平均pm10 */
     @Excel(name = "平均pm10/24")
     @Column(name = "average_pm10_24")
-    private Long averagePm10_24;
+    private Double averagePm10_24;
 
     /** 级别 */
     @Excel(name = "级别")
@@ -201,12 +201,12 @@ public class HourlyAverageAirData extends BaseEntity
         return averagePm25;
     }
 
-    public void setAveragePm25_24(Long averagePm25_24)
+    public void setAveragePm25_24(Double averagePm25_24)
     {
         this.averagePm25_24 = averagePm25_24;
     }
 
-    public Long getAveragePm25_24()
+    public Double getAveragePm25_24()
     {
         return averagePm25_24;
     }
@@ -220,12 +220,12 @@ public class HourlyAverageAirData extends BaseEntity
         return averagePm10;
     }
 
-    public void setAveragePm10_24(Long averagePm10_24)
+    public void setAveragePm10_24(Double averagePm10_24)
     {
         this.averagePm10_24 = averagePm10_24;
     }
 
-    public Long getAveragePm10_24()
+    public Double getAveragePm10_24()
     {
         return averagePm10_24;
     }
