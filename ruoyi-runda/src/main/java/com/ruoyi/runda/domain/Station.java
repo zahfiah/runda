@@ -105,7 +105,7 @@ public class Station extends BaseEntity
 
     /** 状态 */
     @Excel(name = "状态")
-    private Long stationStatus;
+    private Long status;
 
     /** 电话 */
     private String phone;
@@ -406,14 +406,14 @@ public class Station extends BaseEntity
     {
         return type;
     }
-    public void setStationStatus(Long stationStatus) 
+    public void setStationStatus(Long status)
     {
-        this.stationStatus = stationStatus;
+        this.status = status;
     }
 
     public Long getStationStatus() 
     {
-        return stationStatus;
+        return status;
     }
     public void setPhone(String phone) 
     {

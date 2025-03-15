@@ -125,6 +125,12 @@ public class AirDataHour implements Serializable {
     /** 部门id */
     @Field("deptId")
     private String deptId;
+    /** 温度 */
+    @Field("wd")
+    private String wd;
+    /** 湿度 */
+    @Field("sd")
+    private String sd;
 
     /** 日期 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -223,6 +229,21 @@ public class AirDataHour implements Serializable {
 
     public void setArea(String area) {
         this.area = area;
+    }
+    public String getWd() {
+        return wd;
+    }
+
+    public void setWd(String  wd) {
+        this.wd = wd;
+    }
+
+    public String getSd() {
+        return sd;
+    }
+
+    public void setSd(String  sd) {
+        this.sd = sd;
     }
 
     public Double getCo() {

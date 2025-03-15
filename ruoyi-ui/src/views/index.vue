@@ -21,6 +21,74 @@
       <router-link to="/runda/alarm/remind" class="nav-link">告警管理</router-link>
     </div>
 
+    <!-- 区县统计模块 -->
+    <div class="region-stats-container">
+      <div class="region-header" @click="toggleStats">
+        <h2 class="region-title">张家口监测详情</h2>
+        <i class="el-icon-arrow-down" :class="{ 'rotate-180': isStatsVisible }"></i>
+      </div>
+      <transition name="el-zoom-in-top">
+        <div v-show="isStatsVisible" class="stats-content">
+          <el-row :gutter="20">
+            <el-col 
+              v-for="(region, index) in zjkRegions" 
+              :key="index"
+              :xs="24" :sm="12" :md="8" :lg="6"
+            >
+              <div class="region-card">
+                <h3>{{ region.label }}</h3>
+                <div class="stats-grid">
+                  <div class="stat-item">
+                    <i class="el-icon-monitor"></i>
+                    <div class="stat-content">
+                      <span class="count">{{ deviceCount(region.label) }}</span>
+                      <span class="label">监测设备</span>
+                    </div>
+                  </div>
+                  <div class="stat-item">
+                    <i class="el-icon-office-building"></i>
+                    <div class="stat-content">
+                      <span class="count">{{ stationCount(region.label) }}</span>
+                      <span class="label">监测站点</span>
+                    </div>
+                  </div>
+                </div>
+                <!-- 新增按钮 -->
+                <div class="region-buttons">
+                  <el-button size="mini" @click="toggleRegionStats(region.label, 'device')">设备状态统计</el-button>
+                  <el-button size="mini" @click="toggleRegionStats(region.label, 'station')">站点状态统计</el-button>
+                </div>
+                <!-- 设备状态统计内容 -->
+                <div v-if="showDeviceStats[region.label]" class="region-status-stats">
+                  <h4>设备状态统计</h4>
+                  <el-row :gutter="12">
+                    <el-col v-for="(stat, index) in deviceStatusStats(region.label)" :key="index" :span="12">
+                      <div class="status-item">
+                        <i :class="stat.icon"></i>
+                        <span>{{ stat.title }}: {{ stat.value }}</span>
+                      </div>
+                    </el-col>
+                  </el-row>
+                </div>
+                <!-- 站点状态统计内容 -->
+                <div v-if="showStationStats[region.label]" class="region-status-stats">
+                  <h4>站点状态统计</h4>
+                  <el-row :gutter="12">
+                    <el-col v-for="(stat, index) in stationStatusStats(region.label)" :key="index" :span="12">
+                      <div class="status-item">
+                        <i :class="stat.icon"></i>
+                        <span>{{ stat.title }}: {{ stat.value }}</span>
+                      </div>
+                    </el-col>
+                  </el-row>
+                </div>
+              </div>
+            </el-col>
+          </el-row>
+        </div>
+      </transition>
+    </div>
+
     <div class="announcement-and-carousel-container">
       <div class="announcement-container">
         <div class="announcement-header" style="display: flex; justify-content: space-between;">
@@ -77,7 +145,6 @@
               </el-row>
             </div>
           </el-carousel-item>
-
         </el-carousel>
       </div>
     </div>
@@ -150,6 +217,7 @@ import { listNotice } from "@/api/system/notice";
 import { listDevice } from "@/api/runda/device";
 import { listStation } from "@/api/runda/station";
 import Weather from '@/components/Weather';
+import regions from '@/assets/regions.json'
 
 export default {
   name: "Index",
@@ -158,6 +226,13 @@ export default {
   },
   data() {
     return {
+      isStatsVisible: false,
+      zjkRegions: regions.counties
+        .filter(county => county.city === '1307')
+        .map(item => ({ 
+          value: item.value, 
+          label: item.label.replace('区', '') // 去除"区"字尾
+        })),
       loadingNotices: false,
       latestNotices: [],
       // 统计数据
@@ -185,7 +260,9 @@ export default {
       currentPage: 1,
       itemsPerPage: 3,
       images: [],
-      titleImages: []
+      titleImages: [],
+      showDeviceStats: {}, // 控制设备状态统计的显示
+      showStationStats: {}, // 控制站点状态统计的显示
     };
   },
   created() {
@@ -218,9 +295,39 @@ export default {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
       return this.notices.slice(start, end);
-    }
+    },
+    deviceStatusStats() {
+      return (regionName) => [
+        { icon: 'el-icon-success', title: '正常设备', value: this.deviceList.filter(d => d.countyCn?.includes(regionName) && d.status === 1).length },
+        { icon: 'el-icon-warning-outline', title: '中断设备', value: this.deviceList.filter(d => d.countyCn?.includes(regionName) && d.status === 2).length },
+        { icon: 'el-icon-finished', title: '竣工设备', value: this.deviceList.filter(d => d.countyCn?.includes(regionName) && d.status === 3).length },
+        { icon: 'el-icon-question', title: '未知设备', value: this.deviceList.filter(d => d.countyCn?.includes(regionName) && ![1, 2, 3].includes(d.status)).length },
+      ];
+    },
+    stationStatusStats() {
+      return (regionName) => [
+        { icon: 'el-icon-check', title: '正常站点', value: this.stationlist.filter(s => s.countyCn?.includes(regionName) && s.stationStatus === 1).length },
+        { icon: 'el-icon-stopwatch', title: '停用站点', value: this.stationlist.filter(s => s.countyCn?.includes(regionName) && s.stationStatus === 2).length },
+        { icon: 'el-icon-delete-solid', title: '删除站点', value: this.stationlist.filter(s => s.countyCn?.includes(regionName) && s.stationStatus === 3).length },
+        { icon: 'el-icon-question', title: '未知站点', value: this.stationlist.filter(s => s.countyCn?.includes(regionName) && ![1, 2, 3].includes(s.stationStatus)).length },
+      ];
+    },
   },
   methods: {
+    toggleStats() {
+    this.isStatsVisible = !this.isStatsVisible;
+  },
+    deviceCount(regionName) {
+      return this.deviceList.filter(d => 
+        d.countyCn && d.countyCn.includes(regionName)
+      ).length
+    },
+    // 站点数量统计方法
+    stationCount(regionName) {
+      return this.stationlist.filter(s => 
+        s.countyCn && s.countyCn.includes(regionName)
+      ).length
+    },
     getList() {
       this.loading = true;
       listDevice({
@@ -251,9 +358,9 @@ export default {
 
         this.Station.total = response.total;
         //当stationtype为1时计算站点数量
-        this.Station.normal = this.stationlist.filter(station => station.type === 1).length; // 状态为1表示正常
-        this.Station.stop = this.stationlist.filter(station => station.type === 2).length; // 状态为2表示停用
-        this.Station.delete = this.stationlist.filter(station => station.type === 3).length; // 状态为3表示删除
+        this.Station.normal = this.stationlist.filter(station => station.stationStatus === 1).length; // 状态为1表示正常
+        this.Station.stop = this.stationlist.filter(station => station.stationStatus === 2).length; // 状态为2表示停用
+        this.Station.delete = this.stationlist.filter(station => station.stationStatus === 3).length; // 状态为3表示删除
         this.loading = false;
       });
     },
@@ -302,592 +409,51 @@ export default {
           });
         }
       });
-    }
+    },
+    toggleRegionStats(regionName, type) {
+      if (type === 'device') {
+        this.$set(this.showDeviceStats, regionName, !this.showDeviceStats[regionName]);
+        this.$set(this.showStationStats, regionName, false); // 隐藏站点统计
+      } else if (type === 'station') {
+        this.$set(this.showStationStats, regionName, !this.showStationStats[regionName]);
+        this.$set(this.showDeviceStats, regionName, false); // 隐藏设备统计
+      }
+    },
   }
 };
 </script>
 
 <style scoped lang="scss">
-.home {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: #f0f2f5;
-  padding: 20px;
 
-  .title-container {
-    width: 100%;
-    position: relative;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
+@import "@/assets/styles/seeindex.scss";
 
-    &:hover {
-      transform: translateY(-2px);
-    }
-
-    .el-carousel {
-      border-radius: inherit;
-
-      // 轮播指示器美化
-      ::v-deep .el-carousel__indicator {
-        padding: 8px;
-
-        .el-carousel__button {
-          width: 20px;
-          border-radius: 4px;
-          background: rgba(255, 255, 255, 0.6);
-          transition: all 0.3s;
-        }
-
-        &:hover .el-carousel__button {
-          background: #fff;
-          width: 30px;
-        }
-      }
-    }
-
-    .title-overlay {
-      position: absolute;
-      top: 10%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 2;
-      text-align: center;
-
-
-      h1 {
-        font-size: 2.8rem;
-        font-weight: 500;
-        color: #fff;
-        font-family: system-ui, -apple-system, sans-serif;
-        text-shadow: 1px 2px 3px rgba(0, 0, 0, 0.2);
-        letter-spacing: normal;
-        padding: 12px 24px;
-        background: rgba(15, 42, 67, 0.85);
-        border-radius: 8px;
-
-        &::after {
-          content: none;
-        }
-      }
-    }
-
-    .background-image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 8s ease;
-    }
-
-    // 轮播切换动画
-    .el-carousel__item {
-      &.is-active {
-        .background-image {
-          transform: scale(1.05);
-        }
-      }
-    }
-  }
-
-  @keyframes titleGlow {
-    from {
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5),
-        0 0 20px rgba(255, 255, 255, 0.3),
-        0 0 30px rgba(255, 255, 255, 0.2);
-    }
-
-    to {
-      text-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
-        0 0 30px rgba(255, 255, 255, 0.6),
-        0 0 40px rgba(255, 255, 255, 0.4);
-    }
-  }
-
-  @media (max-width: 768px) {
-    .title-container {
-      .title-overlay {
-        padding: 15px 25px;
-
-        h1 {
-          font-size: 2.2rem;
-
-          &::after {
-            bottom: -6px;
-            height: 2px;
-          }
-        }
-      }
-
-      .el-carousel {
-        height: 300px !important;
-      }
-    }
-  }
-
-  .nav-container {
-    display: flex;
-    justify-content: center;
-    width: 110%;
-    height: 60px;
-    margin-top: 20px;
-
-    .nav-link {
-      width: auto; // 修改宽度为自动
-      font-size: 20px;
-      color: #ffffff;
-      text-align: center;
-      text-decoration: none;
-      padding: 15px 25px;
-      background-color: #66b1ff;
-      transition: background-color 0.3s, transform 0.3s;
-      border: 1px solid transparent;
-      border-radius: 5px;
-      margin: 0 10px;
-      position: relative;
-      overflow: hidden;
-
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1));
-        transform: scaleX(0);
-        transform-origin: left;
-        transition: transform 0.3s;
-        z-index: 0;
-      }
-
-      &:hover {
-        background-color: #54dfbe;
-        transform: scale(1.05);
-
-        &::before {
-          transform: scaleX(1);
-        }
-      }
-
-      span {
-        position: relative;
-        z-index: 1;
-      }
-    }
-  }
-
-  .announcement-and-carousel-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    padding: 20px;
-    background-color: #f9fafc;
-    width: 100%;
-
-    @media (max-width: 768px) {
-      grid-template-columns: 1fr;
-    }
-
-    .announcement-container {
-      width: 100%;
-      background-color: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-      box-sizing: border-box;
-      max-height: 450px; // 设置固定高度
-      overflow-y: auto; // 内容超出时可滚动
-
-      h2 {
-        font-size: 24px;
-        margin-bottom: 20px;
-        color: #333;
-      }
-
-      .notice-list {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-
-        .notice-item {
-          border-bottom: 1px solid #eaeaea;
-          padding-bottom: 15px;
-          margin-bottom: 15px;
-          position: relative;
-          padding-bottom: 35px;
-
-          &:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 35px !important;
-          }
-
-          h3 {
-            font-size: 18px;
-            margin-bottom: 10px;
-            color: #409eff;
-            animation: fadeIn 0.5s ease-in-out;
-          }
-
-          p {
-            font-size: 16px;
-            color: #606266;
-            animation: fadeIn 0.5s ease-in-out 0.2s;
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            position: relative;
-            max-height: 48px;
-          }
-
-          .notice-time {
-            position: absolute;
-            bottom: 10px;
-            left: 0;
-            font-size: 14px;
-            color: #909399;
-            bottom: 10px !important;
-          }
-
-          .expand-button {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            background: none;
-            border: none;
-            color: #409eff;
-            cursor: pointer;
-            font-size: 14px;
-          }
-
-          &:hover {
-            background-color: #f0f9eb;
-            border-radius: 8px;
-
-            p {
-              margin-bottom: 10px;
-              line-height: 1.6;
-              max-height: unset;
-            }
-          }
-        }
-      }
-
-      .no-notices {
-        p {
-          font-size: 16px;
-          color: #909399;
-          text-align: center;
-        }
-      }
-
-      .pagination-controls {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: 20px;
-
-        .pagination-button {
-          background-color: #66b1ff;
-          color: #fff;
-          border: none;
-          border-radius: 5px;
-          padding: 10px 20px;
-          cursor: pointer;
-          transition: background-color 0.3s;
-
-          &:hover {
-            background-color: #54dfbe;
-          }
-
-          &[disabled] {
-            background-color: #ccc;
-            cursor: not-allowed;
-          }
-        }
-
-        .page-info {
-          margin: 0 10px;
-          font-size: 16px;
-          color: #606266;
-        }
-      }
-
-      .loading-state {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: 20px;
-
-        .loading-spinner {
-          border: 4px solid #f3f3f3;
-          border-top: 4px solid #3498db;
-          border-radius: 50%;
-          width: 30px;
-          height: 30px;
-          animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-          0% {
-            transform: rotate(0deg);
-          }
-
-          100% {
-            transform: rotate(360deg);
-          }
-        }
-      }
-    }
-
-    .carousel-container {
-      width: 100%;
-      background-color: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-      backdrop-filter: blur(10px); // 添加玻璃磨砂效果
-
-      .carousel-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: opacity 0.5s ease-in-out;
-      }
-    }
-  }
-
-  .carousel-container {
-    position: relative;
-
-    .stats-overlay {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 80%;
-      z-index: 2;
-
-      h3 {
-        font-size: 24px;
-        font-weight: 600;
-        color: #333;
-        text-align: center;
-        margin-bottom: 15px;
-        text-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
-      }
-
-      .stat-item {
-        text-align: center;
-        padding: 15px;
-        background: rgba(245, 245, 245, 0.8);
-        border-radius: 8px;
-        transition: all 0.3s;
-
-        &:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-icon {
-          font-size: 32px;
-          color: #409eff;
-          margin-bottom: 10px;
-        }
-
-        .el-statistic__title {
-          font-size: 14px;
-          color: #666;
-        }
-
-        .el-statistic__content {
-          font-size: 22px;
-          color: #333;
-          font-weight: bold;
-        }
-      }
-    }
-  }
-
-  .weather-container {
-    width: 100%;
-    padding: 20px;
-    box-sizing: border-box;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-
-    h2 {
-      font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 20px;
-      color: #333;
-    }
-
-    .loading,
-    .error {
-      font-size: 16px;
-      color: #909399;
-      text-align: center;
-    }
-
-    .weather-info {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-
-      .temperature {
-        font-size: 48px;
-        font-weight: bold;
-        color: #409EFF;
-        margin-bottom: 10px;
-      }
-
-      .description {
-        font-size: 20px;
-        color: #606266;
-        margin-bottom: 20px;
-      }
-
-      .details {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 20px;
-
-        .detail-item {
-          display: flex;
-          align-items: center;
-          font-size: 16px;
-          color: #909399;
-
-          i {
-            margin-right: 5px;
-            font-size: 20px;
-          }
-        }
-      }
-    }
-  }
-
-  .footer-container {
-    width: 100%;
-    background-color: darken(#333, 5%);
-    color: #fff;
-    padding: 10px 0;
+.region-card {
+  .region-buttons {
     margin-top: 10px;
-    position: relative;
-    overflow: hidden;
-
-    // 新增渐变背景
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: linear-gradient(90deg, #66b1ff, #54dfbe);
-    }
-
-    // 网格布局容器
-    .footer-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 30px;
-      padding: 0 10px;
-
-      @media (max-width: 992px) {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      @media (max-width: 576px) {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    // 区块标题样式
-    .footer-section {
-      h4 {
-        font-size: 18px;
-        margin-bottom: 15px;
-        color: #66b1ff;
-        position: relative;
-        padding-bottom: 8px;
-
-        &::after {
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          width: 40px;
-          height: 2px;
-          background: #54dfbe;
-        }
-      }
-
-      ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-
-        li {
-          margin-bottom: 8px;
-
-          a {
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-
-            &:hover {
-              color: #54dfbe;
-              transform: translateX(5px);
-            }
-
-            i {
-              margin-right: 8px;
-              font-size: 14px;
-            }
-          }
-        }
-      }
-
-      &.contact {
-        .contact-item {
-          display: flex;
-          align-items: center;
-          margin-bottom: 10px;
-
-          i {
-            width: 24px;
-            font-size: 16px;
-            color: #66b1ff;
-          }
-        }
-      }
-    }
-
-    // 版权信息
-    .copyright {
-      text-align: center;
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    gap: 10px;
+  }
+  .region-status-stats {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f5f7fa;
+    border-radius: 4px;
+    h4 {
+      margin-bottom: 10px;
       font-size: 14px;
-      color: rgba(255, 255, 255, 0.6);
-
-      a {
-        color: #66b1ff;
-        margin: 0 5px;
+      color: #303133;
+    }
+    .status-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+      i {
+        margin-right: 5px;
+        color: #409eff;
+      }
+      span {
+        font-size: 12px;
+        color: #606266;
       }
     }
   }

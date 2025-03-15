@@ -186,6 +186,8 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             airDataHour.setCo3Thickness(dataQuery212.getCo3Thickness());
             airDataHour.setPm25(dataQuery212.getPm2_5());
             airDataHour.setPm10(dataQuery212.getPm10());
+            airDataHour.setWd(String.valueOf(dataQuery212.getTemperature()));
+            airDataHour.setSd(String.valueOf(dataQuery212.getHumidity()));
 //            airDataHour.setCreateDate(new Timestamp(dataQuery212.getDate()));
             return airDataHour;
         }).collect(Collectors.toList()));
@@ -204,6 +206,8 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                             map.put("deptId", avgData.getDeptId());
                             map.put("deviceName", avgData.getDeviceName());
                             map.put("stationName", avgData.getStationName());
+                            map.put("tempture",avgData.getWd());
+                            map.put("humidity",avgData.getSd());
                             map.put("controlStation", deptIdToDeptNameMap.getOrDefault(avgData.getDeptId(), "未知站点"));
                             map.put("averagePm25_24", avgData.getAveragePm25_24()); //pm2.524
                             map.put("averagePm10_24", avgData.getAveragePm10_24()); //pm10.24
@@ -307,6 +311,8 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                         calibratedMap.put("deviceId", calibratedDataRecord.getDeviceId());
                         calibratedMap.put("stationId", calibratedDataRecord.getStationId());
                         calibratedMap.put("deptId", calibratedDataRecord.getDeptId());
+                        calibratedMap.put("tempture", calibratedDataRecord.getWd());
+                        calibratedMap.put("humidity", calibratedDataRecord.getSd());
                         calibratedMap.put("deviceName", calibratedDataRecord.getDeviceName());
                         calibratedMap.put("stationName", calibratedDataRecord.getStationName());
                         calibratedMap.put("controlStation", deptIdToDeptNameMap.getOrDefault(calibratedDataRecord.getDeptId(), "未知站点"));
@@ -397,6 +403,20 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                 .findFirst()
                 .orElse(null);
 
+        //得到温度 湿度信息 并保留整数
+        String wd = reports.stream()
+                .filter(Objects::nonNull)
+                .map(AirDataHour::getWd)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+        String sd = reports.stream()
+                .filter(Objects::nonNull)
+                .map(AirDataHour::getSd)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+
         // 根据 deptId 获取国控站点名称
         String controlStation = deptIdToDeptNameMap.getOrDefault(deptId, "未知站点");
 
@@ -412,6 +432,8 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         metrics.put("deviceId", deviceId);
         metrics.put("stationId", stationId);
         metrics.put("deptId", deptId);
+        metrics.put("wd", wd);
+        metrics.put("sd",sd);
         metrics.put("deviceName", deviceName);
         metrics.put("stationName", stationName);
         metrics.put("longitude", longitude);
@@ -712,6 +734,8 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             hourlyAverageAirData.setCreatedAt(createAt); // 设置 create_at 字段
             hourlyAverageAirData.setUpdatedAt(updateAt); // 设置 update_at 字段
             hourlyAverageAirData.setStationId(stationId); // 添加 stationId 字段
+            hourlyAverageAirData.setWd((String) row.get("wd"));
+            hourlyAverageAirData.setSd((String) row.get("sd"));
             hourlyAverageAirData.setDeptId((String) row.get("deptId"));
             hourlyAverageAirData.setAverageAqi(((Number) row.get("averageAqi")).longValue());
             hourlyAverageAirData.setAverageSo2(((Number) row.get("averageSo2")).longValue());
@@ -727,6 +751,7 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             hourlyAverageAirData.setPrimaryPollutant((String) row.get("primaryPollutant"));
             hourlyAverageAirData.setDeviceName((String) row.get("deviceName"));
             hourlyAverageAirData.setStationName((String) row.get("stationName"));
+//            hourlyAverageAirData.setCreatedAt(createAt);
 
             // 数据校准逻辑
             String deptId = (String) row.get("deptId");
@@ -811,7 +836,7 @@ public class AirDataHourServiceImpl implements AirDataHourService {
 
         Double pm10 = data.getAveragePm10();
         logger.info("PM10 before calibration: {}", pm10);
-
+//        Date date =data.getCreatedAt();
         List<DataQueryCountry> queryCountries = dataQueryCountryMapper.selectDataQueryCountryByName(controlStation);
 
         DataQueryCountry queryCountry = queryCountries.stream()
@@ -1003,7 +1028,6 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         metrics.put("averageO3", round(calculateAverage(reports, AirDataHour::getCo3Thickness)));
         metrics.put("averagePm2_5", round(calculateAverage(reports, AirDataHour::getPm25)));
         metrics.put("averagePm10", round(calculateAverage(reports, AirDataHour::getPm10)));
-
         Double averageAqi = (Double) metrics.get("averageAqi");
         metrics.put("level", getAqiLevel(averageAqi));
         metrics.put("quality", getAqiQuality(averageAqi));

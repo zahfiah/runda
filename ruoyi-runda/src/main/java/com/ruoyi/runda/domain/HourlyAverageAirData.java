@@ -80,6 +80,15 @@ public class HourlyAverageAirData extends BaseEntity
     @Excel(name = "级别")
     @Column(name = "aqi_level")
     private String aqiLevel;
+    /** 温度 */
+    @Excel(name = "温度")
+    @Column(name = "wd")
+    private String wd;
+
+    /** 湿度 */
+    @Excel(name = "湿度")
+    @Column(name = "sd")
+    private String sd;
 
     /** 质量 */
     @Excel(name = "质量")
@@ -255,6 +264,26 @@ public class HourlyAverageAirData extends BaseEntity
     public String getAqiColor() 
     {
         return aqiColor;
+    }
+
+    public void setWd(String wd)
+    {
+        this.wd = wd;
+    }
+
+    public String getWd()
+    {
+        return wd;
+    }
+
+    public void setSd(String sd)
+    {
+        this.sd = sd;
+    }
+
+    public String getSd()
+    {
+        return sd;
     }
     public void setPrimaryPollutant(String primaryPollutant) 
     {

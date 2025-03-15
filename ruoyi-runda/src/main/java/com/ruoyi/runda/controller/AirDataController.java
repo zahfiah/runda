@@ -12,6 +12,7 @@ import com.ruoyi.runda.service.impl.HourlyAverageAirDataServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,7 +35,6 @@ public class AirDataController extends BaseController {
 
     @Autowired
     private AirDataHourService airDataHourService;
-
     @GetMapping("/average-by-hour")
     public TableDataInfo averageByDateTime(@RequestParam String dateTime) throws Exception {
         TableDataInfo tableDataInfo = airDataHourService.calculateAverageForSpecificDateTime(dateTime);

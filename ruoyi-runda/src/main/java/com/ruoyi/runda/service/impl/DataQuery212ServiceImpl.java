@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -25,14 +26,14 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DataQuery212ServiceImpl implements DataQuery212Service {
@@ -51,27 +52,39 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
     @Override
     public TableDataInfo selectDataQuery212ListByDeviceId(String deviceId, int page, int size) {
         try {
+
+
             // 创建分页对象
             Pageable pageable = PageRequest.of(page - 1, size);
-            logger.debug("Device ID: {}, Page: {}, Size: {}", deviceId, page, size);
-            // 调用 DataQuery212Overwrite 接口的 findByDeviceId 方法，获取转换后的 DataQuery212 数据
-            Page<DataQuery212> dataQuery212Page = dataQuery212OVRepository.findByDeviceId(deviceId, pageable);
-            // 封装返回结果
-            TableDataInfo result = new TableDataInfo();
-            result.setCode(0);
-            result.setMsg("ok");
-            result.setTotal(dataQuery212Page.getTotalElements());
-            result.setRows(dataQuery212Page.getContent());
 
-            return result;
+            String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+            // 使用线程安全的日期时间类
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate localDate = LocalDate.parse(date, formatter);
+            ZoneId zoneId = ZoneId.systemDefault();
+            Date startDate = Date.from(localDate.atStartOfDay(zoneId).toInstant());
+            Date endDate = Date.from(localDate.atTime(23, 59, 59, 999_999_999).atZone(zoneId).toInstant());
+
+            long startTimestamp = startDate.getTime();
+            long endTimestamp = endDate.getTime();
+
+            logger.debug("startTimestamp: {}, endTimestamp: {}", startTimestamp, endTimestamp);
+
+            // 查询 AirDataResult 数据
+            Page<DataQuery212> dataQuery212Page = dataQuery212OVRepository.findByCreateDateBetween(startTimestamp, endTimestamp, pageable);
+
+            // 封装返回结果
+            return buildTableDataInfo(dataQuery212Page);
+        } catch (DateTimeParseException e) {
+            logger.error("Error parsing date", e);
+            return buildErrorResult("Invalid date format. Please use yyyy-MM-dd.");
         } catch (Exception e) {
-            // 异常处理
-            TableDataInfo errorResult = new TableDataInfo();
-            errorResult.setCode(-1);
-            errorResult.setMsg(e.getMessage());
-            return errorResult;
+            logger.error("Error while fetching data", e);
+            return buildErrorResult(e.getMessage());
         }
     }
+
 
 
 
@@ -90,31 +103,58 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
     @Override
     public TableDataInfo selectDataQuery212ListByDate(String dateStr, int page, int size) {
         try {
+            // 设置时区为 Asia/Shanghai (UTC+8)
+            TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
+
+            // 解析日期字符串
             Date startDate = dateFormat.parse(dateStr);
             long startTimestamp = startDate.getTime();
-            long endTimestamp = startTimestamp + 24 * 60 * 60 * 1000L - 1;
-            Pageable pageable = PageRequest.of(page - 1, size);
-            logger.debug("startTimestamp: {}, endTimestamp: {}", startTimestamp, endTimestamp);
+            long endTimestamp = startTimestamp + 24 * 60 * 60 * 1000L - 1; // 当天 23:59:59
+
+            // 获取当前中国时间戳
+            ZoneId zoneId = ZoneId.of("Asia/Shanghai");
+            ZonedDateTime zonedDateTime = ZonedDateTime.now(zoneId);
+            long currentTimestamp = zonedDateTime.toInstant().toEpochMilli();
+
+            // 如果结束时间大于当前时间，则使用当前时间作为结束时间
+            if (endTimestamp > currentTimestamp) {
+                endTimestamp = currentTimestamp;
+            }
+
+            Pageable pageable = PageRequest.of(page - 1, size); // 分页参数（页码从 0 开始）
+            logger.debug("startTimestamp (UTC+8): {}, endTimestamp (UTC+8): {}", startTimestamp, endTimestamp);
 
             // 查询 AirDataResult 数据
             Page<DataQuery212> dataQuery212Page = dataQuery212OVRepository.findByCreateDateBetween(startTimestamp, endTimestamp, pageable);
-
-
-
             logger.debug("Total number of records found: {}", dataQuery212Page.getTotalElements());
-            if (logger.isDebugEnabled()) {
-                for (DataQuery212 data : dataQuery212Page.getContent()) {
-                    logger.debug("DataQuery212: {}", data);
-                }
-            }
+
+            // 过滤未来数据
+            List<DataQuery212> filteredData = dataQuery212Page.getContent().stream()
+                    .filter(data -> {
+                        long dataTimestamp = data.getDate().getTime(); // 假设 createDate 是时间戳字段
+                        return dataTimestamp <= currentTimestamp; // 只保留小于等于当前时间的数据
+                    })
+                    .collect(Collectors.toList());
+
+            logger.debug("Number of records after filtering future data: {}", filteredData.size());
+
+            // 重新封装分页数据
+            // 注意：这里使用 dataQuery212Page.getTotalElements() 作为总条数，而不是 filteredData.size()
+            Page<DataQuery212> filteredPage = new PageImpl<>(
+                    filteredData, // 过滤后的数据
+                    pageable, // 分页参数
+                    dataQuery212Page.getTotalElements() // 使用原始查询的总条数
+            );
 
             TableDataInfo result = new TableDataInfo();
             result.setCode(0);
             result.setMsg("ok");
-            result.setTotal(dataQuery212Page.getTotalElements());
-            result.setRows(dataQuery212Page.getContent());
+            result.setTotal(filteredPage.getTotalElements()); // 返回原始查询的总条数
+            result.setRows(filteredPage.getContent()); // 返回过滤后的当前页数据
             return result;
+
         } catch (ParseException e) {
             logger.error("Error parsing date", e);
             TableDataInfo errorResult = new TableDataInfo();
@@ -129,7 +169,6 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
             return errorResult;
         }
     }
-
 
     public void exportToExcel(HttpServletResponse response, List<DataQuery212> dataList) throws IOException {
         Workbook workbook = new XSSFWorkbook();
@@ -191,20 +230,18 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
 
     @Override
     public TableDataInfo selectDataQuery212ListByDateAndDeviceId(String deviceId, String date, int page, int size) {
+        // 使用线程安全的日期时间类
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        // 时区
+        ZoneId zoneId = ZoneId.of("Asia/Shanghai");
+
         try {
-            // 检查 page 和 size 的有效性
-            if (page <= 0 || size <= 0) {
-                return createErrorResult("Invalid page or size parameters");
-            }
-
-            // 使用线程安全的日期时间类
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             LocalDate localDate = LocalDate.parse(date, formatter);
-            LocalDate startDate = localDate.atStartOfDay().toLocalDate();
-            LocalDate endDate = localDate.plusDays(1).atStartOfDay().toLocalDate();
+            ZonedDateTime startDateTime = localDate.atStartOfDay(zoneId);
+            ZonedDateTime endDateTime = localDate.plusDays(1).atStartOfDay(zoneId);
 
-            long startTimestamp = startDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
-            long endTimestamp = endDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
+            long startTimestamp = startDateTime.toInstant().toEpochMilli();
+            long endTimestamp = endDateTime.toInstant().toEpochMilli();
 
             Pageable pageable = PageRequest.of(page - 1, size);
             logger.debug("deviceId: {}, startTimestamp: {}, endTimestamp: {}", deviceId, startTimestamp, endTimestamp);
@@ -235,8 +272,8 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
             logger.error("Error while fetching data", e);
             return createErrorResult(e.getMessage());
         }
-
     }
+
 
     private TableDataInfo createErrorResult(String msg) {
         TableDataInfo errorResult = new TableDataInfo();
