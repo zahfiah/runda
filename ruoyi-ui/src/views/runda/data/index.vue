@@ -8,28 +8,25 @@
         </el-select>
       </el-form-item>
 
-
       <!-- 小时类型的选择器 -->
-      <template v-if="queryParams.timeType === 'hour'">
-        <el-form-item label="选择日期" prop="selectedDate">
-          <el-date-picker v-model="queryParams.selectedDate" type="date" placeholder="选择日期" value-format="yyyy-MM-dd"
-            format="yyyy-MM-dd" />
-        </el-form-item>
-        <el-form-item label="开始时间" prop="startHour">
-          <el-time-select v-model="queryParams.startHour" :picker-options="{
-            start: '00:00',
-            step: '01:00',
-            end: '23:00',
-          }" placeholder="选择开始时间" />
-        </el-form-item>
-        <el-form-item label="结束时间" prop="endHour">
-          <el-time-select v-model="queryParams.endHour" :picker-options="{
-            start: '00:00',
-            step: '01:00',
-            end: '23:59',
-          }" placeholder="选择结束时间" :min-time="queryParams.startHour" />
-        </el-form-item>
-      </template>
+      <el-form-item label="选择日期" prop="selectedDate">
+        <el-date-picker v-model="queryParams.selectedDate" type="date" placeholder="选择日期" value-format="yyyy-MM-dd"
+          format="yyyy-MM-dd" />
+      </el-form-item>
+      <el-form-item label="开始时间" prop="startHour">
+        <el-time-select v-model="queryParams.startHour" :picker-options="{
+          start: '00:00',
+          step: '01:00',
+          end: '23:00',
+        }" placeholder="选择开始时间" />
+      </el-form-item>
+      <el-form-item label="结束时间" prop="endHour">
+        <el-time-select v-model="queryParams.endHour" :picker-options="{
+          start: '00:00',
+          step: '01:00',
+          end: '23:59',
+        }" placeholder="选择结束时间" :min-time="queryParams.startHour" />
+      </el-form-item>
 
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -51,13 +48,11 @@
 
     <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <!-- <el-table-column label="城市名称" align="center" prop="deptId" /> -->
       <el-table-column label="站点名称" align="center" prop="stationName" />
       <el-table-column label="设备名称" align="center" prop="deviceName" />
-      <el-table-column label="日期" align="center" :prop="queryParams.timeType === 'date' ? 'date' : 'dateTimeStr'"
-        width="100">
+      <el-table-column label="日期" align="center" prop="dateTimeStr" width="100">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row[queryParams.timeType === 'date' ? 'date' : 'dateTimeStr']) }}</span>
+          <span>{{ parseTime(scope.row.dateTimeStr) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="so2浓度(μg/m³)" align="center" prop="averageSo2">
@@ -157,18 +152,15 @@ export default {
         pageNum: 1,
         pageSize: 10,
         deviceId: null,
-        timeType: "hour", // 默认选择小时类型
-        selectedDate: new Date().toLocaleDateString().replace(/\//g, "-"),
-        startHour: "01:00",
+        selectedDate: null,
+        startHour: null,
         endHour: null,
       },
-
       // 表单校验
       rules: {
         deviceId: [
           { required: true, message: '请选择设备', trigger: 'blur' }
         ],
-        // ],
         selectedDate: [
           { required: true, message: '请选择日期', trigger: 'blur' }
         ],
@@ -182,8 +174,8 @@ export default {
     };
   },
   created() {
-    this.getList();
-    this.getDeviceList(); // 新增设备列表获取
+    this.fetchInitialData(); // 页面加载时获取初始数据
+    this.getDeviceList();
   },
   methods: {
     // 新增设备相关方法
@@ -278,39 +270,28 @@ export default {
     },
 
     async getList() {
-      this.loading = true;
+      this.loading = true; // 显示加载圈
+      if (!this.validateHourParams()) return;
 
-      if (this.queryParams.timeType === 'hour') {
-        if (!this.validateHourParams()) return;
+      const hours = this.generateHourRange(
+        this.queryParams.startHour,
+        this.queryParams.endHour
+      );
 
-        const hours = this.generateHourRange(
-          this.queryParams.startHour,
-          this.queryParams.endHour
+      try {
+        const responses = await Promise.all(
+          hours.map(hour => this.fetchHourData(hour))
         );
-
-        try {
-          const responses = await Promise.all(
-            hours.map(hour => this.fetchHourData(hour))
-          );
-
-          this.processData(responses);
-        } catch (error) {
-          this.handleDataError(error);
-        }
+        this.processData(responses);
+      } catch (error) {
+        this.handleDataError(error);
+      } finally {
+        this.loading = false; // 确保加载圈关闭
       }
-
-      this.loading = false;
     },
 
     validateHourParams() {
-      if (this.queryParams.timeType === 'hour' && !this.queryParams.deviceId) {
-        if (!this.queryParams.selectedDate || !this.queryParams.startHour) {
-          this.loading = false;
-          return false;
-        }
-        return true;
-      }
-      if (!this.queryParams.deviceId || !this.queryParams.selectedDate || !this.queryParams.startHour) {
+      if (!this.queryParams.selectedDate || !this.queryParams.startHour) {
         this.loading = false;
         return false;
       }
@@ -427,7 +408,6 @@ export default {
         pageNum: 1,
         pageSize: 10,
         deviceId: null,
-        timeType: "hour", // 固定为小时
         selectedDate: null,
         startHour: null,
         endHour: null
@@ -492,7 +472,46 @@ export default {
       this.download('runda/data/export', {
         ...this.queryParams
       }, `data_${new Date().getTime()}.xlsx`)
-    }
+    },
+    async fetchInitialData() {
+      this.loading = true; // 显示加载圈
+      try {
+        const response = await request({
+          url: "http://localhost:8080/runda/air/list-hour-data",
+          method: "get",
+        });
+        if (response && response.code === 200) {
+          this.processInitialData(response.data);
+        } else {
+          this.$message.error("获取初始数据失败");
+        }
+      } catch (error) {
+        console.error("获取初始数据失败：", error);
+        this.$message.error("获取初始数据失败");
+      } finally {
+        this.loading = false; // 确保加载圈关闭
+      }
+    },
+    processInitialData(data) {
+      if (Array.isArray(data) && data.length > 0) {
+        // 分页处理
+        const paginatedData = data.slice(
+          (this.queryParams.pageNum - 1) * this.queryParams.pageSize,
+          this.queryParams.pageNum * this.queryParams.pageSize
+        );
+        this.dataList = paginatedData.map(item => ({
+          ...item,
+          dateTimeStr: item.createdAt, // 将 createdAt 映射到 dateTimeStr
+          averagePm2_5: item.averagePm25, // 新增：映射小时pm25浓度字段
+          level: item.aqiLevel, // 新增：映射级别字段
+          quality: item.aqiQuality, // 新增：映射质量字段
+          color: item.aqiColor, // 新增：映射颜色字段
+        }));
+        this.total = data.length;
+      } else {
+        this.$message.warning("未找到初始数据");
+      }
+    },
   }
 };
 </script>
