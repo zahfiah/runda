@@ -1,6 +1,8 @@
 package com.ruoyi.runda.service.impl;
 
 import java.util.List;
+
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.runda.mapper.StationMapper;
@@ -52,6 +54,7 @@ public class StationServiceImpl implements IStationService
     @Override
     public int insertStation(Station station)
     {
+
         return stationMapper.insertStation(station);
     }
 

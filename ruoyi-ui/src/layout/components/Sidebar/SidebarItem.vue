@@ -65,22 +65,20 @@ export default {
   //   this.message_num(this.onlyOneChild.meta)
   // },
   methods: {
-    message_num(data) {
-      if (data.title == '消息通知') {//判断自己需要传入的标题，不然你标题多的时候会请求很多次
-        // console.log(data)
-        //this.loading = true;
-        isRead(this.queryParams).then(response => {
-          console.log(response)
-          this.num = response;
-          console.log(this.num);
-          //this.total = response.total;
-          //this.loading = false;
-
-        });
-        return this.num;
-      }
+    refreshMessageNum() {
+    if (this.onlyOneChild?.meta?.title === '消息通知') {
+      this.message_num(this.onlyOneChild.meta)
     }
-    ,
+  },
+  message_num(data) {
+    if (data.title == '消息通知') {
+      isRead().then(response => { // 去掉参数传递
+        this.num = response;
+        this.$forceUpdate(); // 强制更新视图
+      });
+      return this.num;
+    }
+  },
     hasOneShowingChild(children = [], parent) {
       if (!children) {
         children = [];

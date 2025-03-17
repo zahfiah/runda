@@ -9,14 +9,14 @@
                         placeholder="请选择创建时间">
         </el-date-picker>
       </el-form-item>
-      <el-form-item label="是否已读(0未读 1已读）" prop="isRead">
+      <!-- <el-form-item label="是否已读" prop="isRead">
         <el-input
           v-model="queryParams.isRead"
-          placeholder="请输入是否已读(0未读 1已读）"
+          placeholder="请输入是否已读"
           clearable
           @keyup.enter.native="handleQuery"
         />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="备注" prop="remark">
         <el-input
           v-model="queryParams.remark"
@@ -32,7 +32,7 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="primary"
           plain
@@ -52,7 +52,7 @@
           @click="handleUpdate"
           v-hasPermi="['runda:message:edit']"
         >修改</el-button>
-      </el-col>
+      </el-col> -->
       <el-col :span="1.5">
         <el-button
           type="danger"
@@ -79,14 +79,18 @@
 
     <el-table v-loading="loading" :data="messageList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键id" align="center" prop="id" />
+      <!-- <el-table-column label="主键id" align="center" prop="id" /> -->
       <el-table-column label="消息内容" align="center" prop="content" />
       <el-table-column label="创建时间" align="center" prop="time" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.time, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="是否已读(0未读 1已读）" align="center" prop="isRead" />
+      <el-table-column label="是否已读" align="center" prop="isRead">
+        <template slot-scope="scope">
+          <span>{{ scope.row.isRead === 1 ? '已读' : '未读' }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -97,13 +101,13 @@
             @click="uRead(scope.row)"
             v-hasPermi="['runda:message:updateRead']"
           >详情</el-button>
-          <el-button
+          <!-- <el-button
             size="mini"
             type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['runda:message:edit']"
-          >修改</el-button>
+          >修改</el-button> -->
           <el-button
             size="mini"
             type="text"
@@ -306,16 +310,14 @@ export default {
     //已读
     cl() {
       updateRead(this.form).then(response => {
-        console.log(this.form)
         this.$modal.msgSuccess("已读");
-        //this.iR = false;
+        // 触发侧边栏更新
+        if (window.__$sidebar) {
+          window.__$sidebar.refreshMessageNum();
+        }
+        this.iR = false;
         this.getList();
       });
-      this.iR = false;
-
-      this.reset();
-      this.reload();
-
     }
   }
 };

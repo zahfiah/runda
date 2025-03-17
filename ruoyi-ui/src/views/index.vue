@@ -228,7 +228,7 @@ export default {
     return {
       isStatsVisible: false,
       zjkRegions: regions.counties
-        .filter(county => county.city === '1307')
+        .filter(county => county.city === '130700')
         .map(item => ({ 
           value: item.value, 
           label: item.label.replace('区', '') // 去除"区"字尾

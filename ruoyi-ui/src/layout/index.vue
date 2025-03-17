@@ -23,6 +23,10 @@ import { mapState } from 'vuex'
 import variables from '@/assets/styles/variables.scss'
 
 export default {
+  mounted() {
+    // 将侧边栏实例挂载到window对象
+    window.__$sidebar = this.$refs.sidebar;
+  },
   name: 'Layout',
   components: {
     AppMain,

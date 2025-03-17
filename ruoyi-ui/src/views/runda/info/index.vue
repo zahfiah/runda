@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="县级id" prop="userId">
-        <el-input v-model="queryParams.userId" placeholder="请输入县级id" clearable @keyup.enter.native="handleQuery" />
+      <el-form-item label="联系人" prop="userName">
+        <el-input v-model="queryParams.userName" placeholder="请输入联系人" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item label="设备名称" prop="deviceName">
         <el-input v-model="queryParams.deviceName" placeholder="请输入设备名称" clearable @keyup.enter.native="handleQuery" />
@@ -14,14 +14,14 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd"
           v-hasPermi="['runda:info:add']">新增</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button type="success" plain icon="el-icon-edit" size="mini" :disabled="single" @click="handleUpdate"
           v-hasPermi="['runda:info:edit']">修改</el-button>
-      </el-col>
+      </el-col> -->
       <el-col :span="1.5">
         <el-button type="danger" plain icon="el-icon-delete" size="mini" :disabled="multiple" @click="handleDelete"
           v-hasPermi="['runda:info:remove']">删除</el-button>
@@ -35,7 +35,7 @@
 
     <el-table v-loading="loading" :data="infoList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" />
+      <!-- <el-table-column label="主键" align="center" prop="id" /> -->
       <el-table-column label="联系人" align="center" prop="userName" />
       <el-table-column label="手机号" align="center" prop="phoneNumber" />
       <el-table-column label="短信模板" align="center" prop="smsTem" />
@@ -43,12 +43,12 @@
       <el-table-column label="失败原因" align="center" prop="smsFail" />
       <el-table-column label="创建时间" align="center" prop="createDate" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.createDate, '{y}-{m}-{d}') }}</span>
+          <span>{{ parseTime(scope.row.createDate, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="更新时间" align="center" prop="lastUpdatedDate" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.lastUpdatedDate, '{y}-{m}-{d}') }}</span>
+          <span>{{ parseTime(scope.row.lastUpdatedDate, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="设备状态" align="center" prop="status" />
@@ -182,7 +182,7 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        userId: null,
+        userName: null,
         deviceName: null,
       },
       // 表单参数

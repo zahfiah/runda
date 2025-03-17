@@ -38,7 +38,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="selectAlarmInfoList" parameterType="AlarmInfo" resultMap="AlarmInfoResult">
         <include refid="selectAlarmInfoVo"/>
         <where>  
-            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="userName != null "> and user_name = #{userName}</if>
             <if test="deviceName != null  and deviceName != ''"> and device_name like concat('%', #{deviceName}, '%')</if>
         </where>
     </select>

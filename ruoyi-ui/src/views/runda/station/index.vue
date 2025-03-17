@@ -33,6 +33,7 @@
     </el-row>
 
     <el-table v-loading="loading" :data="stationList" @selection-change="handleSelectionChange">
+      <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="监测站" align="center" prop="stationName" />
       <el-table-column label="监测站类型" align="center" prop="type">
         <template slot-scope="scope">
@@ -109,26 +110,35 @@
             <el-form-item label="占地面积" prop="floorSpace">
               <el-input v-model="form.floorSpace" placeholder="请输入占地面积" />
             </el-form-item>
-            <el-form-item label="省" prop="provinceCn">
+            <el-form-item label="省" prop="provinceCn" required>
               <el-select v-model="form.provinceCn" placeholder="请输入省名称" @change="onProvinceChange">
                 <el-option v-for="item in regions.provinces" :key="item.value" :label="item.label"
                   :value="item.label"></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="市" prop="cityCn">
+            <el-form-item label="市" prop="cityCn" required>
               <el-select v-model="form.cityCn" placeholder="请输入市昵称" @change="onCityChange">
                 <el-option v-for="item in cities" :key="item.value" :label="item.label" :value="item.label"></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="区" prop="countyCn">
+            <el-form-item label="区" prop="countyCn" required>
               <el-select v-model="form.countyCn" placeholder="请输入区/县昵称" @change="onCountyChange">
                 <el-option v-for="item in counties" :key="item.value" :label="item.label"
                   :value="item.label"></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="乡镇" prop="townCn">
-              <el-select v-model="form.townCn" placeholder="请输入乡/镇昵称">
-                <el-option v-for="item in towns" :key="item.value" :label="item.label" :value="item.label"></el-option>
+            <el-form-item label="乡镇" prop="townCn" required>
+              <el-select 
+                v-model="form.townCn" 
+                placeholder="请输入乡/镇昵称"
+                @change="onTownChange"  
+              >
+                <el-option 
+                  v-for="item in towns" 
+                  :key="item.value" 
+                  :label="item.label" 
+                  :value="item.label"
+                />
               </el-select>
             </el-form-item>
             <el-form-item label="备注" prop="remark">
@@ -278,7 +288,16 @@ export default {
         licensNumber: null,
       },
       // 表单参数
-      form: {},
+      form: {
+        province: null,    // 新增：存储省的编码
+        provinceCn: null,  
+        city: null,       // 新增：存储市的编码
+        cityCn: null,
+        county: null,     // 新增：存储区的编码
+        countyCn: null,
+        town: null,       // 新增：存储乡镇的编码
+        townCn: null,
+      },
       // 表单校验
       rules: {
         stationName: [
@@ -331,6 +350,18 @@ export default {
         ],
         sfazjcsb: [
           { required: true, message: "PM10是否安装不能为空", trigger: "change" }
+        ],
+        provinceCn: [
+          { required: true, message: "省不能为空", trigger: "change" }
+        ],
+        cityCn: [
+          { required: true, message: "市不能为空", trigger: "change" }
+        ],
+        countyCn: [
+          { required: true, message: "区/县不能为空", trigger: "change" }
+        ],
+        townCn: [
+          { required: true, message: "乡镇不能为空", trigger: "change" }
         ],
       },
       // 设备详情对话框可见性
@@ -475,20 +506,37 @@ export default {
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
-      this.reset();
-      const id = row.id || this.ids;
-      getStation(id).then(response => {
-        this.form = response.data;
+    this.reset();
+    const id = row.id || this.ids;
+    getStation(id).then(response => {
+      this.form = response.data;
 
-        // 初始化城市、区县和乡镇选项
-        this.cities = this.regions.cities.filter(city => city.province === this.regions.provinces.find(p => p.label === this.form.provinceCn)?.value);
-        this.counties = this.regions.counties.filter(county => county.city === this.regions.cities.find(c => c.label === this.form.cityCn)?.value);
-        this.towns = this.regions.towns.filter(town => town.county === this.regions.counties.find(c => c.label === this.form.countyCn)?.value);
+      // 根据已有中文名称反向查找编码
+      const provinceObj = this.regions.provinces.find(p => p.label === this.form.provinceCn);
+      if (provinceObj) {
+        this.form.province = provinceObj.value;
+        this.cities = this.regions.cities.filter(city => city.province === provinceObj.value);
+      }
 
-        this.open = true;
-        this.title = "修改监测站点管理";
-      });
-    },
+      const cityObj = this.regions.cities.find(c => c.label === this.form.cityCn);
+      if (cityObj) {
+        this.form.city = cityObj.value;
+        this.counties = this.regions.counties.filter(county => county.city === cityObj.value);
+      }
+
+      const countyObj = this.regions.counties.find(c => c.label === this.form.countyCn);
+      if (countyObj) {
+        this.form.county = countyObj.value;
+        this.towns = this.regions.towns.filter(town => town.county === countyObj.value);
+      }
+
+      const townObj = this.regions.towns.find(t => t.label === this.form.townCn);
+      if (townObj) this.form.town = townObj.value;
+
+      this.open = true;
+      this.title = "修改监测站点管理";
+    });
+  },
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
@@ -551,24 +599,59 @@ export default {
       this.deviceDialogVisible = false;
       this.selectedDevices = [];
     },
-    onProvinceChange(province) {
-      this.cities = this.regions.cities.filter(city => city.province === this.regions.provinces.find(p => p.label === province)?.value);
-      this.counties = [];
-      this.towns = [];
-      this.form.cityCn = '';
-      this.form.countyCn = '';
-      this.form.townCn = '';
-    },
-    onCityChange(city) {
-      this.counties = this.regions.counties.filter(county => county.city === this.regions.cities.find(c => c.label === city)?.value);
-      this.towns = [];
-      this.form.countyCn = '';
-      this.form.townCn = '';
-    },
-    onCountyChange(county) {
-      this.towns = this.regions.towns.filter(town => town.county === this.regions.counties.find(c => c.label === county)?.value);
-      this.form.townCn = '';
+  // 省选择事件
+  onProvinceChange(provinceLabel) {
+    const province = this.regions.provinces.find(p => p.label === provinceLabel);
+    if (province) {
+      this.form.province = province.value; // 保存编码
+      this.form.provinceCn = provinceLabel; // 保存中文名
+      this.cities = this.regions.cities.filter(city => city.province === province.value);
     }
+    this.counties = [];
+    this.towns = [];
+    this.form.city = '';
+    this.form.cityCn = '';
+    this.form.county = '';
+    this.form.countyCn = '';
+    this.form.town = '';
+    this.form.townCn = '';
+  },
+
+  // 市选择事件
+  onCityChange(cityLabel) {
+    const city = this.regions.cities.find(c => c.label === cityLabel);
+    if (city) {
+      this.form.city = city.value; // 保存编码
+      this.form.cityCn = cityLabel; // 保存中文名
+      this.counties = this.regions.counties.filter(county => county.city === city.value);
+    }
+    this.towns = [];
+    this.form.county = '';
+    this.form.countyCn = '';
+    this.form.town = '';
+    this.form.townCn = '';
+  },
+
+  // 区选择事件
+  onCountyChange(countyLabel) {
+    const county = this.regions.counties.find(c => c.label === countyLabel);
+    if (county) {
+      this.form.county = county.value; // 保存编码
+      this.form.countyCn = countyLabel; // 保存中文名
+      this.towns = this.regions.towns.filter(town => town.county === county.value);
+    }
+    this.form.town = '';
+    this.form.townCn = '';
+  },
+
+  // 乡镇选择事件（新增）
+  onTownChange(townLabel) {
+    const town = this.regions.towns.find(t => t.label === townLabel);
+    if (town) {
+      this.form.town = town.value; // 保存编码
+      this.form.townCn = townLabel; // 保存中文名
+    }
+  }
   }
 };
 </script>

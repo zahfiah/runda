@@ -6,7 +6,6 @@
 
     <resultMap type="Station" id="StationResult">
         <result property="id"    column="id"    />
-<!--        <result property="stationAddr"    column="station_addr"    />-->
         <result property="stationName"    column="station_name"    />
         <result property="riverName"    column="river_name"    />
         <result property="riverCode"    column="river_code"    />
@@ -26,7 +25,6 @@
         <result property="town"    column="town"    />
         <result property="townCn"    column="town_cn"    />
         <result property="userId"    column="user_id"    />
-<!--        <result property="systemUserId"    column="system_user_id"    />-->
         <result property="createdTime"    column="created_time"    />
         <result property="lastUpdatedTime"    column="last_updated_time"    />
         <result property="longitude"    column="longitude"    />
@@ -51,7 +49,6 @@
         <result property="sgjd"    column="sgjd"    />
         <result property="sfazjcsb"    column="sfazjcsb"    />
         <result property="jgrq"    column="jgrq"    />
-<!--        <result property="deviceId"    column="device_id"    />-->
     </resultMap>
 
     <sql id="selectStationVo">
@@ -78,7 +75,7 @@
         insert into station
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null">id,</if>
---             <if test="stationAddr != null">station_addr,</if>
+            <!-- <if test="stationAddr != null">station_addr,</if> -->
             <if test="stationName != null and stationName != ''">station_name,</if>
             <if test="riverName != null">river_name,</if>
             <if test="riverCode != null">river_code,</if>
@@ -97,7 +94,7 @@
             <if test="countyCn != null">county_cn,</if>
             <if test="town != null">town,</if>
             <if test="townCn != null">town_cn,</if>
---             <if test="userId != null">user_id,</if>
+            <!-- <if test="userId != null">user_id,</if> -->
             <if test="systemUserId != null">system_user_id,</if>
             <if test="createdTime != null">created_time,</if>
             <if test="lastUpdatedTime != null">last_updated_time,</if>
@@ -123,11 +120,11 @@
             <if test="sgjd != null and sgjd != ''">sgjd,</if>
             <if test="sfazjcsb != null and sfazjcsb != ''">sfazjcsb,</if>
             <if test="jgrq != null">jgrq,</if>
---             <if test="deviceId != null">device_id,</if>
+            <!-- <if test="deviceId != null">device_id,</if> -->
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">#{id},</if>
---             <if test="stationAddr != null">#{stationAddr},</if>
+            <!-- <if test="stationAddr != null">#{stationAddr},</if> -->
             <if test="stationName != null and stationName != ''">#{stationName},</if>
             <if test="riverName != null">#{riverName},</if>
             <if test="riverCode != null">#{riverCode},</if>
@@ -146,7 +143,7 @@
             <if test="countyCn != null">#{countyCn},</if>
             <if test="town != null">#{town},</if>
             <if test="townCn != null">#{townCn},</if>
---             <if test="userId != null">#{userId},</if>
+            <!-- <if test="userId != null">#{userId},</if> -->
             <if test="systemUserId != null">#{systemUserId},</if>
             <if test="createdTime != null">#{createdTime},</if>
             <if test="lastUpdatedTime != null">#{lastUpdatedTime},</if>
@@ -172,9 +169,10 @@
             <if test="sgjd != null and sgjd != ''">#{sgjd},</if>
             <if test="sfazjcsb != null and sfazjcsb != ''">#{sfazjcsb},</if>
             <if test="jgrq != null">#{jgrq},</if>
---             <if test="deviceId != null">#{deviceId},</if>
+            <!-- <if test="deviceId != null">#{deviceId},</if> -->
         </trim>
     </insert>
+
 
     <update id="updateStation" parameterType="Station">
         update station
