@@ -1,6 +1,7 @@
 package com.ruoyi.runda.controller;
 
 import com.ruoyi.common.core.controller.BaseController;
+import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.runda.domain.AirDataHour;
 import com.ruoyi.runda.domain.DataQuery212;
@@ -68,11 +69,6 @@ public class AirDataController extends BaseController {
     }
 
 
-    @GetMapping("/daily-average-pm25-and-pm10")
-    public TableDataInfo dailyAveragePm25AndPm10(@RequestParam String date) throws Exception {
-        return airDataHourService.calculateDailyAveragePm25AndPm10ForAllDevices(date);
-    }
-
 
     private List<AirDataHour> convertMapListToAirDataHourList(List<Map<String, Object>> mapList) {
         List<AirDataHour> dataList = new ArrayList<>();
@@ -101,6 +97,12 @@ public class AirDataController extends BaseController {
             dataList.add(airDataHour);
         }
         return dataList;
+    }
+
+    @GetMapping("/list-hour-data")
+    public AjaxResult list() throws ParseException {
+        List<HourlyAverageAirData> list = airDataHourService.selectDataList();
+        return success(list);
     }
 
 }

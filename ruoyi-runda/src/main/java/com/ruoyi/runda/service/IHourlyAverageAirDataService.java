@@ -37,5 +37,4 @@ public interface IHourlyAverageAirDataService
             @Param("endDate") Date endDate
     );
 
-
 }

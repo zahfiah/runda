@@ -63,4 +63,6 @@ public interface DeviceMapper
   public   List<Device> selectAllDevice();
     @Select("select id,name from device")
     List<Device> selectIdAndName();
+    @Select("select is_yunwei from device where id=#{id}")
+    Integer getIsYunwei(String deviceId);
 }

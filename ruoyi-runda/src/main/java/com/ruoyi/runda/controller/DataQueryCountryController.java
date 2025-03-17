@@ -42,7 +42,7 @@ public class DataQueryCountryController extends BaseController
      * @throws
      */
     //@PreAuthorize("@ss.hasPermi('runda:country:api')")
-//    @Scheduled(cron = "0 0 * * * ?")
+    @Scheduled(cron = "0 0 * * * ?")
     @GetMapping("/getApi")
     //@ResponseBody
     public String newsApi() throws Exception {

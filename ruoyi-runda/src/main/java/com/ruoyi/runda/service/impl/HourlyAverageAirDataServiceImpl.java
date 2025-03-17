@@ -55,4 +55,5 @@ public class HourlyAverageAirDataServiceImpl implements IHourlyAverageAirDataSer
         return hourlyAverageAirDataMapper.calculateDailyHourlyAverage(deviceId, startDate, endDate );
     }
 
+
 }

@@ -2,6 +2,7 @@ package com.ruoyi.runda.service;
 
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.runda.domain.AirDataHour;
+import com.ruoyi.runda.domain.HourlyAverageAirData;
 import org.springframework.data.domain.Pageable;
 
 import javax.servlet.http.HttpServletResponse;
@@ -27,5 +28,6 @@ public interface AirDataHourService {
 
     void exportToExcel(HttpServletResponse response, List<AirDataHour> dataList) throws IOException;
 
-    TableDataInfo calculateDailyAveragePm25AndPm10ForAllDevices(String date) throws Exception;
+
+    List<HourlyAverageAirData> selectDataList() throws ParseException;
 }
