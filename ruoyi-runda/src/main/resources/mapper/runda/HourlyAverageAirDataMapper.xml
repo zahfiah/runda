@@ -45,6 +45,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
 
+    <select id="calculateDailyHourlyAverage" resultType="map">
+        SELECT
+        AVG(average_pm2_5) as avg25,
+        AVG(average_pm10) as avg10
+        FROM hourly_average_air_data
+        <where>
+            <if test="deviceId != null and deviceId != ''">
+                AND device_id = #{deviceId}
+            </if>
+            <if test="startDate != null and endDate != null">
+                AND created_at BETWEEN #{startDate} AND #{endDate}
+            </if>
+        </where>
+    </select>
+
 
     <insert id="insertHourlyAverageAirData" parameterType="HourlyAverageAirData" useGeneratedKeys="true" keyProperty="id">
         insert into hourly_average_air_data

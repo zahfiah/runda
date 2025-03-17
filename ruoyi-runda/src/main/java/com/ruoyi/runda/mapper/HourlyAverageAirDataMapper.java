@@ -1,7 +1,11 @@
 package com.ruoyi.runda.mapper;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
 import com.ruoyi.runda.domain.HourlyAverageAirData;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 /**
@@ -35,6 +39,14 @@ public interface HourlyAverageAirDataMapper
      * @return 结果
      */
     public int insertHourlyAverageAirData(HourlyAverageAirData hourlyAverageAirData);
+
+    //计算24小时平均值
+
+    List<Map<String, Object>> calculateDailyHourlyAverage(
+            @Param("deviceId") String deviceId,
+            @Param("startDate") Date startDate,
+            @Param("endDate") Date endDate
+    );
 
 
 }
