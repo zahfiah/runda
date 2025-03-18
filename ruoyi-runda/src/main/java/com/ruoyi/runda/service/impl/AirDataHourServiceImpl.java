@@ -1021,7 +1021,7 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         // 添加 Pageable 参数
         PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE);
         // 调用 Repository 方法，传入 Date 类型参数
-        return hourlyAverageAirDataRepository.findByDate(date);
+        return hourlyAverageAirDataRepository.findByDate(date,dateTime);
     }
 
 
@@ -1169,6 +1169,8 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         metrics.put("deviceName", hourlyAverage.getDeviceName());
         metrics.put("stationName", hourlyAverage.getStationName());
         metrics.put("endTime", dateTimeFormat.format(hourlyAverage.getUpdatedAt()));
+        metrics.put("averagePm2_5_24h",hourlyAverage.getAveragePm25_24());
+        metrics.put("averagePm10_24h",hourlyAverage.getAveragePm10_24());
 
         List<Map<String, Object>> data = Collections.singletonList(metrics);
         TableDataInfo tableDataInfo = new TableDataInfo();

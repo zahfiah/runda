@@ -87,6 +87,14 @@
           </div>
         </template>
       </el-table-column>
+      <el-table-column label="日pm2.5浓度(μg/m³)" align="center" prop="averagePm2_5_24h">
+        <template slot="header">
+          <div style="display: flex; flex-direction: column; align-items: center">
+            <span>日pm2.5</span>
+            <span style="margin-top: 2px">浓度(μg/m³)</span>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column label="小时pm10浓度(μg/m³)" align="center" prop="averagePm10">
         <template slot="header">
           <div style="display: flex; flex-direction: column; align-items: center">
@@ -95,8 +103,14 @@
           </div>
         </template>
       </el-table-column>
-      <!-- <el-table-column label="平均每天pm25" align="center" prop="averagePm2_5_24" />
-      <el-table-column label="平均每天pm10" align="center" prop="averagePm10_24" /> -->
+      <el-table-column label="日pm10浓度(μg/m³)" align="center" prop="averagePm10_24h">
+        <template slot="header">
+          <div style="display: flex; flex-direction: column; align-items: center">
+            <span>日pm10</span>
+            <span style="margin-top: 2px">浓度(μg/m³)</span>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column label="空气质量指数(AQI)" align="center" prop="averageAqi" />
       <el-table-column label="级别" align="center" prop="level" />
       <el-table-column label="质量" align="center" prop="quality" />
@@ -174,8 +188,9 @@ export default {
     };
   },
   created() {
-    this.fetchInitialData(); // 页面加载时获取初始数据
     this.getDeviceList();
+    // 新增：页面加载时获取当前时间的前一个整点小时数据
+    this.fetchLatestHourData();
   },
   methods: {
     // 新增设备相关方法
@@ -251,23 +266,6 @@ export default {
       return dateRange;
     },
 
-    async fetchDailyData(date) {
-
-
-      try {
-        return await request({
-          url: "http://localhost:8080/runda/air/daily-hourly-average",
-          params: {
-
-            date: date,
-            deviceId: this.queryParams.deviceId,
-          }
-        });
-      } catch (error) {
-        console.error(`查询${date}数据失败:`, error);
-        return { code: -1, rows: [] };
-      }
-    },
 
     async getList() {
       this.loading = true; // 显示加载圈
@@ -314,18 +312,37 @@ export default {
     },
 
     async fetchHourDataWithoutDeviceId(hour) {
-      try {
-        return await request({
-          url: "http://localhost:8080/runda/air/average-by-hour",
-          params: {
-            dateTime: `${this.queryParams.selectedDate} ${hour}`,
-          }
-        });
-      } catch (error) {
-        console.error(`查询${hour}数据失败:`, error);
-        return { code: -1, rows: [] };
+  try {
+    const response = await request({
+      url: "http://localhost:8080/runda/air/list-hour-data",
+      params: {
+        date: `${this.queryParams.selectedDate} ${hour}`
       }
-    },
+    });
+
+    // 字段转换逻辑
+    return {
+      code: response.code === 200 ? 0 : -1,
+      rows: (response.data || []).map(item => ({
+        ...item,
+        // 字段映射
+        averagePm2_5: item.averagePm25,
+        averagePm10: item.averagePm10,
+        averagePm2_5_24h: item.averagePm25_24,
+        averagePm10_24h: item.averagePm10_24,
+        level: item.aqiLevel,
+        quality: item.aqiQuality,
+        color: item.aqiColor,
+        // 保持原始字段
+        primaryPollutant: item.primaryPollutant,
+        dateTimeStr: item.createdAt // 假设使用createdAt作为时间字段
+      }))
+    };
+  } catch (error) {
+    console.error(`查询${hour}数据失败:`, error);
+    return { code: -1, rows: [] };
+  }
+},
 
     async fetchHourData(hour) {
       if (this.queryParams.deviceId) {
@@ -336,18 +353,25 @@ export default {
     },
 
     processData(responses) {
-      const allData = responses.reduce((acc, res) =>
-        res.code === 0 ? acc.concat(res.rows) : acc, []);
-      console.log(responses);
+  const allData = responses.reduce((acc, res) => {
+    if (res.code === 0) {
+      // 根据接口来源选择数据字段
+      const sourceData = this.queryParams.deviceId ? res.rows : res.rows;
+      return acc.concat(sourceData);
+    }
+    return acc;
+  }, []);
 
-      this.total = allData.length;
-      this.dataList = allData.slice(
-        (this.queryParams.pageNum - 1) * this.queryParams.pageSize,
-        this.queryParams.pageNum * this.queryParams.pageSize
-      );
+  console.log('处理后的数据:', allData);
+  
+  this.total = allData.length;
+  this.dataList = allData.slice(
+    (this.queryParams.pageNum - 1) * this.queryParams.pageSize,
+    this.queryParams.pageSize * this.queryParams.pageNum
+  );
 
-      if (!allData.length) this.$message.warning("未找到数据");
-    },
+  if (!allData.length) this.$message.warning("未找到数据");
+},
 
     handleDataError(error) {
       console.error("查询失败:", error);
@@ -473,48 +497,56 @@ export default {
         ...this.queryParams
       }, `data_${new Date().getTime()}.xlsx`)
     },
-    async fetchInitialData(hour) {
+
+    // 新增方法：获取当前时间的前一个整点小时数据
+    async fetchLatestHourData() {
       this.loading = true; // 显示加载圈
       try {
+        // 计算当前时间的前一个整点小时
+        const now = new Date();
+        const previousHour = new Date(now.getTime() - 60 * 60 * 1000);
+        const formattedDate = previousHour.toISOString().split('T')[0];
+        const hour = previousHour.getHours().toString().padStart(2, '0') + ":00";
+
+        // 调用接口获取数据
         const response = await request({
           url: "http://localhost:8080/runda/air/list-hour-data",
-          method: "get",
           params: {
-            date: `${this.queryParams.selectedDate} ${hour}`,
+            date: `${formattedDate} ${hour}`
           }
         });
-        if (response && response.code === 200) {
-          this.processInitialData(response.data);
+
+        // 更新数据列表并进行分页处理
+        if (response.code === 200 && Array.isArray(response.data)) {
+          const allData = response.data.map(item => ({
+            ...item,
+            averagePm2_5_24h: item.averagePm25_24,
+            averagePm10_24h: item.averagePm10_24,
+            averagePm2_5: item.averagePm25,
+            averagePm10: item.averagePm10,
+            level: item.aqiLevel,
+            quality: item.aqiQuality,
+            color: item.aqiColor,
+            dateTimeStr: item.createdAt 
+          }));
+
+          // 分页逻辑
+          this.total = allData.length;
+          this.dataList = allData.slice(
+            (this.queryParams.pageNum - 1) * this.queryParams.pageSize,
+            this.queryParams.pageNum * this.queryParams.pageSize
+          );
         } else {
-          this.$message.error("获取初始数据失败");
+          this.$message.warning("未找到符合条件的数据");
         }
       } catch (error) {
-        console.error("获取初始数据失败：", error);
-        this.$message.error("获取初始数据失败");
+        console.error("获取最新小时数据失败:", error);
+        this.$message.error("获取最新小时数据失败");
       } finally {
         this.loading = false; // 确保加载圈关闭
       }
     },
-    processInitialData(data) {
-      if (Array.isArray(data) && data.length > 0) {
-        // 分页处理
-        const paginatedData = data.slice(
-          (this.queryParams.pageNum - 1) * this.queryParams.pageSize,
-          this.queryParams.pageNum * this.queryParams.pageSize
-        );
-        this.dataList = paginatedData.map(item => ({
-          ...item,
-          dateTimeStr: item.createdAt, // 将 createdAt 映射到 dateTimeStr
-          averagePm2_5: item.averagePm25, // 新增：映射小时pm25浓度字段
-          level: item.aqiLevel, // 新增：映射级别字段
-          quality: item.aqiQuality, // 新增：映射质量字段
-          color: item.aqiColor, // 新增：映射颜色字段
-        }));
-        this.total = data.length;
-      } else {
-        this.$message.warning("未找到初始数据");
-      }
-    },
+
   }
 };
 </script>
