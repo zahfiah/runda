@@ -990,23 +990,38 @@ public class AirDataHourServiceImpl implements AirDataHourService {
     }
 
     @Override
-    public List<HourlyAverageAirData> selectDataList() throws ParseException {
-        LocalDateTime localDateTime = LocalDateTime.now(ZoneId.of("Asia/Shanghai"));
+    public List<HourlyAverageAirData> selectDataList(Date date) throws ParseException {
+        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        dateTimeFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai")); // 明确指定时区
 
-        localDateTime = localDateTime.minusHours(1);
+        Date dateTime = date;
+        try {
+            dateTime = dateTimeFormat.parse(String.valueOf(date));
+        } catch (ParseException e) {
+            logger.error("Error parsing date: {}", e.getMessage());
+
+        }
+
+        Calendar startCalendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Shanghai"));
+        startCalendar.setTime(dateTime);
+        startCalendar.set(Calendar.MINUTE, 0);
+        startCalendar.set(Calendar.SECOND, 0);
+        startCalendar.set(Calendar.MILLISECOND, 0);
+
+        Calendar endCalendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Shanghai"));
+        endCalendar.setTime(dateTime);
+        endCalendar.set(Calendar.MINUTE, 59);
+        endCalendar.set(Calendar.SECOND, 59);
+        endCalendar.set(Calendar.MILLISECOND, 999);
+
+        long startDateMillis = startCalendar.getTimeInMillis();
+        long endDateMillis = endCalendar.getTimeInMillis();
 
 
-        localDateTime = localDateTime.truncatedTo(ChronoUnit.HOURS);
-
-
-        ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.of("Asia/Shanghai"));
-
-
-        Instant instant = zonedDateTime.toInstant();
-
-        Date date = Date.from(instant);
-
-        return hourlyAverageAirDataRepository.findByDateTime(date);
+        // 添加 Pageable 参数
+        PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE);
+        // 调用 Repository 方法，传入 Date 类型参数
+        return hourlyAverageAirDataRepository.findByDate(date);
     }
 
 

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -29,5 +30,5 @@ public interface AirDataHourService {
     void exportToExcel(HttpServletResponse response, List<AirDataHour> dataList) throws IOException;
 
 
-    List<HourlyAverageAirData> selectDataList() throws ParseException;
+    List<HourlyAverageAirData> selectDataList(Date date) throws ParseException;
 }

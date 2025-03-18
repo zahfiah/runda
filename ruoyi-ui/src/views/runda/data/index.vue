@@ -473,12 +473,15 @@ export default {
         ...this.queryParams
       }, `data_${new Date().getTime()}.xlsx`)
     },
-    async fetchInitialData() {
+    async fetchInitialData(hour) {
       this.loading = true; // 显示加载圈
       try {
         const response = await request({
           url: "http://localhost:8080/runda/air/list-hour-data",
           method: "get",
+          params: {
+            date: `${this.queryParams.selectedDate} ${hour}`,
+          }
         });
         if (response && response.code === 200) {
           this.processInitialData(response.data);

@@ -29,6 +29,7 @@ public interface HourlyAverageAirDataRepository extends JpaRepository<HourlyAver
         //根据日期条件查询数据信息
         @Query("SELECT h FROM HourlyAverageAirData h WHERE h.createdAt = :createdAt ORDER BY h.createdAt DESC")
         List<HourlyAverageAirData> findByDateTime(@Param("createdAt") Date dateTimeStr);
-
+        @Query("SELECT h FROM HourlyAverageAirData h WHERE  DATE(h.createdAt) = :date ORDER BY h.createdAt DESC")
+        List<HourlyAverageAirData> findByDate(@Param("date") Date date);
 }
 

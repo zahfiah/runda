@@ -100,8 +100,8 @@ public class AirDataController extends BaseController {
     }
 
     @GetMapping("/list-hour-data")
-    public AjaxResult list() throws ParseException {
-        List<HourlyAverageAirData> list = airDataHourService.selectDataList();
+    public AjaxResult list(@RequestParam Date date) throws ParseException {
+        List<HourlyAverageAirData> list = airDataHourService.selectDataList(date);
         return success(list);
     }
 
