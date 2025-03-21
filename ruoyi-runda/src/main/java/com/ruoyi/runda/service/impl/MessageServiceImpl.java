@@ -97,6 +97,11 @@ public class MessageServiceImpl implements IMessageService
     }
 
     @Override
+    public List<Message> selectMessageListByDate(String date) {
+        return messageMapper.selectMessageListByDate(date);
+    }
+
+    @Override
     public int updateRead(Message message)
     {
         return messageMapper.updateRead(message);

@@ -1,10 +1,11 @@
 <template>
   <div v-if="!item.hidden">
-    <template v-if="hasOneShowingChild(item.children,item) && (!onlyOneChild.children||onlyOneChild.noShowingChildren)&&!item.alwaysShow">
+    <template
+      v-if="hasOneShowingChild(item.children, item) && (!onlyOneChild.children || onlyOneChild.noShowingChildren) && !item.alwaysShow">
       <app-link v-if="onlyOneChild.meta" :to="resolvePath(onlyOneChild.path, onlyOneChild.query)">
-        <el-menu-item :index="resolvePath(onlyOneChild.path)" :class="{'submenu-title-noDropdown':!isNest}">
-          <item :icon="onlyOneChild.meta.icon||(item.meta&&item.meta.icon)" :title="onlyOneChild.meta.title"
-                :num="message_num(onlyOneChild.meta)"/>
+        <el-menu-item :index="resolvePath(onlyOneChild.path)" :class="{ 'submenu-title-noDropdown': !isNest }">
+          <item :icon="onlyOneChild.meta.icon || (item.meta && item.meta.icon)" :title="onlyOneChild.meta.title"
+            :num="message_num(onlyOneChild.meta)" />
         </el-menu-item>
       </app-link>
 
@@ -15,14 +16,8 @@
       <template slot="title">
         <item v-if="item.meta" :icon="item.meta && item.meta.icon" :title="item.meta.title" />
       </template>
-      <sidebar-item
-        v-for="(child, index) in item.children"
-        :key="child.path + index"
-        :is-nest="true"
-        :item="child"
-        :base-path="resolvePath(child.path)"
-        class="nest-menu"
-      />
+      <sidebar-item v-for="(child, index) in item.children" :key="child.path + index" :is-nest="true" :item="child"
+        :base-path="resolvePath(child.path)" class="nest-menu" />
     </el-submenu>
   </div>
 
@@ -58,7 +53,7 @@ export default {
   data() {
     this.onlyOneChild = null
     return {
-      num : null
+      num: null
     }
   },
   // mounted(){
@@ -66,19 +61,20 @@ export default {
   // },
   methods: {
     refreshMessageNum() {
-    if (this.onlyOneChild?.meta?.title === '消息通知') {
-      this.message_num(this.onlyOneChild.meta)
-    }
-  },
-  message_num(data) {
-    if (data.title == '消息通知') {
-      isRead().then(response => { // 去掉参数传递
-        this.num = response;
-        this.$forceUpdate(); // 强制更新视图
-      });
-      return this.num;
-    }
-  },
+      if (this.onlyOneChild?.meta?.title === '消息通知') {
+        this.message_num(this.onlyOneChild.meta)
+      }
+    },
+    message_num(data) {
+      if (data.title == '消息通知') {
+        isRead().then(response => { // 去掉参数传递
+          this.num = response;
+          // this.$forceUpdate(); // 强制更新视图
+          this.$set(this.onlyOneChild, 'num', this.num)
+        });
+        return this.num;
+      }
+    },
     hasOneShowingChild(children = [], parent) {
       if (!children) {
         children = [];
@@ -99,7 +95,7 @@ export default {
 
       // Show parent if there are no child router to display
       if (showingChildren.length === 0) {
-        this.onlyOneChild = { ... parent, path: '', noShowingChildren: true }
+        this.onlyOneChild = { ...parent, path: '', noShowingChildren: true }
         return true
       }
 

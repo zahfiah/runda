@@ -33,6 +33,10 @@
     <select id="selectIsRead" parameterType="Message" resultType="int">
         select count(1) from message where is_read = 0
     </select>
+    <select id="selectMessageListByDate" resultType="com.ruoyi.runda.domain.Message"
+            parameterType="java.lang.String">
+        select id, content, time, is_read from message where date(time) = #{date}
+    </select>
 
     <insert id="insertMessage" parameterType="Message" useGeneratedKeys="true" keyProperty="id">
         insert into message

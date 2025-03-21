@@ -62,4 +62,6 @@ public interface IMessageService
     public  int updateRead(Message message);
 
     public int selectIsRead(Message message);
+
+    List<Message> selectMessageListByDate(String date);
 }

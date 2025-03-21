@@ -122,4 +122,13 @@ public class MessageController extends BaseController
         startPage();
         return messageService.selectIsRead(message);
     }
+
+//    @PreAuthorize("@ss.hasPermi('runda:message:listByDate')")
+    @GetMapping("/listByDate")
+    public TableDataInfo listByDate(String date)
+    {
+        startPage();
+        List<Message> list = messageService.selectMessageListByDate(date);
+        return getDataTable(list);
+    }
 }

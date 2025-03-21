@@ -2,6 +2,7 @@ package com.ruoyi.runda.mapper;
 
 import java.util.List;
 import com.ruoyi.runda.domain.Message;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * 消息通知Mapper接口
@@ -62,4 +63,5 @@ public interface MessageMapper
     public int updateRead(Message message);
 
     public int selectIsRead(Message message);
+    List<Message> selectMessageListByDate(String date);
 }
