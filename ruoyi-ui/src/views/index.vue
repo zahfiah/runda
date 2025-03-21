@@ -17,8 +17,9 @@
       <router-link to="/runda/station" class="nav-link">监测站点管理</router-link>
       <router-link to="/runda/query212" class="nav-link">大气数据查询</router-link>
       <router-link to="/runda/yunwei" class="nav-link">运维日志</router-link>
-      <router-link to="/runda/infor/calibration" class="nav-link">基础信息管理</router-link>
-      <router-link to="/runda/alarm/remind" class="nav-link">告警管理</router-link>
+      <router-link to="/runda/country" class="nav-link">国控数据查询</router-link>
+      <router-link to="/runda/info" class="nav-link">告警管理</router-link>
+      <router-link to="/runda/message" class="nav-link">消息通知</router-link>
     </div>
 
     <!-- 区县统计模块 -->

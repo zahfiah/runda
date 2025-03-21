@@ -58,3 +58,11 @@ export function isRead(query) {
     params: query
   })
 }
+
+export function listByDate(params) {
+  return request({
+    url: '/runda/message/listByDate',
+    method: 'get',
+    params: params
+  })
+}

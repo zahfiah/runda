@@ -867,6 +867,7 @@ export default {
               this.getList();
               // 发送设备信息到消息通知
               sendDevice(this.deviceForm).then(response => {
+                this.$bus.$emit('message-read', 1); 
                 this.$modal.msgSuccess("发送成功");
 
               });

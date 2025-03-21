@@ -56,26 +56,37 @@ export default {
       num: null
     }
   },
-  // mounted(){
-  //   this.message_num(this.onlyOneChild.meta)
-  // },
+  created() {
+    // 初始化获取未读数
+    this.message_num(this.onlyOneChild?.meta);
+    
+    // 监听消息已读事件
+    this.$bus.$on('message-read', (delta) => {
+      if (this.onlyOneChild?.meta?.title === '消息通知') {
+        this.num = Math.max(0, (this.num || 0) + delta);
+        this.$set(this.onlyOneChild, 'num', this.num);
+      }
+    });
+  },
+  beforeDestroy() {
+    this.$bus.$off('message-read');
+  },
   methods: {
     refreshMessageNum() {
       if (this.onlyOneChild?.meta?.title === '消息通知') {
         this.message_num(this.onlyOneChild.meta)
       }
     },
-    message_num(data) {
-      if (data.title == '消息通知') {
-        isRead().then(response => { // 去掉参数传递
+        message_num(data) {
+      if (data?.title === '消息通知') {
+        isRead().then(response => {
           this.num = response;
-          // this.$forceUpdate(); // 强制更新视图
-          this.$set(this.onlyOneChild, 'num', this.num)
+          this.$set(this.onlyOneChild, 'num', this.num);
         });
         return this.num;
       }
     },
-    hasOneShowingChild(children = [], parent) {
+      hasOneShowingChild(children = [], parent) {
       if (!children) {
         children = [];
       }

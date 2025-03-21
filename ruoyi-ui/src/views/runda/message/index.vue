@@ -17,14 +17,14 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item> -->
-      <el-form-item label="备注" prop="remark">
+      <!-- <el-form-item label="备注" prop="remark">
         <el-input
           v-model="queryParams.remark"
           placeholder="请输入备注"
           clearable
           @keyup.enter.native="handleQuery"
         />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -88,10 +88,10 @@
       </el-table-column>
       <el-table-column label="是否已读" align="center" prop="isRead">
         <template slot-scope="scope">
-          <span>{{ scope.row.isRead === 1 ? '已读' : '未读' }}</span>
+          <span>{{ scope.row.isRead === 0 ? '未读' : '已读' }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="备注" align="center" prop="remark" />
+      <!-- <el-table-column label="备注" align="center" prop="remark" /> -->
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -158,7 +158,7 @@
 </template>
 
 <script>
-import {listMessage, getMessage, delMessage, addMessage, updateMessage, updateRead} from "@/api/runda/message";
+import { listMessage, getMessage, delMessage, addMessage, updateMessage, updateRead, listByDate } from "@/api/runda/message";
 
 export default {
   name: "Message",
@@ -230,8 +230,18 @@ export default {
     },
     /** 搜索按钮操作 */
     handleQuery() {
-      this.queryParams.pageNum = 1;
-      this.getList();
+      if (this.queryParams.time) {
+        // 调用新的接口进行按日期查询
+        listByDate({ date: this.queryParams.time }).then(response => {
+          this.messageList = response.rows;
+          this.total = response.total;
+          this.loading = false;
+        });
+      } else {
+        // 如果没有选择时间，则调用默认查询接口
+        this.queryParams.pageNum = 1;
+        this.getList();
+      }
     },
     /** 重置按钮操作 */
     resetQuery() {
@@ -311,10 +321,8 @@ export default {
     cl() {
       updateRead(this.form).then(response => {
         this.$modal.msgSuccess("已读");
-        // 触发侧边栏更新
-        if (window.__$sidebar) {
-          window.__$sidebar.refreshMessageNum();
-        }
+        // 触发事件总线更新，参数-1表示减少未读数
+        this.$bus.$emit('message-read', -1); 
         this.iR = false;
         this.getList();
       });

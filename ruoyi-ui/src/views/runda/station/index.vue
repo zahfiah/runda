@@ -549,6 +549,7 @@ export default {
             });
           } else {
             addStation(this.form).then(response => {
+              this.$bus.$emit('message-read', 1); 
               this.$modal.msgSuccess("新增成功");
               this.open = false;
               this.getList();
