@@ -1,123 +1,53 @@
 <template>
   <div class="app-container">
-    <el-form
-      :model="queryParams"
-      ref="queryForm"
-      size="small"
-      :inline="true"
-      v-show="showSearch"
-      label-width="68px"
-    >
+    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="设备名称" prop="siteName">
-        <el-input
-          v-model="queryParams.siteName"
-          placeholder="请输入设备名称"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-input v-model="queryParams.siteName" placeholder="请输入设备名称" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item label="运维时间" prop="maintenanceTime">
-        <el-date-picker
-          clearable
-          v-model="queryParams.maintenanceTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择运维时间"
-        >
+        <el-date-picker clearable v-model="queryParams.maintenanceTime" type="date" value-format="yyyy-MM-dd"
+          placeholder="请选择运维时间">
         </el-date-picker>
       </el-form-item>
       <el-form-item>
-        <el-button
-          type="primary"
-          icon="el-icon-search"
-          size="mini"
-          @click="handleQuery"
-          >搜索</el-button
-        >
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery"
-          >重置</el-button
-        >
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['runda:yunwei:add']"
-          >新增</el-button
-        >
+        <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd"
+          v-hasPermi="['runda:yunwei:add']">新增</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['runda:yunwei:edit']"
-          >修改</el-button
-        >
+        <el-button type="success" plain icon="el-icon-edit" size="mini" :disabled="single" @click="handleUpdate"
+          v-hasPermi="['runda:yunwei:edit']">修改</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['runda:yunwei:remove']"
-          >删除</el-button
-        >
+        <el-button type="danger" plain icon="el-icon-delete" size="mini" :disabled="multiple" @click="handleDelete"
+          v-hasPermi="['runda:yunwei:remove']">删除</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['runda:yunwei:export']"
-          >导出</el-button
-        >
+        <el-button type="warning" plain icon="el-icon-download" size="mini" @click="handleExport"
+          v-hasPermi="['runda:yunwei:export']">导出</el-button>
       </el-col>
-      <right-toolbar
-        :showSearch.sync="showSearch"
-        @queryTable="getList"
-      ></right-toolbar>
+      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table
-      v-loading="loading"
-      :data="yunweiList"
-      @selection-change="handleSelectionChange"
-    >
+    <el-table v-loading="loading" :data="yunweiList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" />
+      <!-- <el-table-column label="主键" align="center" prop="id" /> -->
       <el-table-column label="设备名称" align="center" prop="siteName" />
       <el-table-column label="设备号" align="center" prop="sn" />
-      <el-table-column
-        label="运维时间"
-        align="center"
-        prop="maintenanceTime"
-        width="180"
-      >
+      <el-table-column label="运维时间" align="center" prop="maintenanceTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.maintenanceTime, "{y}-{m}-{d}") }}</span>
         </template>
       </el-table-column>
       <el-table-column label="是否完成" align="center" prop="isFinsh">
         <template slot-scope="scope">
-          <dict-tag
-            :options="dict.type.is_complete"
-            :value="scope.row.isFinsh"
-          />
+          <dict-tag :options="dict.type.is_complete" :value="scope.row.isFinsh" />
         </template>
       </el-table-column>
       <el-table-column label="图片" align="center" prop="img" width="100">
@@ -126,39 +56,18 @@
         </template>
       </el-table-column>
       <el-table-column label="日志信息" align="center" prop="log" />
-      <el-table-column
-        label="操作"
-        align="center"
-        class-name="small-padding fixed-width"
-      >
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['runda:yunwei:edit']"
-            >修改</el-button
-          >
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['runda:yunwei:remove']"
-            >删除</el-button
-          >
+          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)"
+            v-hasPermi="['runda:yunwei:edit']">修改</el-button>
+          <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)"
+            v-hasPermi="['runda:yunwei:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination
-      v-show="total > 0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
+      @pagination="getList" />
 
     <!-- 添加或修改运维日志对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
@@ -170,23 +79,15 @@
           <el-input v-model="form.sn" placeholder="请输入设备号" />
         </el-form-item>
         <el-form-item label="运维时间" prop="maintenanceTime">
-          <el-date-picker
-            clearable
-            v-model="form.maintenanceTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择运维时间"
-          >
+          <el-date-picker clearable v-model="form.maintenanceTime" type="date" value-format="yyyy-MM-dd"
+            placeholder="请选择运维时间">
           </el-date-picker>
         </el-form-item>
         <el-form-item label="是否完成" prop="isFinsh">
           <el-radio-group v-model="form.isFinsh">
-            <el-radio
-              v-for="dict in dict.type.is_complete"
-              :key="dict.value"
-              :label="parseInt(dict.value)"
-              >{{ dict.label }}</el-radio
-            >
+            <el-radio v-for="dict in dict.type.is_complete" :key="dict.value" :label="parseInt(dict.value)">{{
+              dict.label
+              }}</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="图片" prop="img">
@@ -362,7 +263,7 @@ export default {
           this.getList();
           this.$modal.msgSuccess("删除成功");
         })
-        .catch(() => {});
+        .catch(() => { });
     },
     /** 导出按钮操作 */
     handleExport() {

@@ -18,6 +18,7 @@ public class DataMigrationController {
      * t_b_site_info
      * @return
      */
+    @Scheduled(cron = "0 0 * * * ?")
     @GetMapping("/info")
     public String migrate() {
         return dataMigrationService.migrateData();
@@ -27,23 +28,23 @@ public class DataMigrationController {
      *t_d_site_state
      * @return
      */
-//    @Scheduled(cron = "0 0 * * * ?")
+    @Scheduled(cron = "0 0 * * * ?")
     @GetMapping("/state")
     public String state() {
         return dataMigrationService.migrateStateData();
     }
-
+    @Scheduled(cron = "0 0 * * * ?")
     @GetMapping("/monitor")
 
     public String monitor() {
         return dataMigrationService.migrateMonitorData();
     }
-//    @Scheduled(cron = "0 0 * * * ?")
+    @Scheduled(cron = "0 0 * * * ?")
     @GetMapping("/monitor-info")
     public String monitorInfo() {
         return dataMigrationService.migrateMonitorInfoData();
     }
-
+    @Scheduled(cron = "0 0 * * * ?")
     @GetMapping("/monitor-hour")
     public String monitorHour() {
         return dataMigrationService.migrateMonitorHourData();

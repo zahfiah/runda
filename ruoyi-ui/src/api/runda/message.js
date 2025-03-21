@@ -8,7 +8,6 @@ export function listMessage(query) {
     params: query
   })
 }
-
 // 查询消息通知详细
 export function getMessage(id) {
   return request({

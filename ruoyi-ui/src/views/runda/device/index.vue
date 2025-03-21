@@ -183,7 +183,7 @@
         <el-form-item label="是否运维" prop="isYunwei">
           <el-radio-group v-model="deviceForm.isYunwei">
             <el-radio v-for="dict in dict.type.is_yunwei" :key="dict.value" :label="parseInt(dict.value)">{{ dict.label
-            }}</el-radio>
+              }}</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="备注" prop="remark">
@@ -215,7 +215,7 @@
           <el-radio-group v-model="yunweiForm.isFinsh">
             <el-radio v-for="dict in dict.type.is_complete" :key="dict.value" :label="parseInt(dict.value)">{{
               dict.label
-            }}</el-radio>
+              }}</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="图片" prop="img">
@@ -238,7 +238,7 @@ import {
   getDevice,
   delDevice,
   addDevice,
-  updateDevice,
+  updateDevice, sendDevice
 } from "@/api/runda/device";
 import { addYunwei, updateYunwei } from "@/api/runda/yunwei";
 import { listStation } from "@/api/runda/station";

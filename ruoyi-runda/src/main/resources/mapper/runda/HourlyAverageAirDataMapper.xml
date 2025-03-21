@@ -24,11 +24,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="deviceName"    column="device_name"    />
         <result property="stationName"    column="station_name"    />
         <result property="deptId"    column="dept_id"    />
+        <result property="type"    column="type"    />
 
     </resultMap>
 
     <sql id="selectHourlyAverageAirDataVo">
-        select id, device_id,  average_aqi, average_so2, average_no2, average_o3, average_pm2_5, average_pm10,  aqi_level, aqi_quality, aqi_color, primary_pollutant, created_at, updated_at,average_pm2_5_24, average_pm10_24,device_name, station_name,dept_id, from hourly_average_air_data
+        select id, device_id,  average_aqi, average_so2, average_no2, average_o3, average_pm2_5, average_pm10,  aqi_level, aqi_quality, aqi_color, primary_pollutant, created_at, updated_at,average_pm2_5_24, average_pm10_24,device_name, station_name,dept_id, type,from hourly_average_air_data
     </sql>
 
     <select id="selectHourlyAverageAirDataList" parameterType="HourlyAverageAirData" resultMap="HourlyAverageAirDataResult">
@@ -82,6 +83,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="deviceName != null">device_name,</if>
             <if test="stationName != null">station_name,</if>
             <if test="deptId != null">dept_id,</if>
+            <if test="type != null">type,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="deviceId != null">#{deviceId},</if>
@@ -102,6 +104,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="deviceName != null">#{deviceName},</if>
             <if test="stationName != null">#{stationName},</if>
             <if test="deptId != null">#{deptId},</if>
+            <if test="type != null">#{type},</if>
          </trim>
     </insert>
 

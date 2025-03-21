@@ -418,7 +418,7 @@ export default {
       try {
         // 请求新的接口获取设备列表
         const response = await request({
-          url: "http://localhost:8080/runda/query212/listDeviceIdAndName",
+          url: "/runda/query212/listDeviceIdAndName",
           method: "get",
         });
 

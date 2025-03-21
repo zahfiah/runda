@@ -135,6 +135,19 @@ public class HourlyAverageAirData extends BaseEntity
     @Column(name = "station_name")
     private String stationName;
 
+    /** type判断是否报警 */
+    @Excel(name = "判告警")
+    @Column(name = "type")
+    private Integer type;
+
+    public  void setType(Integer type)
+    {
+        this.type = type;
+    }
+    public Integer getType()
+    {
+        return type;
+    }
     public void setId(Long id) 
     {
         this.id = id;

@@ -82,7 +82,9 @@
       <el-table-column label="小时pm25浓度(μg/m³)" align="center" prop="averagePm2_5">
         <template slot="header">
           <div style="display: flex; flex-direction: column; align-items: center">
-            <span>小时pm25</span>
+            <span>颗粒物
+              （粒径小于等于2.5μm）
+              1小时平均</span>
             <span style="margin-top: 2px">浓度(μg/m³)</span>
           </div>
         </template>
@@ -90,7 +92,9 @@
       <el-table-column label="日pm2.5浓度(μg/m³)" align="center" prop="averagePm2_5_24h">
         <template slot="header">
           <div style="display: flex; flex-direction: column; align-items: center">
-            <span>日pm2.5</span>
+            <span>颗粒物
+              （粒径小于等于2.5μm）
+              24小时滑动平均</span>
             <span style="margin-top: 2px">浓度(μg/m³)</span>
           </div>
         </template>
@@ -98,7 +102,9 @@
       <el-table-column label="小时pm10浓度(μg/m³)" align="center" prop="averagePm10">
         <template slot="header">
           <div style="display: flex; flex-direction: column; align-items: center">
-            <span>小时pm10</span>
+            <span>颗粒物
+              （粒径小于等于10μm）
+              1小时平均</span>
             <span style="margin-top: 2px">浓度(μg/m³)</span>
           </div>
         </template>
@@ -106,7 +112,9 @@
       <el-table-column label="日pm10浓度(μg/m³)" align="center" prop="averagePm10_24h">
         <template slot="header">
           <div style="display: flex; flex-direction: column; align-items: center">
-            <span>日pm10</span>
+            <span>颗粒物
+              （粒径小于等于10μm）
+              24小时滑动平均</span>
             <span style="margin-top: 2px">浓度(μg/m³)</span>
           </div>
         </template>
@@ -115,7 +123,7 @@
       <el-table-column label="级别" align="center" prop="level" />
       <el-table-column label="质量" align="center" prop="quality" />
       <el-table-column label="颜色" align="center" prop="color" />
-      <el-table-column label="主要污染物" align="center" prop="primaryPollutant" />
+      <el-table-column label="主要污染物" align="center" prop="primaryPollutant" width="150px" />
     </el-table>
 
     <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
@@ -198,7 +206,7 @@ export default {
       try {
         // 请求新的接口获取设备列表
         const response = await request({
-          url: "http://localhost:8080/runda/query212/listDeviceIdAndName",
+          url: "/runda/query212/listDeviceIdAndName",
           method: "get",
         });
 
@@ -312,37 +320,37 @@ export default {
     },
 
     async fetchHourDataWithoutDeviceId(hour) {
-  try {
-    const response = await request({
-      url: "http://localhost:8080/runda/air/list-hour-data",
-      params: {
-        date: `${this.queryParams.selectedDate} ${hour}`
-      }
-    });
+      try {
+        const response = await request({
+          url: "/runda/air/list-hour-data",
+          params: {
+            date: `${this.queryParams.selectedDate} ${hour}`
+          }
+        });
 
-    // 字段转换逻辑
-    return {
-      code: response.code === 200 ? 0 : -1,
-      rows: (response.data || []).map(item => ({
-        ...item,
-        // 字段映射
-        averagePm2_5: item.averagePm25,
-        averagePm10: item.averagePm10,
-        averagePm2_5_24h: item.averagePm25_24,
-        averagePm10_24h: item.averagePm10_24,
-        level: item.aqiLevel,
-        quality: item.aqiQuality,
-        color: item.aqiColor,
-        // 保持原始字段
-        primaryPollutant: item.primaryPollutant,
-        dateTimeStr: item.createdAt // 假设使用createdAt作为时间字段
-      }))
-    };
-  } catch (error) {
-    console.error(`查询${hour}数据失败:`, error);
-    return { code: -1, rows: [] };
-  }
-},
+        // 字段转换逻辑
+        return {
+          code: response.code === 200 ? 0 : -1,
+          rows: (response.data || []).map(item => ({
+            ...item,
+            // 字段映射
+            averagePm2_5: item.averagePm25,
+            averagePm10: item.averagePm10,
+            averagePm2_5_24h: item.averagePm25_24,
+            averagePm10_24h: item.averagePm10_24,
+            level: item.aqiLevel,
+            quality: item.aqiQuality,
+            color: item.aqiColor,
+            // 保持原始字段
+            primaryPollutant: item.primaryPollutant,
+            dateTimeStr: item.createdAt // 假设使用createdAt作为时间字段
+          }))
+        };
+      } catch (error) {
+        console.error(`查询${hour}数据失败:`, error);
+        return { code: -1, rows: [] };
+      }
+    },
 
     async fetchHourData(hour) {
       if (this.queryParams.deviceId) {
@@ -353,25 +361,25 @@ export default {
     },
 
     processData(responses) {
-  const allData = responses.reduce((acc, res) => {
-    if (res.code === 0) {
-      // 根据接口来源选择数据字段
-      const sourceData = this.queryParams.deviceId ? res.rows : res.rows;
-      return acc.concat(sourceData);
-    }
-    return acc;
-  }, []);
+      const allData = responses.reduce((acc, res) => {
+        if (res.code === 0) {
+          // 根据接口来源选择数据字段
+          const sourceData = this.queryParams.deviceId ? res.rows : res.rows;
+          return acc.concat(sourceData);
+        }
+        return acc;
+      }, []);
 
-  console.log('处理后的数据:', allData);
-  
-  this.total = allData.length;
-  this.dataList = allData.slice(
-    (this.queryParams.pageNum - 1) * this.queryParams.pageSize,
-    this.queryParams.pageSize * this.queryParams.pageNum
-  );
+      console.log('处理后的数据:', allData);
 
-  if (!allData.length) this.$message.warning("未找到数据");
-},
+      this.total = allData.length;
+      this.dataList = allData.slice(
+        (this.queryParams.pageNum - 1) * this.queryParams.pageSize,
+        this.queryParams.pageSize * this.queryParams.pageNum
+      );
+
+      if (!allData.length) this.$message.warning("未找到数据");
+    },
 
     handleDataError(error) {
       console.error("查询失败:", error);
@@ -510,7 +518,7 @@ export default {
 
         // 调用接口获取数据
         const response = await request({
-          url: "http://localhost:8080/runda/air/list-hour-data",
+          url: "/runda/air/list-hour-data",
           params: {
             date: `${formattedDate} ${hour}`
           }
@@ -527,7 +535,7 @@ export default {
             level: item.aqiLevel,
             quality: item.aqiQuality,
             color: item.aqiColor,
-            dateTimeStr: item.createdAt 
+            dateTimeStr: item.createdAt
           }));
 
           // 分页逻辑

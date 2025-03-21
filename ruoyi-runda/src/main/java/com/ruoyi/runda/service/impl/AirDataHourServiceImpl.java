@@ -79,30 +79,31 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         deptIdToDeptNameMap.put("18002", "怀来北辰佳苑"); // 怀来县-怀来北辰佳苑
         deptIdToDeptNameMap.put("18003", "蔚县职教中心");//蔚县-蔚县玉皇阁西
         deptIdToDeptNameMap.put("18070", "蔚县职教中心");//蔚县-蔚县玉皇阁西
-        deptIdToDeptNameMap.put("18007", " 怀安环境分局");//怀安县-怀安环境分局
-        deptIdToDeptNameMap.put("18071", " 怀安环境分局");//怀安县-怀安环境分局
-        deptIdToDeptNameMap.put("18011", " 世纪豪园");//桥东区-世纪豪园
-        deptIdToDeptNameMap.put("18114", " 世纪豪园");//桥东区-世纪豪园
-        deptIdToDeptNameMap.put("18115", " 人民公园");//桥西区-人民公园
-        deptIdToDeptNameMap.put("18013", " 烟厂");//经开区-烟厂
-        deptIdToDeptNameMap.put("18116", " 烟厂");//经开区-烟厂
+        deptIdToDeptNameMap.put("18007", "怀安环境分局");//怀安县-怀安环境分局
+        deptIdToDeptNameMap.put("18071", "怀安环境分局");//怀安县-怀安环境分局
+        deptIdToDeptNameMap.put("18011", "世纪豪园");//桥东区-世纪豪园
+        deptIdToDeptNameMap.put("18114", "世纪豪园");//桥东区-世纪豪园
+        deptIdToDeptNameMap.put("18072", "世纪豪园");
+        deptIdToDeptNameMap.put("18115", "人民公园");//桥西区-人民公园
+        deptIdToDeptNameMap.put("18013", "烟厂");//经开区-烟厂
+        deptIdToDeptNameMap.put("18116", "烟厂");//经开区-烟厂
         deptIdToDeptNameMap.put("18014", "宣化军营凤凰城"); // 长安区 宣化区 -宣化军营凤凰城
-        deptIdToDeptNameMap.put("18016", " 崇礼梦特芳丹酒店");//崇礼区-崇礼梦特芳丹酒店
-        deptIdToDeptNameMap.put("18077", " 崇礼梦特芳丹酒店");//崇礼区-崇礼梦特芳丹酒店
+        deptIdToDeptNameMap.put("18016", "崇礼梦特芳丹酒店");//崇礼区-崇礼梦特芳丹酒店
+        deptIdToDeptNameMap.put("18077", "崇礼梦特芳丹酒店");//崇礼区-崇礼梦特芳丹酒店
         deptIdToDeptNameMap.put("18017", "下花园环境分局");//下花园区-下花园环境分局
         deptIdToDeptNameMap.put("18018", "涿鹿县政府");//涿鹿县-涿鹿县政府
         deptIdToDeptNameMap.put("18019", "赤城北山");//赤城县-赤城北山
-        deptIdToDeptNameMap.put("18020", " 阳原人民政府");//阳原县-阳原人民政府
-        deptIdToDeptNameMap.put("18021", " 万全环境分局");//万全县- 万全环境分局
+        deptIdToDeptNameMap.put("18020", "阳原人民政府");//阳原县-阳原人民政府
+        deptIdToDeptNameMap.put("18021", "万全环境分局");//万全县- 万全环境分局
         deptIdToDeptNameMap.put("18022", "尚义第二中学");//尚义县-尚义第二中学
-        deptIdToDeptNameMap.put("18023", " 康保环境分局");//康保县-康保环境分局
+        deptIdToDeptNameMap.put("18023", "康保环境分局");//康保县-康保环境分局
         deptIdToDeptNameMap.put("18024", "张北环境分局");//张北县-张北环境分局
         deptIdToDeptNameMap.put("18025", "沽源县人民政府办公楼");//沽源县-沽源县人民政府办公楼
-        deptIdToDeptNameMap.put("18026", " 沽源第一中学");//察北管理区-沽源第一中学
+        deptIdToDeptNameMap.put("18026", "沽源第一中学");//察北管理区-沽源第一中学
         deptIdToDeptNameMap.put("18079", "涿鹿县政府");//涿鹿县-涿鹿县政府
-        deptIdToDeptNameMap.put("18081", " 阳原人民政府");//阳原县-阳原人民政府
-        deptIdToDeptNameMap.put("18114 ", " 世纪豪园");//阳原县-阳原人民政府
-        deptIdToDeptNameMap.put("18072", " 世纪豪园");
+        deptIdToDeptNameMap.put("18081", "阳原人民政府");//阳原县-阳原人民政府
+        deptIdToDeptNameMap.put("18114 ", "世纪豪园");//阳原县-阳原人民政府
+
     }
     @Autowired
     private AirDataHourRepository airDataHourRepository;
@@ -183,11 +184,9 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         // 添加 Pageable 参数
         PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE); // 使用默认分页参数，可以根据需求调整
         Page<DataQuery212> dataPage = dataQuery212OVRepository.findByCreateDateBetween(startDateMillis, endDateMillis, pageable);
-//        Page<AirDataHour> pageReports = airDataHourRepository.findCustomByCreateDateBetweenTimestamps(startDateMillis, endDateMillis, pageable);
 
         // 合并 DataQuery212 和 AirDataHour 数据
         List<AirDataHour> combinedData = new ArrayList<>();
-//        combinedData.addAll(pageReports.getContent());
         combinedData.addAll(dataPage.getContent().stream().map(dataQuery212 -> {
             AirDataHour airDataHour = new AirDataHour();
             airDataHour.setDeviceId(dataQuery212.getDeviceId());
@@ -204,7 +203,6 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             airDataHour.setPm10(dataQuery212.getPm10());
             airDataHour.setWd(String.valueOf(dataQuery212.getTemperature()));
             airDataHour.setSd(String.valueOf(dataQuery212.getHumidity()));
-//            airDataHour.setCreateDate(new Timestamp(dataQuery212.getDate()));
             return airDataHour;
         }).collect(Collectors.toList()));
 
@@ -260,17 +258,7 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             }
         } else {
             logger.info("Found {} records in total", combinedData.size());
-            // 打印每条记录的 deviceId 和 aqi
-//            pageReports.getContent().forEach(report -> logger.debug("Report: deviceId={}, aqi={}, so2={}, no2={}, co={}, o3={}, pm2_5={}, pm10={}, deptId={}, stationId={},deviceName={},stationName={},deptId={}",
-//                    report.getDeviceId(), report.getAqi(), report.getSo2Thickness(), report.getNo2Thickness(),
-//                    report.getCo(), report.getCo3Thickness(), report.getPm25(), report.getPm10(), report.getDeptId(), report.getStationId(),report.getDeviceName(),report.getStationName(),report.getDeptId()));
         }
-
-
-
-        // 直接使用Calendar获取时间戳
-
-       // Instant endTimestamp = shanghaiCalendar.toInstant();
 
 
         // 计算每个设备指定日期时间内的各项指标平均值
@@ -305,7 +293,6 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                 })
                 .collect(Collectors.toList());
         // 添加日志信息以确认 stationId 是否存在
-//        data.forEach(row -> logger.debug("Row data: {}", row));
 
         // 将平均数据保存到MySQL数据库中
         saveToMysql(data);
@@ -314,6 +301,11 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         List<Map<String, Object>> calibratedData = data.stream()
                 .map(row -> {
                     String deviceId = (String) row.get("deviceId");
+
+                    if (deviceId == null || deviceId.isEmpty()) {
+                        // 如果 deviceId 为空，跳过当前记录
+                        return null;
+                    }
                     // 根据 deviceId 和 dateTimeStr 查询校准后的数据
                     HourlyAverageAirData calibratedDataRecord = hourlyAverageAirDataRepository.findByDeviceIdAndCreatedAt(deviceId, dateTime);
                     if (calibratedDataRecord != null) {
@@ -711,10 +703,12 @@ public class AirDataHourServiceImpl implements AirDataHourService {
 
         for (Map<String, Object> row : data) {
             String deviceId = (String) row.get("deviceId");
+            Double pm2_5 = (Double) row.get("averagePm2_5");
             if (deviceId == null || deviceId.isEmpty()) {
                 logger.error("Device ID is null or empty: {}", row);
                 continue;
             }
+
             // 确认 stationId 是否存在
             String stationId = (String) row.get("stationId");
             if (stationId == null || stationId.isEmpty()) {
@@ -737,9 +731,8 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             calendar.setTime(createAt);
             calendar.add(Calendar.MINUTE, 59);
             Date updateAt = calendar.getTime();
-
             HourlyAverageAirData hourlyAverageAirData = new HourlyAverageAirData();
-
+            hourlyAverageAirData.setType(2);
             hourlyAverageAirData.setDeviceId(deviceId);
             hourlyAverageAirData.setCreatedAt(createAt); // 设置 create_at 字段
             hourlyAverageAirData.setUpdatedAt(updateAt); // 设置 update_at 字段
@@ -762,109 +755,94 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             hourlyAverageAirData.setDeviceName((String) row.get("deviceName"));
             hourlyAverageAirData.setStationName((String) row.get("stationName"));
 
-//            Integer type =  deviceMapper.getIsYunwei(deviceId);
-//              if(type == 1){
-//              // 数据校准逻辑
-//              String deptId = (String) row.get("deptId"); // 获取部门ID
-//              if (deptId == null) {
-//                  throw new IllegalArgumentException("deptId不能为空");
-//              }
-//
-//              String controlStation = deptIdToDeptNameMap.getOrDefault(deptId, "未知站点");
-//
-//              // 定义需要校准的站点集合
-//              Set<String> calibrationStations = Set.of(
-//                      "五金库", "怀来北辰佳苑", "蔚县职教中心", "怀安环境分局", "世纪豪园",
-//                      "人民公园", "烟厂", "宣化军营凤凰城", "崇礼梦特芳丹酒店", "下花园环境分局",
-//                      "涿鹿县政府", "赤城北山", "阳原人民政府", "万全环境分局", "尚义第二中学",
-//                      "康保环境分局", "张北环境分局", "沽源县人民政府办公楼", "沽源第一中学",
-//                      "青少年活动中心","阳原职教中心","赤城御福庄园","万全第三初级中学","下花园区医院"
-//              );
-//
-//              // 判断是否需要校准
-//              if (calibrationStations.contains(controlStation)) {
-//                  hourlyAverageAirData = calibrateData(hourlyAverageAirData, controlStation);
-//              }
-//          }
+            // 检查设备是否存在
+            Device existingDevice = deviceMapper.selectDeviceById(Long.valueOf(deviceId));
+            if (existingDevice == null) {
+                logger.error("Device with ID {} does not exist", deviceId);
+                continue; // 跳过当前记录
+            }
+
+
+            Long isYunwei = deviceMapper.getIsYunwei(deviceId);
+
+            if (isYunwei==1L || isYunwei==null) {
+
             // 数据校准逻辑
             String deptId = (String) row.get("deptId"); // 获取部门ID
             if (deptId == null) {
                 throw new IllegalArgumentException("deptId不能为空");
             }
 
-            String controlStation = deptIdToDeptNameMap.getOrDefault(deptId, "未知站点");
+                String controlStation = deptIdToDeptNameMap.getOrDefault(deptId, "世纪豪园");
 
-            // 定义需要校准的站点集合
-            Set<String> calibrationStations = Set.of(
-                    "五金库", "怀来北辰佳苑", "蔚县职教中心", "怀安环境分局", "世纪豪园",
-                    "人民公园", "烟厂", "宣化军营凤凰城", "崇礼梦特芳丹酒店", "下花园环境分局",
-                    "涿鹿县政府", "赤城北山", "阳原人民政府", "万全环境分局", "尚义第二中学",
-                    "康保环境分局", "张北环境分局", "沽源县人民政府办公楼", "沽源第一中学",
-                    "青少年活动中心","阳原职教中心","赤城御福庄园","万全第三初级中学","下花园区医院"
-            );
+                // 定义需要校准的站点集合
+                Set<String> calibrationStations = Set.of(
+                        "五金库", "怀来北辰佳苑", "蔚县职教中心", "怀安环境分局", "世纪豪园",
+                        "人民公园", "烟厂", "宣化军营凤凰城", "崇礼梦特芳丹酒店", "下花园环境分局",
+                        "涿鹿县政府", "赤城北山", "阳原人民政府", "万全环境分局", "尚义第二中学",
+                        "康保环境分局", "张北环境分局", "沽源县人民政府办公楼", "沽源第一中学",
+                        "青少年活动中心", "阳原职教中心", "赤城御福庄园", "万全第三初级中学", "下花园区医院"
+                );
 
-            // 判断是否需要校准
-            if (calibrationStations.contains(controlStation)) {
-                hourlyAverageAirData = calibrateData(hourlyAverageAirData, controlStation);
-            }
-
-            Double averagePm25 =  hourlyAverageAirData.getAveragePm25();
-            //System.out.println("averagePm25: " + averagePm25);
-            Double averagePm10 =  hourlyAverageAirData.getAveragePm10();
-            if (averagePm25 != null && averagePm10 != null && averagePm25 > 50 && averagePm10 > 50) {
-                AlarmInfo alarmInfo = new AlarmInfo();
-                alarmInfo.setStationId(Long.valueOf(stationId));
-                alarmInfo.setDeviceId(Long.valueOf(deviceId));
-                alarmInfo.setDeptId(Long.valueOf((String) row.get("deptId")));
-                //根据stationId进行查询station表中的phone信息并把phone插入到alarmInfo表中
-                // 根据stationId获取电话号码
-                String phone = stationMapper.getPhoneByStationId(stationId);
-                String userName = stationMapper.getNameByStationId(stationId);
-                if (phone != null) {
-                    alarmInfo.setPhoneNumber(phone);
-                    alarmInfo.setUserName(userName);
-                } else {
-
-                    alarmInfo.setPhoneNumber(null);
+//             判断是否需要校准
+                if (calibrationStations.contains(controlStation)) {
+                    hourlyAverageAirData = calibrateData(hourlyAverageAirData, controlStation);
                 }
+                //0->低值 1->高值 2->正常
+                if (hourlyAverageAirData.getType() == 0) {
+                    AlarmInfo alarmInfo = new AlarmInfo();
+                    alarmInfo.setStationId(Long.valueOf(stationId));
+                    alarmInfo.setDeviceId(Long.valueOf(deviceId));
+                    alarmInfo.setDeptId(Long.valueOf((String) row.get("deptId")));
+                    //根据stationId进行查询station表中的phone信息并把phone插入到alarmInfo表中
+                    // 根据stationId获取电话号码
+                    String phone = stationMapper.getPhoneByStationId(stationId);
+                    String userName = stationMapper.getNameByStationId(stationId);
+                    if (phone != null) {
+                        alarmInfo.setPhoneNumber(phone);
+                        alarmInfo.setUserName(userName);
+                    } else {
 
-                alarmInfo.setStationName(hourlyAverageAirData.getStationName());
-                alarmInfo.setDeviceName(hourlyAverageAirData.getDeviceName());
-                alarmInfo.setAlarmType(2L);
-                alarmInfo.setCreateDate(updateAt);
-                alarmInfo.setStatus("设备高值");
-                alarmInfo.setSmsMessage("设备" + deviceId + "数据高值，请及时处理");
-                alarmInfoMapper.insertAlarmInfo(alarmInfo);
-            } else if (averagePm25 != null && averagePm10 != null && averagePm25 < 30 && averagePm10 < 30) {
-                AlarmInfo alarmInfo = new AlarmInfo();
-                alarmInfo.setStationId(Long.valueOf(stationId));
-                alarmInfo.setDeviceId(Long.valueOf(deviceId));
-                alarmInfo.setDeptId(Long.valueOf((String) row.get("deptId")));
-                //根据stationId进行查询station表中的phone信息并把phone插入到alarmInfo表中
-                // 根据stationId获取电话号码
-                String phone = stationMapper.getPhoneByStationId(stationId);
-                String userName = stationMapper.getNameByStationId(stationId);
-                if (phone != null) {
-                    alarmInfo.setPhoneNumber(phone);
-                    alarmInfo.setUserName(userName);
-                } else {
+                        alarmInfo.setPhoneNumber(null);
+                    }
+                    alarmInfo.setStationName(hourlyAverageAirData.getStationName());
+                    alarmInfo.setDeviceName(hourlyAverageAirData.getDeviceName());
+                    alarmInfo.setAlarmType(2L);
+                    alarmInfo.setCreateDate(updateAt);
+                    alarmInfo.setStatus("设备低值");
+                    alarmInfo.setSmsMessage("设备" + deviceId + "数据低值，请及时处理");
+                    alarmInfoMapper.insertAlarmInfo(alarmInfo);
+                } else if (hourlyAverageAirData.getType() == 1) {
+                    AlarmInfo alarmInfo = new AlarmInfo();
+                    alarmInfo.setStationId(Long.valueOf(stationId));
+                    alarmInfo.setDeviceId(Long.valueOf(deviceId));
+                    alarmInfo.setDeptId(Long.valueOf((String) row.get("deptId")));
+                    //根据stationId进行查询station表中的phone信息并把phone插入到alarmInfo表中
+                    // 根据stationId获取电话号码
+                    String phone = stationMapper.getPhoneByStationId(stationId);
+                    String userName = stationMapper.getNameByStationId(stationId);
+                    if (phone != null) {
+                        alarmInfo.setPhoneNumber(phone);
+                        alarmInfo.setUserName(userName);
+                    } else {
 
-                    alarmInfo.setPhoneNumber(null);
+                        alarmInfo.setPhoneNumber(null);
+                    }
+
+                    alarmInfo.setStationName(hourlyAverageAirData.getStationName());
+                    alarmInfo.setDeviceName(hourlyAverageAirData.getDeviceName());
+                    alarmInfo.setAlarmType(2L);
+                    alarmInfo.setCreateDate(updateAt);
+                    alarmInfo.setStatus("设备高值");
+                    alarmInfo.setSmsMessage("设备" + deviceId + "数据高值，请及时处理");
+                    alarmInfoMapper.insertAlarmInfo(alarmInfo);
                 }
-                alarmInfo.setStationName(hourlyAverageAirData.getStationName());
-                alarmInfo.setDeviceName(hourlyAverageAirData.getDeviceName());
-                alarmInfo.setAlarmType(2L);
-                alarmInfo.setCreateDate(updateAt);
-                alarmInfo.setStatus("设备低值");
-                alarmInfo.setSmsMessage("设备" + deviceId + "数据低值，请及时处理");
-                alarmInfoMapper.insertAlarmInfo(alarmInfo);
             }
-
             hourlyAverageAirDataRepository.save(hourlyAverageAirData);
         }
     }
     private HourlyAverageAirData calibrateData(HourlyAverageAirData data, String controlStation) {
-        // 实现具体的数据校准逻辑
+
         Double pm2_5 = data.getAveragePm25();
 //        logger.info("PM2.5 before calibration: {}", pm2_5);
 
@@ -883,17 +861,24 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         }
 
         Double pmCountry = queryCountry.getPm();
-//        logger.info("PM country value: {}", pmCountry);
+
 
         Double pm10Country = queryCountry.getPm10();
-//        logger.info("PM10 country value: {}", pm10Country);
+
+        //pm_25 比pmCount 大于80时设置type为1
+        if(pm2_5>pmCountry+80){
+            data.setType(1);
+        } else if (pm2_5<pmCountry-60) {
+            data.setType(0);
+        }
+
 
         // Calculate differences
         Double countPm = pm2_5 - pmCountry;
-//        logger.info("Difference for PM2.5: {}", countPm);
+
 
         Double countPm10 = pm10 - pm10Country;
-//        logger.info("Difference for PM10: {}", countPm10);
+
 
         // Define a random fluctuation range (e.g., ±5% of the difference)
         double fluctuationRange = 0.15;
@@ -926,7 +911,6 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             data.setAveragePm10(pm10Country);
         }
 
-//        logger.info("PM10 after calibration: {}", pm10);
 
         return data;
     }
@@ -991,12 +975,16 @@ public class AirDataHourServiceImpl implements AirDataHourService {
 
     @Override
     public List<HourlyAverageAirData> selectDataList(Date date) throws ParseException {
-        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        dateTimeFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai")); // 明确指定时区
+
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
+//        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+//        dateTimeFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai")); // 明确指定时区
 
         Date dateTime = date;
         try {
-            dateTime = dateTimeFormat.parse(String.valueOf(date));
+            dateTime = dateFormat.parse(String.valueOf(date));
         } catch (ParseException e) {
             logger.error("Error parsing date: {}", e.getMessage());
 
@@ -1013,9 +1001,6 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         endCalendar.set(Calendar.MINUTE, 59);
         endCalendar.set(Calendar.SECOND, 59);
         endCalendar.set(Calendar.MILLISECOND, 999);
-
-        long startDateMillis = startCalendar.getTimeInMillis();
-        long endDateMillis = endCalendar.getTimeInMillis();
 
 
         // 添加 Pageable 参数

@@ -36,27 +36,28 @@
     <el-table v-loading="loading" :data="infoList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <!-- <el-table-column label="主键" align="center" prop="id" /> -->
+      <el-table-column label="设备名称" align="center" prop="deviceName" />
       <el-table-column label="联系人" align="center" prop="userName" />
       <el-table-column label="手机号" align="center" prop="phoneNumber" />
-      <el-table-column label="短信模板" align="center" prop="smsTem" />
+      <!-- <el-table-column label="短信模板" align="center" prop="smsTem" /> -->
       <el-table-column label="发送内容" align="center" prop="smsMessage" />
-      <el-table-column label="失败原因" align="center" prop="smsFail" />
+      <!-- <el-table-column label="失败原因" align="center" prop="smsFail" /> -->
       <el-table-column label="创建时间" align="center" prop="createDate" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createDate, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="更新时间" align="center" prop="lastUpdatedDate" width="180">
+      <!-- <el-table-column label="更新时间" align="center" prop="lastUpdatedDate" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.lastUpdatedDate, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column label="设备状态" align="center" prop="status" />
-      <el-table-column label="设备名称" align="center" prop="deviceName" />
+
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)"
-            v-hasPermi="['runda:info:edit']">修改</el-button>
+          <!-- <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)"
+            v-hasPermi="['runda:info:edit']">修改</el-button> -->
           <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)"
             v-hasPermi="['runda:info:remove']">删除</el-button>
         </template>
