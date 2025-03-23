@@ -2,11 +2,8 @@
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="创建时间" prop="time">
-        <el-date-picker clearable
-                        v-model="queryParams.time"
-                        type="date"
-                        value-format="yyyy-MM-dd"
-                        placeholder="请选择创建时间">
+        <el-date-picker clearable v-model="queryParams.time" type="date" value-format="yyyy-MM-dd"
+          placeholder="请选择创建时间">
         </el-date-picker>
       </el-form-item>
       <!-- <el-form-item label="是否已读" prop="isRead">
@@ -54,25 +51,12 @@
         >修改</el-button>
       </el-col> -->
       <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['runda:message:remove']"
-        >删除</el-button>
+        <el-button type="danger" plain icon="el-icon-delete" size="mini" :disabled="multiple" @click="handleDelete"
+          v-hasPermi="['runda:message:remove']">删除</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['runda:message:export']"
-        >导出</el-button>
+        <el-button type="warning" plain icon="el-icon-download" size="mini" @click="handleExport"
+          v-hasPermi="['runda:message:export']">导出</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
@@ -94,13 +78,8 @@
       <!-- <el-table-column label="备注" align="center" prop="remark" /> -->
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-view"
-            @click="uRead(scope.row)"
-            v-hasPermi="['runda:message:updateRead']"
-          >详情</el-button>
+          <el-button size="mini" type="text" icon="el-icon-view" @click="uRead(scope.row)"
+            v-hasPermi="['runda:message:updateRead']">详情</el-button>
           <!-- <el-button
             size="mini"
             type="text"
@@ -108,24 +87,14 @@
             @click="handleUpdate(scope.row)"
             v-hasPermi="['runda:message:edit']"
           >修改</el-button> -->
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['runda:message:remove']"
-          >删除</el-button>
+          <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)"
+            v-hasPermi="['runda:message:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
+      @pagination="getList" />
 
     <!-- 添加或修改消息通知对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
@@ -139,14 +108,14 @@
 
     <el-dialog :title="title" :visible.sync="iR" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item  label="消息内容">
-          <el-input v-model="form.content"  readonly/>
+        <el-form-item label="消息内容">
+          <el-input v-model="form.content" readonly />
         </el-form-item>
         <el-form-item label="时间" prop="time">
-          <el-input v-model="form.time"  readonly/>
+          <el-input v-model="form.time" readonly />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark"  readonly/>
+          <el-input v-model="form.remark" readonly />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -166,7 +135,7 @@ export default {
     return {
       // 遮罩层
       loading: true,
-      iR:false,
+      iR: false,
       // 选中数组
       ids: [],
       // 非单个禁用
@@ -188,7 +157,8 @@ export default {
         pageNum: 1,
         pageSize: 10,
         content: null,
-        time: null,
+        //得到当前年月日
+        time: new Date().toISOString().split('T')[0],
         isRead: null,
         remark: null
       },
@@ -251,7 +221,7 @@ export default {
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.id)
-      this.single = selection.length!==1
+      this.single = selection.length !== 1
       this.multiple = !selection.length
     },
     /** 新增按钮操作 */
@@ -293,12 +263,12 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除消息通知编号为"' + ids + '"的数据项？').then(function() {
+      this.$modal.confirm('是否确认删除消息通知编号为"' + ids + '"的数据项？').then(function () {
         return delMessage(ids);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
+      }).catch(() => { });
     },
     /** 导出按钮操作 */
     handleExport() {
@@ -307,7 +277,7 @@ export default {
       }, `message_${new Date().getTime()}.xlsx`)
     },
     //详情
-    uRead(row){
+    uRead(row) {
       this.reset();
       const id = row.id || this.ids
       getMessage(id).then(response => {
@@ -322,7 +292,7 @@ export default {
       updateRead(this.form).then(response => {
         this.$modal.msgSuccess("已读");
         // 触发事件总线更新，参数-1表示减少未读数
-        this.$bus.$emit('message-read', -1); 
+        this.$bus.$emit('message-read', -1);
         this.iR = false;
         this.getList();
       });

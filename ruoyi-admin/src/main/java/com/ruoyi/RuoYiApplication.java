@@ -6,6 +6,9 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import javax.annotation.PostConstruct;
+import java.util.TimeZone;
+
 /**
  * 启动程序
  *
@@ -30,5 +33,10 @@ public class RuoYiApplication
                 " |  | \\ `'   /|   `-'  /           \n" +
                 " |  |  \\    /  \\      /           \n" +
                 " ''-'   `'-'    `-..-'              ");
+    }
+    @PostConstruct
+    void started() {
+        // 设置 JVM 默认时区为东八区
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
     }
 }

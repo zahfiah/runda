@@ -92,6 +92,7 @@ export const constantRoutes = [
 
 // 动态路由，基于用户权限动态去加载
 export const dynamicRoutes = [
+
   {
     path: '/system/user-auth',
     component: Layout,
@@ -161,7 +162,7 @@ export const dynamicRoutes = [
         meta: { title: '修改生成配置', activeMenu: '/tool/gen' }
       }
     ]
-  }
+  },
 ]
 
 // 防止连续点击多次路由报错
@@ -177,7 +178,7 @@ Router.prototype.replace = function push(location) {
 }
 
 export default new Router({
-  mode: 'hash', // 去掉url中的#
+  mode: 'history', // 去掉url中的#
   scrollBehavior: () => ({ y: 0 }),
   routes: constantRoutes
 })

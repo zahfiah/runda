@@ -324,7 +324,7 @@ export default {
         const response = await request({
           url: "/runda/air/list-hour-data",
           params: {
-            date: `${this.queryParams.selectedDate} ${hour}`
+            date: `${this.queryParams.selectedDate} ${hour}`,
           }
         });
 
@@ -508,7 +508,6 @@ export default {
 
     // 新增方法：获取当前时间的前一个整点小时数据
     async fetchLatestHourData() {
-      this.loading = true; // 显示加载圈
       try {
         // 计算当前时间的前一个整点小时
         const now = new Date();
@@ -520,7 +519,7 @@ export default {
         const response = await request({
           url: "/runda/air/list-hour-data",
           params: {
-            date: `${formattedDate} ${hour}`
+            date: `${formattedDate} ${hour}`,
           }
         });
 
