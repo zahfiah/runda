@@ -92,6 +92,110 @@ export const constantRoutes = [
 
 // 动态路由，基于用户权限动态去加载
 export const dynamicRoutes = [
+  {
+    path: '/runda/data',
+    component: Layout,
+    permissions: ['runda:data:view'],
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/runda/data'),
+        name: 'Data',
+        meta: { title: '监测小时报表', icon: 'data' }
+      }
+    ]
+  },
+  {
+    path: '/runda/device',
+    component: Layout,
+    permissions: ['runda:device:view'],
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/runda/device'),
+        name: 'Device',
+        meta: { title: '监测设备管理', icon: 'device' }
+      }
+    ]
+  },
+  {
+    path: '/runda/station',
+    component: Layout,
+    permissions: ['runda:station:view'],
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/runda/station'),
+        name: 'station',
+        meta: { title: '监测站点管理', icon: 'station' }
+      }
+    ]
+  },
+  {
+    path: '/runda/info',
+    component: Layout,
+    permissions: ['runda:info:view'],
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/runda/info'),
+        name: 'info',
+        meta: { title: '告警管理', icon: 'info' }
+      }
+    ]
+  },
+  {
+    path: '/runda/query212',
+    component: Layout,
+    permissions: ['runda:query212:view'],
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/runda/query212'),
+        name: 'query212',
+        meta: { title: '大气数据查询212', icon: 'query212' }
+      }
+    ]
+  },
+  {
+    path: '/runda/message',
+    component: Layout,
+    permissions: ['runda:message:view'],
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/runda/message'),
+        name: 'message',
+        meta: { title: '消息通知', icon: 'message' }
+      }
+    ]
+  },
+  {
+    path: '/runda/country',
+    component: Layout,
+    permissions: ['runda:country:view'],
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/runda/country'),
+        name: 'country',
+        meta: { title: '国控数据查询', icon: 'country' }
+      }
+    ]
+  },
+  {
+    path: '/runda/yunwei',
+    component: Layout,
+    permissions: ['runda:yunwei:view'],
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/runda/yunwei'),
+        name: 'yunwei',
+        meta: { title: '运维日志', icon: 'yunwei' }
+      }
+    ]
+  },
 
   {
     path: '/system/user-auth',

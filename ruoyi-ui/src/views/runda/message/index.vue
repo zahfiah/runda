@@ -158,7 +158,7 @@ export default {
         pageSize: 10,
         content: null,
         //得到当前年月日
-        time: new Date().toISOString().split('T')[0],
+        time: null,
         isRead: null,
         remark: null
       },

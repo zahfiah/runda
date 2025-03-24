@@ -31,11 +31,7 @@
       <transition name="el-zoom-in-top">
         <div v-show="isStatsVisible" class="stats-content">
           <el-row :gutter="20">
-            <el-col 
-              v-for="(region, index) in zjkRegions" 
-              :key="index"
-              :xs="24" :sm="12" :md="8" :lg="6"
-            >
+            <el-col v-for="(region, index) in zjkRegions" :key="index" :xs="24" :sm="12" :md="8" :lg="6">
               <div class="region-card">
                 <h3>{{ region.label }}</h3>
                 <div class="stats-grid">
@@ -230,8 +226,8 @@ export default {
       isStatsVisible: false,
       zjkRegions: regions.counties
         .filter(county => county.city === '130700')
-        .map(item => ({ 
-          value: item.value, 
+        .map(item => ({
+          value: item.value,
           label: item.label.replace('区', '') // 去除"区"字尾
         })),
       loadingNotices: false,
@@ -316,16 +312,16 @@ export default {
   },
   methods: {
     toggleStats() {
-    this.isStatsVisible = !this.isStatsVisible;
-  },
+      this.isStatsVisible = !this.isStatsVisible;
+    },
     deviceCount(regionName) {
-      return this.deviceList.filter(d => 
+      return this.deviceList.filter(d =>
         d.countyCn && d.countyCn.includes(regionName)
       ).length
     },
     // 站点数量统计方法
     stationCount(regionName) {
-      return this.stationlist.filter(s => 
+      return this.stationlist.filter(s =>
         s.countyCn && s.countyCn.includes(regionName)
       ).length
     },
@@ -425,7 +421,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-
 @import "@/assets/styles/seeindex.scss";
 
 .region-card {
@@ -434,24 +429,29 @@ export default {
     display: flex;
     gap: 10px;
   }
+
   .region-status-stats {
     margin-top: 10px;
     padding: 10px;
     background-color: #f5f7fa;
     border-radius: 4px;
+
     h4 {
       margin-bottom: 10px;
       font-size: 14px;
       color: #303133;
     }
+
     .status-item {
       display: flex;
       align-items: center;
       margin-bottom: 5px;
+
       i {
         margin-right: 5px;
         color: #409eff;
       }
+
       span {
         font-size: 12px;
         color: #606266;

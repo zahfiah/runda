@@ -41,13 +41,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="userName != null "> and user_name = #{userName}</if>
             <if test="deviceName != null  and deviceName != ''"> and device_name like concat('%', #{deviceName}, '%')</if>
         </where>
-        ordery by createDate desc
+        order by create_date desc
     </select>
     
     <select id="selectAlarmInfoById" parameterType="Long" resultMap="AlarmInfoResult">
         <include refid="selectAlarmInfoVo"/>
         where id = #{id}
-        ordery by createDate desc
+        order by create_date desc
     </select>
 
     <insert id="insertAlarmInfo" parameterType="AlarmInfo" useGeneratedKeys="true" keyProperty="id">
