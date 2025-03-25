@@ -39,10 +39,10 @@
         <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd"
           v-hasPermi="['runda:data:add']">新增</el-button>
       </el-col>
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button type="warning" plain icon="el-icon-download" size="mini" @click="handleExport"
           v-hasPermi="['runda:data:export']">导出</el-button>
-      </el-col>
+      </el-col> -->
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
@@ -178,6 +178,24 @@ export default {
         startHour: null,
         endHour: null,
       },
+      // 表单数据
+      form: {
+        id: null,
+        deviceId: null,
+        queryTime: null,
+        averageAqi: null,
+        averageSo2: null,
+        averageNo2: null,
+        averageO3: null,
+        averagePm25: null,
+        averagePm10: null,
+        aqiLevel: null,
+        aqiQuality: null,
+        aqiColor: null,
+        primaryPollutant: null,
+        createdAt: null,
+        updatedAt: null
+      },
       // 表单校验
       rules: {
         deviceId: [
@@ -277,6 +295,8 @@ export default {
 
     async getList() {
       this.loading = true; // 显示加载圈
+
+      await this.fetchLatestHourData(); // 调用 fetchLatestHourData 方法
       if (!this.validateHourParams()) return;
 
       const hours = this.generateHourRange(
@@ -373,14 +393,14 @@ export default {
       console.log('处理后的数据:', allData);
 
       this.total = allData.length;
+      // 应用分页逻辑
       this.dataList = allData.slice(
         (this.queryParams.pageNum - 1) * this.queryParams.pageSize,
-        this.queryParams.pageSize * this.queryParams.pageNum
+        this.queryParams.pageNum * this.queryParams.pageSize
       );
 
       if (!allData.length) this.$message.warning("未找到数据");
     },
-
     handleDataError(error) {
       console.error("查询失败:", error);
       this.$message.error("查询失败");
@@ -501,7 +521,7 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport() {
-      this.download('runda/data/export', {
+      this.download('runda/air/export', {
         ...this.queryParams
       }, `data_${new Date().getTime()}.xlsx`)
     },
@@ -543,6 +563,10 @@ export default {
             (this.queryParams.pageNum - 1) * this.queryParams.pageSize,
             this.queryParams.pageNum * this.queryParams.pageSize
           );
+          // 确保分页参数正确传递
+          console.log('分页参数:', this.queryParams);
+          console.log('总数据量:', this.total);
+          console.log('当前页数据:', this.dataList);
         } else {
           this.$message.warning("未找到符合条件的数据");
         }

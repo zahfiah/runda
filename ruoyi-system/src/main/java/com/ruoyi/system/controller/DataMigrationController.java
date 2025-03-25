@@ -3,6 +3,7 @@ package com.ruoyi.system.controller;
 import com.ruoyi.system.service.DataMigrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,7 +14,6 @@ public class DataMigrationController {
 
     @Autowired
     private DataMigrationService dataMigrationService;
-
     /**
      * t_b_site_info
      * @return
@@ -33,6 +33,7 @@ public class DataMigrationController {
     public String state() {
         return dataMigrationService.migrateStateData();
     }
+
     @Scheduled(cron = "0 0 * * * ?")
     @GetMapping("/monitor")
 
@@ -44,7 +45,7 @@ public class DataMigrationController {
     public String monitorInfo() {
         return dataMigrationService.migrateMonitorInfoData();
     }
-    @Scheduled(cron = "0 0 * * * ?")
+    @Scheduled(cron = "0 5 * * * ?")
     @GetMapping("/monitor-hour")
     public String monitorHour() {
         return dataMigrationService.migrateMonitorHourData();

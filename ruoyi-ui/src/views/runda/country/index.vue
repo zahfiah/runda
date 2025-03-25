@@ -1,10 +1,16 @@
 <template>
   <div class="app-container">
+
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="更新时间" prop="time">
         <el-date-picker clearable v-model="queryParams.time" type="datetime" value-format="yyyy-MM-dd HH:mm:ss"
           placeholder="请选择更新时间">
         </el-date-picker>
+        <!-- 根据名称查询 -->
+        <el-form-item label="国控站点" prop="name">
+          <el-input v-model="queryParams.name" placeholder="请输入国控站点名称" clearable size="small"
+            @keyup.enter.native="handleQuery" />
+        </el-form-item>
 
       </el-form-item>
       <el-form-item>

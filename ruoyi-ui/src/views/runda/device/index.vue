@@ -666,6 +666,20 @@ export default {
     });
   },
   methods: {
+    parseTime(time) {
+      if (!time) return '-'; // 空值处理
+
+      // 修正秒部分的异常值
+      const parts = time.split(' ');
+      const datePart = parts[0]; // "2024-11-24"
+      const timePart = parts[1]; // "15:31:0441"
+
+      const [hours, minutes, seconds] = timePart.split(':');
+      const correctedSeconds = String(seconds).slice(0, 2); // 只取前两位有效秒数
+
+      const correctedTime = `${datePart} ${hours}:${minutes}:${correctedSeconds}`;
+      return correctedTime;
+    },
     handleCountyChange(value) {
       // 重置乡镇选择
       this.deviceForm.townCn = null;
@@ -867,7 +881,7 @@ export default {
               this.getList();
               // 发送设备信息到消息通知
               sendDevice(this.deviceForm).then(response => {
-                this.$bus.$emit('message-read', 1); 
+                this.$bus.$emit('message-read', 1);
                 this.$modal.msgSuccess("发送成功");
 
               });

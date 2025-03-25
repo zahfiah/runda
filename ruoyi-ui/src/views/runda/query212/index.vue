@@ -88,10 +88,10 @@
         >
       </el-col> -->
 
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button type="warning" plain icon="el-icon-download" size="mini" @click="handleExport"
           v-hasPermi="['runda:query:export']">导出</el-button>
-      </el-col>
+      </el-col> -->
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
@@ -405,11 +405,11 @@ export default {
     handleTimeTypeChange(value) {
       // 切换时间类型时重置相关字段
       if (value === "date") {
-        this.queryParams.selectedDate = null;
+        this.queryParams.selectedDate = this.startDate;
         this.queryParams.startHour = null;
         this.queryParams.endHour = null;
       } else {
-        this.queryParams.startDate = null;
+        this.queryParams.selectedDate = this.queryParams.startDate; // 设置为当前年月日
         this.queryParams.endDate = null;
       }
     },

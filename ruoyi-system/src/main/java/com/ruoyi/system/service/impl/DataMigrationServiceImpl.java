@@ -244,7 +244,7 @@ public class DataMigrationServiceImpl implements DataMigrationService {
                 "FROM " + sourceTable + " d " +
                 "LEFT JOIN station s ON d.name LIKE CONCAT(s.station_name, '%')";
         List<Map<String, Object>> sourceDataList = jdbcTemplateA.queryForList(selectSql);
-
+        //打印查询到的sourceDataList
         // 2. 遍历源表数据
         for (Map<String, Object> sourceRow : sourceDataList) {
             // 获取唯一标识（假设 name 是唯一标识）
@@ -267,7 +267,20 @@ public class DataMigrationServiceImpl implements DataMigrationService {
                 }
             } else {
                 // 6. 如果目标表中不存在对应的记录，则插入新数据
-                buildInsertMonitorParams(targetTable, sourceRow);
+                InsertNewParams(targetTable, sourceRow);
+            }
+        }
+    }
+
+    private void InsertNewParams(String targetTable, Map<String, Object> sourceRow) {
+
+        Object[] params = buildInsertMonitorParams(targetTable, sourceRow);
+        if (params != null) {
+            try {
+                jdbcTemplateB.update(params[0].toString(), (Object[]) params[1]);
+                System.out.println("插入成功：设备 " + sourceRow.get("name") + " 的数据已插入");
+            } catch (Exception e) {
+                System.err.println("插入失败：设备 " + sourceRow.get("name") + "，错误信息：" + e.getMessage());
             }
         }
     }
@@ -282,7 +295,8 @@ public class DataMigrationServiceImpl implements DataMigrationService {
 
         String selectSql = "SELECT d.name, s.licens_number, d.created_time, d.last_updated_time, d.fromResource,   d.status, d.sn,d.latitude,d.longitude " +
                 "FROM " + sourceTable + " d " +
-                "LEFT JOIN station s ON d.name like CONCAT(s.station_name, '%')";
+                "LEFT JOIN station s   ON d.name LIKE CONCAT(s.station_name, '%') AND LENGTH(s.station_name) > 5\n" +
+                "  ";
 
         List<Map<String, Object>> dataList = jdbcTemplateA.queryForList(selectSql);
 
@@ -291,7 +305,7 @@ public class DataMigrationServiceImpl implements DataMigrationService {
 
         // 3. 将新数据插入到目标表
         if (!dataList.isEmpty()) {
-            for (Map<String, Object> row : dataList) {
+            for (Map<String, Object> row : newDataList) {
                 try {
                     // 检查 SGXKZBH 是否为空
                     String licensNumberValue = (String) row.get("licens_number");
@@ -906,7 +920,10 @@ public class DataMigrationServiceImpl implements DataMigrationService {
             addedColumns.add("XGRQSJ");
         }
 
+
         String sql = "INSERT INTO " + targetTable + " (" + columns + ") VALUES (" + values + ")";
+        System.out.println("生成的插入SQL: " + sql);
+        System.out.println("参数值: " + paramsList);
         return new Object[]{sql, paramsList.toArray()};
     }
     /**
