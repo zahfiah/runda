@@ -4,10 +4,9 @@
       <el-form-item label="设备名称" prop="siteName">
         <el-input v-model="queryParams.siteName" placeholder="请输入设备名称" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="运维时间" prop="maintenanceTime">
-        <el-date-picker clearable v-model="queryParams.maintenanceTime" type="date" value-format="yyyy-MM-dd"
-          placeholder="请选择运维时间">
-        </el-date-picker>
+      <el-form-item label="时间范围">
+        <el-date-picker v-model="dateRange" type="daterange" value-format="yyyy-MM-dd" start-placeholder="开始日期"
+          end-placeholder="结束日期" range-separator="至" @change="handleDateChange"></el-date-picker>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -125,6 +124,34 @@ export default {
   dicts: ["is_complete"],
   data() {
     return {
+      dateRange: [], // 日期范围
+      pickerOptions: {
+        shortcuts: [{
+          text: '最近一周',
+          onClick(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+            picker.$emit('pick', [start, end]);
+          }
+        }, {
+          text: '最近一个月',
+          onClick(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+            picker.$emit('pick', [start, end]);
+          }
+        }, {
+          text: '最近三个月',
+          onClick(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+            picker.$emit('pick', [start, end]);
+          }
+        }]
+      },
       // 遮罩层
       loading: true,
       // 选中数组
@@ -148,7 +175,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         siteName: null,
-        maintenanceTime: null,
+        // maintenanceTime: null,
       },
       // 表单参数
       form: {},
@@ -172,6 +199,16 @@ export default {
     this.getList();
   },
   methods: {
+    // 处理日期范围变化
+    handleDateRangeChange(val) {
+      if (val && val.length === 2) {
+        this.queryParams.beginTime = val[0];
+        this.queryParams.endTime = val[1];
+      } else {
+        this.queryParams.beginTime = null;
+        this.queryParams.endTime = null;
+      }
+    },
     /** 查询运维日志列表 */
     getList() {
       this.loading = true;
@@ -199,13 +236,35 @@ export default {
       };
       this.resetForm("form");
     },
-    /** 搜索按钮操作 */
+    // 在查询方法中
     handleQuery() {
-      this.queryParams.pageNum = 1;
-      this.getList();
+      // 构建查询参数对象
+      const params = {
+        pageNum: 1,
+        pageSize: this.queryParams.pageSize,
+        siteName: this.queryParams.siteName,
+        sn: this.queryParams.sn
+      };
+
+      // 处理日期范围
+      if (this.dateRange && this.dateRange.length === 2) {
+        params.beginTime = this.dateRange[0]; // 开始日期
+        params.endTime = this.dateRange[1];   // 结束日期
+      }
+
+      console.log('发送的查询参数:', params); // 调试用
+
+      this.loading = true;
+      listYunwei(params).then(response => {
+        this.yunweiList = response.rows;
+        this.total = response.total;
+        this.loading = false;
+      });
     },
     /** 重置按钮操作 */
     resetQuery() {
+      // 重置查询表单
+      this.dateRange = [];
       this.resetForm("queryForm");
       this.handleQuery();
     },
@@ -267,13 +326,26 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport() {
-      this.download(
-        "runda/yunwei/export",
-        {
-          ...this.queryParams,
-        },
-        `yunwei_${new Date().getTime()}.xlsx`
-      );
+      const { siteName, beginTime, endTime } = this.queryParams;
+
+      // 验证时间范围
+      if (beginTime && endTime && new Date(beginTime) > new Date(endTime)) {
+        this.$modal.msgError("开始日期不能大于结束日期");
+        return;
+      }
+
+      this.$modal.confirm('确认要导出符合条件的运维日志数据吗？').then(() => {
+        this.download(
+          "runda/yunwei/export",
+          {
+            ...this.queryParams,
+            // 清除分页参数
+            pageNum: undefined,
+            pageSize: undefined
+          },
+          `运维日志_${siteName || '全部'}_${beginTime || ''}_${endTime || ''}_${new Date().getTime()}.xlsx`
+        );
+      }).catch(() => { });
     },
   },
 };

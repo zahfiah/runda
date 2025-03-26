@@ -2,6 +2,7 @@ package com.ruoyi.runda.mapper;
 
 import java.util.List;
 import com.ruoyi.runda.domain.SysYunwei;
+import org.apache.ibatis.annotations.SelectProvider;
 
 /**
  * 运维日志Mapper接口

@@ -99,14 +99,11 @@ public class DataMigrationServiceImpl implements DataMigrationService {
         return "数据迁移完成！";
     }
 
-    /**
-     * 迁移数据hdata的主方法
-     */
+
     @Override
     public String migrateMonitorHourData() {
         // 1. 查询源表数据
         List<Map<String, Object>> dataList = querySourceData();
-
 
         // 3. 将新数据插入到目标表
         insertData("t_d_monitor_hdata", dataList);
