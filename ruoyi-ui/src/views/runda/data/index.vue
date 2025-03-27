@@ -226,9 +226,6 @@ export default {
         this.queryParams.pageNum = pagination.page;
         this.queryParams.pageSize = pagination.limit;
         this.dataList = this.getPaginatedData(this.cachedAllData);
-      } else {
-        // 有设备选择时走原有逻辑
-        this.getList();
       }
     },
     // 新增设备相关方法
@@ -565,7 +562,7 @@ export default {
 
         // 更新数据列表并进行分页处理
         if (response.code === 200 && Array.isArray(response.data)) {
-          const allData = response.data.map(item => ({
+          this.cachedAllData = response.data.map(item => ({
             ...item,
             averagePm2_5_24h: item.averagePm25_24,
             averagePm10_24h: item.averagePm10_24,
@@ -578,11 +575,8 @@ export default {
           }));
 
           // 分页逻辑
-          this.total = allData.length;
-          this.dataList = allData.slice(
-            (this.queryParams.pageNum - 1) * this.queryParams.pageSize,
-            this.queryParams.pageNum * this.queryParams.pageSize
-          );
+          this.total = this.cachedAllData.length;
+          this.dataList = this.getPaginatedData(this.cachedAllData); // 改为从缓存池获取
           // 确保分页参数正确传递
           console.log('分页参数:', this.queryParams);
           console.log('总数据量:', this.total);
