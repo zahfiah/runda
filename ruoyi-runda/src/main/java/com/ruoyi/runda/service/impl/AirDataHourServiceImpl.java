@@ -134,7 +134,7 @@ public class AirDataHourServiceImpl implements AirDataHourService {
     // 在方法开头增加时间参数转换
 
     //调用calculateAverageForSpecificDateTime方法
-    @Scheduled(cron = "0 0 * * * ?")
+    @Scheduled(cron = "0 1 * * * ?")
     public  void  getData() throws Exception {
         LocalDateTime nowDate = LocalDateTime.now();
         // 提取年、月、日和小时
@@ -974,7 +974,7 @@ public class AirDataHourServiceImpl implements AirDataHourService {
     }
 
     @Override
-    public List<HourlyAverageAirData> selectDataList(Date date) throws ParseException {
+    public List<HourlyAverageAirData> selectDataList(Date beginDate, Date endDate) throws ParseException {
 
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
@@ -982,31 +982,8 @@ public class AirDataHourServiceImpl implements AirDataHourService {
 //        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 //        dateTimeFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai")); // 明确指定时区
 
-        Date dateTime = date;
-        try {
-            dateTime = dateFormat.parse(String.valueOf(date));
-        } catch (ParseException e) {
-            logger.error("Error parsing date: {}", e.getMessage());
-
-        }
-
-        Calendar startCalendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Shanghai"));
-        startCalendar.setTime(dateTime);
-        startCalendar.set(Calendar.MINUTE, 0);
-        startCalendar.set(Calendar.SECOND, 0);
-        startCalendar.set(Calendar.MILLISECOND, 0);
-
-        Calendar endCalendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Shanghai"));
-        endCalendar.setTime(dateTime);
-        endCalendar.set(Calendar.MINUTE, 59);
-        endCalendar.set(Calendar.SECOND, 59);
-        endCalendar.set(Calendar.MILLISECOND, 999);
-
-
-        // 添加 Pageable 参数
-        PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE);
         // 调用 Repository 方法，传入 Date 类型参数
-        return hourlyAverageAirDataRepository.findByDate(date,dateTime);
+        return hourlyAverageAirDataRepository.findByDate(beginDate,endDate);
     }
 
 

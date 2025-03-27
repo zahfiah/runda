@@ -127,7 +127,7 @@
     </el-table>
 
     <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
-      @pagination="getList" />
+      @pagination="handlePagination" />
 
     <!-- 添加或修改监测小时报表对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
@@ -149,6 +149,7 @@ export default {
   name: "Data",
   data() {
     return {
+      cachedAllData: [], // 新增：缓存全量数据
       // 新增设备选项
       deviceOptions: [],
       // 遮罩层
@@ -174,7 +175,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         deviceId: null,
-        selectedDate: null,
+        selectedDate: new Date().toISOString().split('T')[0],
         startHour: null,
         endHour: null,
       },
@@ -219,6 +220,17 @@ export default {
     this.fetchLatestHourData();
   },
   methods: {
+    handlePagination(pagination) {
+      if (!this.queryParams.deviceId) {
+        // 无设备选择时使用前端分页
+        this.queryParams.pageNum = pagination.page;
+        this.queryParams.pageSize = pagination.limit;
+        this.dataList = this.getPaginatedData(this.cachedAllData);
+      } else {
+        // 有设备选择时走原有逻辑
+        this.getList();
+      }
+    },
     // 新增设备相关方法
     async getDeviceList() {
       try {
@@ -295,8 +307,19 @@ export default {
 
     async getList() {
       this.loading = true; // 显示加载圈
+      //警告窗口
+      // window.alert("getList");
+      if (!this.queryParams.deviceId && this.cachedAllData.length > 0) {
+        this.dataList = this.getPaginatedData(this.cachedAllData);
+        this.total = this.cachedAllData.length;
+        this.loading = false;
+        return;
+      }
 
-      await this.fetchLatestHourData(); // 调用 fetchLatestHourData 方法
+      if (!this.queryParamsdeviceId) {
+        await this.fetchLatestHourData(); // 调用 fetchLatestHourData 方法
+      }
+
       if (!this.validateHourParams()) return;
 
       const hours = this.generateHourRange(
@@ -308,6 +331,7 @@ export default {
         const responses = await Promise.all(
           hours.map(hour => this.fetchHourData(hour))
         );
+        // window.alert("processData");
         this.processData(responses);
       } catch (error) {
         this.handleDataError(error);
@@ -344,10 +368,10 @@ export default {
         const response = await request({
           url: "/runda/air/list-hour-data",
           params: {
-            date: `${this.queryParams.selectedDate} ${hour}`,
+            beginTime: `${this.queryParams.selectedDate} ${this.queryParams.startHour}`,
+            endTime: `${this.queryParams.selectedDate} ${this.queryParams.endHour}`
           }
         });
-
         // 字段转换逻辑
         return {
           code: response.code === 200 ? 0 : -1,
@@ -383,30 +407,24 @@ export default {
     processData(responses) {
       const allData = responses.reduce((acc, res) => {
         if (res.code === 0) {
-          // 根据接口来源选择数据字段
-          const sourceData = this.queryParams.deviceId ? res.rows : res.rows;
-          return acc.concat(sourceData);
+          return acc.concat(res.rows || []);
         }
         return acc;
       }, []);
 
-      console.log('处理后的数据:', allData);
+      // 缓存全量数据（新增）
+      this.cachedAllData = allData;
 
+      // 分页逻辑（修改）
       this.total = allData.length;
-      // 应用分页逻辑
-      this.dataList = allData.slice(
+      this.dataList = this.getPaginatedData(allData);
+    },
+    getPaginatedData(data) {
+      return data.slice(
         (this.queryParams.pageNum - 1) * this.queryParams.pageSize,
         this.queryParams.pageNum * this.queryParams.pageSize
       );
-
-      if (!allData.length) this.$message.warning("未找到数据");
     },
-    handleDataError(error) {
-      console.error("查询失败:", error);
-      this.$message.error("查询失败");
-      this.loading = false;
-    },
-
     // 处理查询结果响应
     handleResponse(response) {
       if (response && response.code === 0) {
@@ -533,13 +551,15 @@ export default {
         const now = new Date();
         const previousHour = new Date(now.getTime() - 60 * 60 * 1000);
         const formattedDate = previousHour.toISOString().split('T')[0];
-        const hour = previousHour.getHours().toString().padStart(2, '0') + ":00";
+        const beginHour = previousHour.getHours().toString().padStart(2, '0') + ":00";
+        const endHour = previousHour.getHours().toString().padStart(2, '0') + ":59";
 
         // 调用接口获取数据
         const response = await request({
           url: "/runda/air/list-hour-data",
           params: {
-            date: `${formattedDate} ${hour}`,
+            beginTime: `${formattedDate} ${beginHour}`,
+            endTime: `${formattedDate} ${endHour}`
           }
         });
 

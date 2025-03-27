@@ -30,5 +30,5 @@ public interface AirDataHourService {
     void exportToExcel(HttpServletResponse response, List<AirDataHour> dataList) throws IOException;
 
 
-    List<HourlyAverageAirData> selectDataList(Date date) throws ParseException;
+    List<HourlyAverageAirData> selectDataList(Date beginDate, Date endDate) throws ParseException;
 }

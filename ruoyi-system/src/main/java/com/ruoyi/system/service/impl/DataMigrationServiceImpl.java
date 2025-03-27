@@ -3,10 +3,13 @@ package com.ruoyi.system.service.impl;
 import com.ruoyi.system.service.DataMigrationService;
 import org.locationtech.jts.math.DD;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -331,7 +334,7 @@ public class DataMigrationServiceImpl implements DataMigrationService {
      * @return 返回查询到的数据列表
      */
     private List<Map<String, Object>> querySourceData() {
-        // 定义 SQL 查询语句
+        // 定义SQL查询语句（使用参数化查询）
         String selectSql = "SELECT " +
                 "d.sn, " +
                 "d.fromResource, " +
@@ -346,11 +349,26 @@ public class DataMigrationServiceImpl implements DataMigrationService {
                 "FROM device d " +
                 "LEFT JOIN station s ON d.name LIKE CONCAT(s.station_name, '%') " +
                 "LEFT JOIN hourly_average_air_data h ON d.name = h.device_name " +
-                "WHERE h.created_at >= DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 1 HOUR), '%Y-%m-%d %H:00:00') " +
-                "  AND h.created_at < DATE_FORMAT(NOW(), '%Y-%m-%d %H:00:00')";
+                "WHERE h.created_at >= ? " +
+                "AND h.created_at < ?";
 
-        // 执行查询
-        return jdbcTemplateA.queryForList(selectSql);
+        try {
+            // 计算时间范围（前一个完整小时）
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime currentHourStart = now.withMinute(0).withSecond(0).withNano(0);
+            LocalDateTime previousHourStart = currentHourStart.minusHours(1);
+
+            // 格式化时间参数
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String startTime = previousHourStart.format(formatter);
+            String endTime = currentHourStart.format(formatter);
+
+            // 执行查询
+            return jdbcTemplateA.queryForList(selectSql, startTime, endTime);
+
+        } catch (DataAccessException e) {
+            return Collections.emptyList();
+        }
     }
 
     /**
