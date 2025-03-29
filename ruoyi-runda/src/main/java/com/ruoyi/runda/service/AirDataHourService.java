@@ -3,7 +3,6 @@ package com.ruoyi.runda.service;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.runda.domain.AirDataHour;
 import com.ruoyi.runda.domain.HourlyAverageAirData;
-import org.springframework.data.domain.Pageable;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -27,7 +26,7 @@ public interface AirDataHourService {
 
     void saveToMysql(List<Map<String, Object>> data) throws ParseException;
 
-    void exportToExcel(HttpServletResponse response, List<AirDataHour> dataList) throws IOException;
+    void exportToExcel(HttpServletResponse response, List<HourlyAverageAirData> dataList) throws IOException;
 
 
     List<HourlyAverageAirData> selectDataList(Date beginDate, Date endDate) throws ParseException;

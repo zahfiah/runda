@@ -7,7 +7,7 @@
         </el-carousel-item>
       </el-carousel>
       <div class="title-overlay">
-        <h1>塞林智慧环保</h1>
+        <h1>张家口建投润达环保科技有限公司</h1>
       </div>
     </div>
 
@@ -154,7 +154,7 @@
       <div class="footer-content">
         <!-- 公司信息 -->
         <div class="footer-section">
-          <h4>塞林环保</h4>
+          <h4>张家口建投润达环保科技有限公司</h4>
           <ul>
             <li><a href="#"><i class="el-icon-info"></i>关于我们</a></li>
             <li><a href="#"><i class="el-icon-office-building"></i>加入我们</a></li>
@@ -200,7 +200,7 @@
       </div>
 
       <div class="copyright">
-        <p>© 2025 塞林智慧环保
+        <p>© 2025 张家口建投润达环保科技有限公司
           <a href="#">隐私政策</a> |
           <a href="#">服务条款</a>
         </p>

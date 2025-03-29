@@ -1,12 +1,10 @@
 package com.ruoyi.runda.service.impl;
 
 import com.ruoyi.common.core.page.TableDataInfo;
-import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.runda.domain.*;
 import com.ruoyi.runda.mapper.*;
 import com.ruoyi.runda.repository.AirDataHourRepository;
 import com.ruoyi.runda.repository.DataQuery212OVRepository;
-import com.ruoyi.runda.repository.DataQuery212Repository;
 import com.ruoyi.runda.repository.HourlyAverageAirDataRepository;
 import com.ruoyi.runda.service.AirDataHourService;
 import org.apache.poi.ss.usermodel.Cell;
@@ -14,39 +12,24 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.bson.BsonRegularExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -925,13 +908,13 @@ public class AirDataHourServiceImpl implements AirDataHourService {
 
 
     @Override
-    public void exportToExcel(HttpServletResponse response, List<AirDataHour> dataList) throws IOException {
+    public void exportToExcel(HttpServletResponse response, List<HourlyAverageAirData> dataList) throws IOException {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("AirHourData");
 
         // 创建标题行
         Row headerRow = sheet.createRow(0);
-        String[] headers = {"deviceId", "stationId", "rank", "averageAqi", "averageSo2", "averageO3", "averageNo2", "averagePm2_5", "averagePm10", "primaryPollutan", "level", "quality", "color", "dateTimeStr"};
+        String[] headers = {"deviceId", "deviceName", "averageAqi", "averageSo2", "averageO3", "averageNo2", "averagePm2_5", "averagePm10", "primaryPollutan", "level", "quality", "color", "dateTimeStr","averagePm10_24","averagePm2.5_24"};
         for (int i = 0; i < headers.length; i++) {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(headers[i]);
@@ -939,22 +922,23 @@ public class AirDataHourServiceImpl implements AirDataHourService {
 
         // 填充数据
         int rowNum = 1;
-        for (AirDataHour data : dataList) {
+        for (HourlyAverageAirData data : dataList) {
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(data.getDeviceId());
-            row.createCell(1).setCellValue(data.getStationId());
-            row.createCell(2).setCellValue(data.getRanking() != null ? String.valueOf(data.getRanking()) : "");
-            row.createCell(3).setCellValue(data.getAqi() != null ? String.valueOf(data.getAqi()) : "");
-            row.createCell(4).setCellValue(data.getSo2Thickness() != null ? String.valueOf(data.getSo2Thickness()) : "");
-            row.createCell(5).setCellValue(data.getCo3Thickness() != null ? String.valueOf(data.getCo3Thickness()) : "");
-            row.createCell(6).setCellValue(data.getNo2Thickness() != null ? String.valueOf(data.getNo2Thickness()) : "");
-            row.createCell(7).setCellValue(data.getPm25() != null ? String.valueOf(data.getPm25()) : "");
-            row.createCell(8).setCellValue(data.getPm10() != null ? String.valueOf(data.getPm10()) : "");
+            row.createCell(1).setCellValue(data.getDeviceName());
+            row.createCell(3).setCellValue(data.getAverageAqi() != null ? String.valueOf(data.getAverageAqi()) : "");
+            row.createCell(4).setCellValue(data.getAverageSo2() != null ? String.valueOf(data.getAverageSo2()) : "");
+            row.createCell(5).setCellValue(data.getAverageO3() != null ? String.valueOf(data.getAverageO3()) : "");
+            row.createCell(6).setCellValue(data.getAverageNo2() != null ? String.valueOf(data.getAverageNo2()) : "");
+            row.createCell(7).setCellValue(data.getAveragePm25() != null ? String.valueOf(data.getAveragePm25()) : "");
+            row.createCell(8).setCellValue(data.getAveragePm10() != null ? String.valueOf(data.getAveragePm10()) : "");
             row.createCell(9).setCellValue(data.getPrimaryPollutant() != null ? data.getPrimaryPollutant().toString() : "");
-            row.createCell(10).setCellValue(data.getLevel() != null ? data.getLevel().toString() : "");
-            row.createCell(11).setCellValue(data.getQuality() != null ? data.getQuality().toString() : "");
-            row.createCell(12).setCellValue(data.getColor() != null ? data.getColor().toString() : "");
-            row.createCell(13).setCellValue(data.getCreateDate() != null ? String.valueOf(data.getCreateDate()) : "");
+            row.createCell(10).setCellValue(data.getAqiLevel() != null ? data.getAqiLevel().toString() : "");
+            row.createCell(11).setCellValue(data.getAqiQuality() != null ? data.getAqiQuality().toString() : "");
+            row.createCell(12).setCellValue(data.getAqiColor() != null ? data.getAqiColor().toString() : "");
+            row.createCell(13).setCellValue(data.getCreatedAt() != null ? String.valueOf(data.getCreatedAt()) : "");
+            row.createCell(14).setCellValue(data.getAveragePm10_24() != null ? data.getAveragePm10_24().toString() : "");
+            row.createCell(15).setCellValue(data.getAveragePm25_24() != null ? data.getAveragePm25_24().toString() : "");
         }
 
         // 自动调整列宽
