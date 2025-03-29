@@ -65,6 +65,4 @@ public interface DeviceMapper
     List<Device> selectIdAndName();
     @Select("select is_yunwei from device where id=#{id}")
     Long getIsYunwei(String id);
-   @Select("select * from device where county=#{county}")
-    List<Device> selectByRegion(Integer county);
 }
