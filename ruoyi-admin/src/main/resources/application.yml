@@ -127,4 +127,21 @@ xss:
   excludes: /system/notice
   # 匹配链接
   urlPatterns: /system/*,/monitor/*,/tool/*
+# 蔚县推送配置
+yuxian:
+  push:
+    enabled: true
+    regions:
+      130726:
+        auth-url: http://60.8.195.86:9001/auth/oauth/token
+        tenant-id: 165
+        app-id: ReHhQYsijE
+        app-secret: afTH!&*193ghFU
+        device-create-url: http://192.168.1.210:480/admin-api/pm/device/create
+        data-push-url: http://192.168.1.210:480/admin-api/pm/device-air-quality-record/create
+        project-id: df1fccd32e314b2ca8b02ba261832b36
+    http:
+      connect-timeout: 50000
+      read-timeout: 50000
+      max-retry: 3
 
