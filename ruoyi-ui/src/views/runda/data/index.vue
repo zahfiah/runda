@@ -304,20 +304,11 @@ export default {
 
     async getList() {
       this.loading = true; // 显示加载圈
-      //警告窗口
-      // window.alert("getList");
-      if (!this.queryParams.deviceId && this.cachedAllData.length > 0) {
-        this.dataList = this.getPaginatedData(this.cachedAllData);
-        this.total = this.cachedAllData.length;
+
+      if (!this.validateHourParams()) {
         this.loading = false;
         return;
       }
-
-      if (!this.queryParamsdeviceId) {
-        await this.fetchLatestHourData(); // 调用 fetchLatestHourData 方法
-      }
-
-      if (!this.validateHourParams()) return;
 
       const hours = this.generateHourRange(
         this.queryParams.startHour,
@@ -328,7 +319,6 @@ export default {
         const responses = await Promise.all(
           hours.map(hour => this.fetchHourData(hour))
         );
-        // window.alert("processData");
         this.processData(responses);
       } catch (error) {
         this.handleDataError(error);
@@ -338,24 +328,49 @@ export default {
     },
 
     validateHourParams() {
-      if (!this.queryParams.selectedDate || !this.queryParams.startHour) {
-        this.loading = false;
+      if (!this.queryParams.selectedDate) {
+        this.$message.warning("请先选择日期");
+        return false;
+      }
+      if (!this.queryParams.startHour || !this.queryParams.endHour) {
+        this.$message.warning("请同时选择开始时间和结束时间");
         return false;
       }
       return true;
     },
 
-    async fetchHourDataWithDeviceId(hour) {
+    async fetchHourDataWithoutDeviceId() {
       try {
-        return await request({
-          url: "/runda/air/hourly-average-for-specific-time",
+        const response = await request({
+          url: "/runda/air/list-hour-data",
           params: {
-            deviceId: this.queryParams.deviceId,
-            dateTime: `${this.queryParams.selectedDate} ${hour}`,
+            beginTime: `${this.queryParams.selectedDate} ${this.queryParams.startHour}`,
+            endTime: `${this.queryParams.selectedDate} ${this.queryParams.endHour}`
           }
         });
+
+        return {
+          code: response.code === 200 ? 0 : -1,
+          rows: (response.data || []).map(item => ({
+            stationName: item.stationName,
+            deviceName: item.deviceName,
+            dateTimeStr: item.createdAt,
+            averageSo2: item.so2,
+            averageNo2: item.no2,
+            averageO3: item.o3,
+            averagePm2_5: item.pm25,
+            averagePm2_5_24h: item.pm25_24h,
+            averagePm10: item.pm10,
+            averagePm10_24h: item.pm10_24h,
+            averageAqi: item.aqi,
+            level: item.aqiLevel,
+            quality: item.aqiQuality,
+            color: item.aqiColor,
+            primaryPollutant: item.primaryPollutant
+          }))
+        };
       } catch (error) {
-        console.error(`查询${hour}数据失败:`, error);
+        console.error('查询失败:', error);
         return { code: -1, rows: [] };
       }
     },
@@ -398,6 +413,47 @@ export default {
         return await this.fetchHourDataWithDeviceId(hour);
       } else {
         return await this.fetchHourDataWithoutDeviceId(hour);
+      }
+    },
+
+    async fetchHourDataWithDeviceId(hour) {
+      try {
+        const response = await request({
+          url: "/runda/air/hourly-average-for-specific-time",
+          params: {
+            dateTime: `${this.queryParams.selectedDate} ${hour}:00`,
+            deviceId: this.queryParams.deviceId
+          }
+        });
+
+        if (response.code === 0 && Array.isArray(response.rows)) {
+          return {
+            code: 0,
+            rows: response.rows.map(item => ({
+              stationName: item.stationName,
+              deviceName: item.deviceName,
+              dateTimeStr: item.dateTimeStr,
+              averageSo2: item.averageSo2,
+              averageNo2: item.averageNo2,
+              averageO3: item.averageO3,
+              averagePm2_5: item.averagePm2_5,
+              averagePm2_5_24h: item.averagePm2_5_24h,
+              averagePm10: item.averagePm10,
+              averagePm10_24h: item.averagePm10_24h,
+              averageAqi: item.averageAqi,
+              level: item.level,
+              quality: item.quality,
+              color: item.color,
+              primaryPollutant: item.primaryPollutant
+            }))
+          };
+        } else {
+          console.error(`查询${hour}数据失败:`, response.msg);
+          return { code: -1, rows: [] };
+        }
+      } catch (error) {
+        console.error(`查询${hour}数据失败:`, error);
+        return { code: -1, rows: [] };
       }
     },
 
