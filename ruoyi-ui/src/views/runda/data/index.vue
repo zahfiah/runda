@@ -39,10 +39,10 @@
         <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd"
           v-hasPermi="['runda:data:add']">新增</el-button>
       </el-col>
-      <!-- <el-col :span="1.5">
+      <el-col :span="1.5">
         <el-button type="warning" plain icon="el-icon-download" size="mini" @click="handleExport"
           v-hasPermi="['runda:data:export']">导出</el-button>
-      </el-col> -->
+      </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
@@ -303,29 +303,35 @@ export default {
 
 
     async getList() {
-      this.loading = true; // 显示加载圈
+    this.loading = true;
+    
+    if (!this.validateHourParams()) {
+      this.loading = false;
+      return;
+    }
 
-      if (!this.validateHourParams()) {
-        this.loading = false;
-        return;
-      }
-
-      const hours = this.generateHourRange(
-        this.queryParams.startHour,
-        this.queryParams.endHour
-      );
-
-      try {
+    try {
+      if (this.queryParams.deviceId) {
+        // 有设备选择时：按小时多次调用特定设备接口
+        const hours = this.generateHourRange(
+          this.queryParams.startHour,
+          this.queryParams.endHour
+        );
         const responses = await Promise.all(
-          hours.map(hour => this.fetchHourData(hour))
+          hours.map(hour => this.fetchHourDataWithDeviceId(hour))
         );
         this.processData(responses);
-      } catch (error) {
-        this.handleDataError(error);
-      } finally {
-        this.loading = false; // 确保加载圈关闭
+      } else {
+        // 无设备选择时：单次调用范围接口
+        const response = await this.fetchHourDataWithoutDeviceId();
+        this.processData([response]);
       }
-    },
+    } catch (error) {
+      this.handleDataError(error);
+    } finally {
+      this.loading = false;
+    }
+  },
 
     validateHourParams() {
       if (!this.queryParams.selectedDate) {
@@ -339,41 +345,6 @@ export default {
       return true;
     },
 
-    async fetchHourDataWithoutDeviceId() {
-      try {
-        const response = await request({
-          url: "/runda/air/list-hour-data",
-          params: {
-            beginTime: `${this.queryParams.selectedDate} ${this.queryParams.startHour}`,
-            endTime: `${this.queryParams.selectedDate} ${this.queryParams.endHour}`
-          }
-        });
-
-        return {
-          code: response.code === 200 ? 0 : -1,
-          rows: (response.data || []).map(item => ({
-            stationName: item.stationName,
-            deviceName: item.deviceName,
-            dateTimeStr: item.createdAt,
-            averageSo2: item.so2,
-            averageNo2: item.no2,
-            averageO3: item.o3,
-            averagePm2_5: item.pm25,
-            averagePm2_5_24h: item.pm25_24h,
-            averagePm10: item.pm10,
-            averagePm10_24h: item.pm10_24h,
-            averageAqi: item.aqi,
-            level: item.aqiLevel,
-            quality: item.aqiQuality,
-            color: item.aqiColor,
-            primaryPollutant: item.primaryPollutant
-          }))
-        };
-      } catch (error) {
-        console.error('查询失败:', error);
-        return { code: -1, rows: [] };
-      }
-    },
 
     async fetchHourDataWithoutDeviceId(hour) {
       try {
@@ -592,9 +563,29 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport() {
-      this.download('runda/air/export', {
-        ...this.queryParams
-      }, `data_${new Date().getTime()}.xlsx`)
+      if (!this.queryParams.selectedDate) {
+        this.$message.warning("请先选择日期");
+        return;
+      }
+
+      const baseParams = {
+        date: this.queryParams.selectedDate,
+        beginTime: `${this.queryParams.selectedDate} ${this.queryParams.startHour || '00:00'}`,
+        endTime: `${this.queryParams.selectedDate} ${this.queryParams.endHour || '23:59'}`
+      };
+
+      // 根据是否有设备选择决定调用哪个接口
+      if (this.queryParams.deviceId) {
+        this.download('/runda/air/export2', {
+          deviceId: this.queryParams.deviceId,
+          date: baseParams.date
+        }, `空气质量数据_${this.queryParams.deviceId}_${baseParams.date}.xlsx`);
+      } else {
+        this.download('/runda/air/export', {
+          beginTime: baseParams.beginTime,
+          endTime: baseParams.endTime
+        }, `空气质量数据_${baseParams.beginTime}_至_${baseParams.endTime}.xlsx`);
+      }
     },
 
     // 新增方法：获取当前时间的前一个整点小时数据
