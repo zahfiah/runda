@@ -278,7 +278,12 @@ public class SysUserServiceImpl implements ISysUserService
     @Override
     public boolean registerUser(SysUser user)
     {
-        return userMapper.insertUser(user) > 0;
+        int res = userMapper.insertUser(user);
+        // 默认user.getUserId()就可以获取到userId， mybatis: <insert id="insertUser" useGeneratedKeys="true" keyProperty="userId">
+        insertUserRole(user.getUserId(),new Long[]{100L});
+        // 若是你的user.getUserId() = null,就用下面这个
+        // insertUserRole(selectUserByUserName(user.getUserName()).getUserId(),new Long[]{2L});
+        return res > 0;
     }
 
     /**

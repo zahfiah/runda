@@ -13,11 +13,6 @@
           <svg-icon slot="prefix" icon-class="password" class="el-input__icon input-icon" />
         </el-input>
       </el-form-item>
-      <el-form-item prop="userType" label="角色">
-        <el-radio-group v-model="registerForm.userType">
-          <el-radio label="01">张家口</el-radio>
-        </el-radio-group>
-      </el-form-item>
       <el-form-item prop="confirmPassword">
         <el-input v-model="registerForm.confirmPassword" type="password" auto-complete="off" placeholder="确认密码"
           @keyup.enter.native="handleRegister">
@@ -70,7 +65,6 @@ export default {
         username: "",
         password: "",
         confirmPassword: "",
-        userType: "01",
         code: "",
         uuid: ""
       },
