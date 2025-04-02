@@ -458,16 +458,25 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
 
     public List<DataQuery212> selectRecentUnpushedDataByRegion() throws ParseException {
         LocalDateTime nowDate = LocalDateTime.now();
-        // 提取年、月、日和小时
-        int year = nowDate.getYear();
-        int month = nowDate.getMonthValue();
-        int day = nowDate.getDayOfMonth();
-        int hourStart = nowDate.getHour()-1;
-        int hourEnd= nowDate.getHour();
+        // 获取10分钟前的时间
+        LocalDateTime tenMinutesAgo = nowDate.minusMinutes(10);
 
-        //拼接成字符串形式
-        String dateTimeStart = String.format("%d-%02d-%02d %02d:00", year, month, day, hourStart);
-        String dateTimeEnd = String.format("%d-%02d-%02d %02d:00", year, month, day, hourEnd);
+        // 提取年、月、日、小时和分钟
+        int yearStart = tenMinutesAgo.getYear();
+        int monthStart = tenMinutesAgo.getMonthValue();
+        int dayStart = tenMinutesAgo.getDayOfMonth();
+        int hourStart = tenMinutesAgo.getHour();
+        int minuteStart = tenMinutesAgo.getMinute();
+
+        int yearEnd = nowDate.getYear();
+        int monthEnd = nowDate.getMonthValue();
+        int dayEnd = nowDate.getDayOfMonth();
+        int hourEnd = nowDate.getHour();
+        int minuteEnd = nowDate.getMinute();
+
+        // 拼接成字符串形式
+        String dateTimeStart = String.format("%d-%02d-%02d %02d:%02d", yearStart, monthStart, dayStart, hourStart, minuteStart);
+        String dateTimeEnd = String.format("%d-%02d-%02d %02d:%02d", yearEnd, monthEnd, dayEnd, hourEnd, minuteEnd);
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
@@ -481,10 +490,11 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
         PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE); // 使用默认分页参数，可以根据需求调整
         Page<DataQuery212> data = dataQuery212OVRepository.findByCreateDateBetween(startTimestamp, endTimestamp, pageable);
 
-        //将 Page<DataQuery212> 转换为 List<DataQuery212>
+        // 将 Page<DataQuery212> 转换为 List<DataQuery212>
         List<DataQuery212> dataList = data.getContent();
         return dataList;
     }
+
 
 }
 

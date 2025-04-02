@@ -34,30 +34,37 @@ public class DataPushTask {
         if (!yuxianDevices.isEmpty()) {
             RegionDataPushService pushService = pushFactory.getService("130726");
             if (pushService != null) {
-                pushService.syncDevices("130726", yuxianDevices);
+                pushService.pushDeviceData("130726", yuxianDevices);
             }
         }
 
         log.info("设备同步任务执行完成");
     }
 
-    // 每5分钟推送一次大气数据
-//    @Scheduled(cron = "0 */5 * * * ?")
-    public void pushAirQualityData() throws ParseException {
+    // 每10分钟推送一次大气数据
+    @Scheduled(cron = "0 */10 * * * ?")
+    public void pushAirQualityData() {
         log.info("开始执行大气数据推送任务...");
 
-        // 获取最近5分钟未推送的蔚县数据
-        List<DataQuery212> yuxianData = dataQuery212ServiceImpl.selectRecentUnpushedDataByRegion();
+        try {
+            // 获取最近10分钟未推送的蔚县数据
+            List<DataQuery212> yuxianData = dataQuery212ServiceImpl.selectRecentUnpushedDataByRegion();
 
-        if (!yuxianData.isEmpty()) {
-            RegionDataPushService pushService = pushFactory.getService("130726");
-            if (pushService != null) {
-                pushService.pushAirQualityData("130726", yuxianData);
-            } else if (yuxianData == null || yuxianData.isEmpty()) {
+            if (yuxianData == null || yuxianData.isEmpty()) {
                 log.warn("未查询到需要推送的数据");
                 return;
             }
+
+            RegionDataPushService pushService = pushFactory.getService("130726");
+            if (pushService != null) {
+                boolean result = pushService.pushAirQualityData("130726", yuxianData);
+                log.info("大气数据推送任务执行完成，推送{}条记录，结果: {}",
+                        yuxianData.size(), result ? "成功" : "失败");
+            } else {
+                log.error("未找到区域[130726]的推送服务实现");
+            }
+        } catch (Exception e) {
+            log.error("大气数据推送任务执行异常", e);
         }
-        log.info("大气数据推送任务执行完成，推送记录数: {}", yuxianData.size());
     }
 }

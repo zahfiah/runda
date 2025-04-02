@@ -3,8 +3,11 @@
     <div class="i-nav-box">
       <ul class="logo-pic-box">
         <li>
-          <router-link to="/" style="color: #333">
-            <img src="../assets/logo/sign-logo.png" alt="Logo" />
+          <router-link to="/" style="color: #333; display: flex; align-items: center; gap: 10px;">
+            <img src="../assets/logo/logo.png" alt="Logo" />
+            <p style="margin:0;">
+              张家口建投润达环保科技有限公司
+            </p>
           </router-link>
         </li>
         <span></span>
@@ -20,7 +23,13 @@
         <img src="../assets/logo/sign-left.png" />
         <div class="sign-form-box">
           <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form">
-            <img src="../assets/logo/sign-logo.png" alt="Logo" class="logo" />
+            <div
+              style="display: flex; align-items: center; margin-top: -10px; margin-bottom: 15px; margin-left: -40px;">
+              <img src="../assets/logo/logo.png" alt="Logo" class="logo" height="40px" />
+              <p style="margin: 0 0 0 10px; font-size: 18px; font-weight: 600; color: #003366;">
+                张家口建投润达环保科技有限公司
+              </p>
+            </div>
             <el-form-item prop="username">
               <el-input v-model="loginForm.username" type="text" auto-complete="off" placeholder="账号">
                 <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
@@ -97,7 +106,7 @@ export default {
       // 验证码开关
       captchaEnabled: true,
       // 注册开关
-      register: false,
+      register: true,
       redirect: undefined,
     };
   },

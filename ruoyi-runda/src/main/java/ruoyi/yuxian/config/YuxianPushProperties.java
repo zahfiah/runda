@@ -22,7 +22,6 @@ public class YuxianPushProperties {
         private String appSecret;
         private String deviceCreateUrl;  // 确保这个字段存在
         private String dataPushUrl;
-        private String projectId;
     }
 
     @Data

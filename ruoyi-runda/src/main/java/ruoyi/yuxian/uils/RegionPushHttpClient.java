@@ -1,30 +1,14 @@
 package ruoyi.yuxian.uils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.client.ClientHttpRequestExecution;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.util.StreamUtils;
-import org.springframework.web.client.HttpClientErrorException;
 import ruoyi.yuxian.config.YuxianPushProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+
 import org.springframework.web.client.RestTemplate;
 
 
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -44,64 +28,76 @@ public class RegionPushHttpClient {
             throw new IllegalArgumentException("无效的地区代码: " + regionCode);
         }
 
-        // 先尝试GET请求
-        String getUrl = String.format("%s?client_id=%s&client_secret=%s&grant_type=client_credentials&tenant_id=%s",
-                config.getAuthUrl(),
-                URLEncoder.encode(config.getAppId(), StandardCharsets.UTF_8),
-                URLEncoder.encode(config.getAppSecret(), StandardCharsets.UTF_8),
-                config.getTenantId());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("tag", "twins_local");
+        headers.set("tenant-id", config.getTenantId()); // 从配置读取tenant-id
+
+        // 构建JSON请求体
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("appId", config.getAppId());
+        requestBody.put("appSecret", config.getAppSecret());
+
+        HttpEntity<Map<String, String>> request = new HttpEntity<>(requestBody, headers);
 
         try {
-            ResponseEntity<Map> response = restTemplate.getForEntity(getUrl, Map.class);
-            return extractAccessToken(response);
-        } catch (HttpClientErrorException e) {
-            if (e.getStatusCode() == HttpStatus.METHOD_NOT_ALLOWED) {
-                // GET失败后尝试POST
-                return tryPostForToken(config);
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                    config.getAuthUrl(),
+                    request,
+                    Map.class);
+
+            // 解析响应
+            Map<String, Object> body = response.getBody();
+            if (body == null) {
+                throw new RuntimeException("响应体为空");
             }
-            throw e;
+
+            // 检查业务状态码
+            if (body.containsKey("code") && !"0".equals(String.valueOf(body.get("code")))) {
+                String msg = body.containsKey("msg") ? (String) body.get("msg") : "未知错误";
+                throw new RuntimeException("获取token失败: " + msg);
+            }
+
+            // 提取token
+            if (body.containsKey("data")) {
+                Map<String, Object> data = (Map<String, Object>) body.get("data");
+                if (data != null && data.containsKey("accessToken")) {
+                    return (String) data.get("accessToken");
+                }
+            }
+            throw new RuntimeException("响应中缺少accessToken字段");
+        } catch (Exception e) {
+            log.error("获取Token异常: {}", e.getMessage());
+            throw new RuntimeException("获取token失败: " + e.getMessage(), e);
         }
-    }
-
-    private String tryPostForToken(YuxianPushProperties.RegionConfig config) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("client_id", config.getAppId());
-        params.add("client_secret", config.getAppSecret());
-        params.add("grant_type", "client_credentials");
-        params.add("tenant_id", config.getTenantId());
-
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                config.getAuthUrl(),
-                request,
-                Map.class);
-
-        return extractAccessToken(response);
     }
 
     private String extractAccessToken(ResponseEntity<Map> response) {
         if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
             Map<String, Object> body = response.getBody();
-            if (body.containsKey("access_token")) {
-                return (String) body.get("access_token");
+
+            // 调试日志 - 打印完整响应
+            log.debug("Token接口响应: {}", body);
+
+            // 尝试多种可能的token字段名
+            String[] possibleTokenFields = {"access_token", "accessToken", "token"};
+            for (String field : possibleTokenFields) {
+                if (body.containsKey(field)) {
+                    return (String) body.get(field);
+                }
+            }
+
+            // 如果标准字段都不存在，尝试遍历所有值
+            for (Object value : body.values()) {
+                if (value instanceof String && ((String) value).length() > 32) {
+                    return (String) value;
+                }
             }
         }
-        throw new RuntimeException("获取token失败: " + response.getStatusCode());
+        throw new RuntimeException("获取token失败: " + response.getStatusCode() +
+                ", 响应体: " + response.getBody());
     }
 
-    private void handleHttpClientError(String regionCode, HttpClientErrorException e, int retryCount) {
-        if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-            log.warn("认证失效，清除token缓存");
-            accessTokenCache.remove(regionCode);
-            tokenExpireTimeCache.remove(regionCode);
-        }
-        log.error("HTTP请求失败 [状态: {}], 重试 {}/{}",
-                e.getStatusCode(), retryCount, properties.getHttp().getMaxRetry());
-    }
 
     private void waitForRetry(int retryCount) {
         try {
@@ -117,16 +113,18 @@ public class RegionPushHttpClient {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer " + accessToken);
+        headers.set("tag", "twins_local");
+        headers.set("tenant-id", properties.getRegions().get(regionCode).getTenantId());
 
         HttpEntity<Object> request = new HttpEntity<>(requestBody, headers);
 
         int retryCount = 0;
         while (retryCount <= properties.getHttp().getMaxRetry()) {
             try {
-                ResponseEntity<T> response = restTemplate.postForEntity(url, request, responseType);
-                if (response.getStatusCode().is2xxSuccessful()) {
-                    return response.getBody();
-                }
+                // 修改这里：使用postForObject代替postForEntity
+                T responseBody = restTemplate.postForObject(url, request, responseType);
+                log.debug("请求成功 - 区域: {}, URL: {}, 响应: {}", regionCode, url, responseBody);
+                return responseBody;
             } catch (Exception e) {
                 log.error("请求{}地区接口失败，URL: {}", regionCode, url, e);
                 if (retryCount == properties.getHttp().getMaxRetry()) {
@@ -137,100 +135,79 @@ public class RegionPushHttpClient {
                 accessTokenCache.remove(regionCode);
                 tokenExpireTimeCache.remove(regionCode);
 
-                try {
-                    Thread.sleep(1000 * (retryCount + 1));
-                } catch (InterruptedException ignored) {
-                }
+                waitForRetry(retryCount);
             }
             retryCount++;
         }
-
         throw new RuntimeException("请求" + regionCode + "地区接口失败: " + url);
     }
 
     public <T> T request(String regionCode, String url, Object requestBody, Class<T> responseType) {
+        try {
+            YuxianPushProperties.RegionConfig config = properties.getRegions().get(regionCode);
+            if (config == null) {
+                throw new IllegalArgumentException("无效的地区代码: " + regionCode);
+            }
+
+            String accessToken = getAccessToken(regionCode);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("Authorization", "Bearer " + accessToken);
+            headers.set("tag", "twins_local");
+            headers.set("tenant-id", config.getTenantId());
+
+            HttpEntity<Object> request = new HttpEntity<>(requestBody, headers);
+
+            log.debug("推送请求 - 区域: {}, URL: {}", regionCode, url);
+
+            // 修改这里：使用postForObject代替exchange
+            T responseBody = restTemplate.postForObject(url, request, responseType);
+
+            log.debug("推送成功 - 区域: {}, 响应: {}", regionCode, responseBody);
+            return responseBody;
+
+        } catch (Exception e) {
+            log.error("推送异常 - 区域: {}, 错误: {}", regionCode, e.getMessage(), e);
+            throw new RuntimeException("推送请求异常", e);
+        }
+    }
+
+    public <T> T put(String regionCode, String url, Object requestBody, Class<T> responseType) {
+        String accessToken = getAccessToken(regionCode);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + accessToken);
+        headers.set("tag", "twins_local");
+        headers.set("tenant-id", properties.getRegions().get(regionCode).getTenantId());
+
+        HttpEntity<Object> request = new HttpEntity<>(requestBody, headers);
+
         int retryCount = 0;
         while (retryCount <= properties.getHttp().getMaxRetry()) {
             try {
-                String accessToken = getAccessToken(regionCode);
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_JSON);
-                headers.set("Authorization", "Bearer " + accessToken);
-                headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-
-                HttpEntity<Object> request = new HttpEntity<>(requestBody, headers);
-
-                // 使用ClientHttpRequestInterceptor处理原始响应
-                RestTemplate restTemplate = new RestTemplate();
-                restTemplate.setInterceptors(Collections.singletonList(new ErrorHandlingInterceptor()));
-
-                // 明确设置消息转换器
-                List<HttpMessageConverter<?>> converters = new ArrayList<>();
-                converters.add(new MappingJackson2HttpMessageConverter());
-                converters.add(new StringHttpMessageConverter());
-                restTemplate.setMessageConverters(converters);
-
-                // 执行请求
                 ResponseEntity<T> response = restTemplate.exchange(
                         url,
-                        HttpMethod.POST,
+                        HttpMethod.PUT,
                         request,
                         responseType);
 
+                log.debug("PUT请求成功 - 区域: {}, URL: {}, 响应: {}", regionCode, url, response.getBody());
                 return response.getBody();
-
-            } catch (HttpClientErrorException e) {
-                handleHttpError(regionCode, url, retryCount, e);
-                retryCount++;
             } catch (Exception e) {
-                log.error("请求异常 [URL: {}], 重试 {}/{}", url, retryCount,
-                        properties.getHttp().getMaxRetry(), e);
+                log.error("PUT请求{}地区接口失败，URL: {}", regionCode, url, e);
                 if (retryCount == properties.getHttp().getMaxRetry()) {
-                    throw new RuntimeException("请求失败，超过最大重试次数", e);
+                    throw new RuntimeException("PUT请求" + regionCode + "地区接口失败: " + url, e);
                 }
-                sleepBeforeRetry(retryCount);
-                retryCount++;
+
+                accessTokenCache.remove(regionCode);
+                tokenExpireTimeCache.remove(regionCode);
+
+                waitForRetry(retryCount);
             }
+            retryCount++;
         }
-        throw new RuntimeException("请求失败");
-    }
-
-    // 错误处理拦截器
-    private static class ErrorHandlingInterceptor implements ClientHttpRequestInterceptor {
-        @Override
-        public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
-            ClientHttpResponse response = execution.execute(request, body);
-            if (response.getHeaders().getContentType().includes(MediaType.TEXT_HTML)) {
-                String responseBody = StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8);
-                throw new HttpClientErrorException(
-                        response.getStatusCode(),
-                        "服务端返回HTML响应: " + responseBody);
-            }
-            return response;
-        }
-    }
-
-    private void handleHttpError(String regionCode, String url, int retryCount, HttpClientErrorException e) {
-        // 清除token缓存
-        accessTokenCache.remove(regionCode);
-        tokenExpireTimeCache.remove(regionCode);
-
-        log.error("HTTP错误 [状态: {}], URL: {}, 响应: {}, 重试 {}/{}",
-                e.getStatusCode(), url, e.getResponseBodyAsString(),
-                retryCount, properties.getHttp().getMaxRetry());
-
-        if (retryCount == properties.getHttp().getMaxRetry()) {
-            throw new RuntimeException("最终请求失败: " + e.getMessage(), e);
-        }
-
-        sleepBeforeRetry(retryCount);
-    }
-
-    private void sleepBeforeRetry(int retryCount) {
-        try {
-            Thread.sleep(50000 * (1 << retryCount)); // 指数退避
-        } catch (InterruptedException ie) {
-            Thread.currentThread().interrupt();
-        }
+        throw new RuntimeException("PUT请求" + regionCode + "地区接口失败: " + url);
     }
 }
