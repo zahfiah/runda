@@ -1,7 +1,10 @@
 <template>
   <div class="register">
     <el-form ref="registerForm" :model="registerForm" :rules="registerRules" class="register-form">
-      <h3 class="title">张家口建投润达环保科技有限公司</h3>
+      <div class="logo-title">
+        <img src="../assets/logo/logo.png" alt="" width="50px">
+        <h3 class="title">张家口建投润达环保科技有限公司</h3>
+      </div>
       <el-form-item prop="username">
         <el-input v-model="registerForm.username" type="text" auto-complete="off" placeholder="账号">
           <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
@@ -132,7 +135,7 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100%;
-  background-image: url("../assets/images/login-background.jpg");
+  background-image: url("../assets/logo/sign-bg.png");
   background-size: cover;
 }
 
@@ -144,6 +147,8 @@ export default {
 
 .register-form {
   border-radius: 6px;
+  // display: flex;
+  align-items: center;
   background: #ffffff;
   width: 400px;
   padding: 25px 25px 5px 25px;
@@ -195,5 +200,22 @@ export default {
 
 .register-code-img {
   height: 38px;
+}
+
+.logo-title {
+  display: flex;
+  align-items: center;
+}
+
+.logo-title img {
+  margin-right: 10px;
+  margin-bottom: 10px;
+  /* 调整图片与文字之间的间距 */
+}
+
+.title {
+  margin: 0;
+  text-align: left;
+  color: #707070;
 }
 </style>
