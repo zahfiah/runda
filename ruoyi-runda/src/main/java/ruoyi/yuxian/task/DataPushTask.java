@@ -13,7 +13,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -23,43 +27,33 @@ public class DataPushTask {
     private final  DataQuery212ServiceImpl dataQuery212ServiceImpl;
     private final RegionDataPushFactory pushFactory;
 
-    // 每天凌晨1点同步设备信息
-    @Scheduled(cron = "0 0 1 * * ?")
-    public void syncDevices() {
-        log.info("开始执行设备同步任务...");
-        Integer county = 130726;
-        // 获取所有需要推送的地区设备
-        List<Device> yuxianDevices = deviceMapper.selectByRegion(county);
-
-        if (!yuxianDevices.isEmpty()) {
-            RegionDataPushService pushService = pushFactory.getService("130726");
-            if (pushService != null) {
-                pushService.pushDeviceData("130726", yuxianDevices);
-            }
-        }
-
-        log.info("设备同步任务执行完成");
-    }
-
     // 每10分钟推送一次大气数据
     @Scheduled(cron = "0 */10 * * * ?")
     public void pushAirQualityData() {
         log.info("开始执行大气数据推送任务...");
 
         try {
-            // 获取最近10分钟未推送的蔚县数据
-            List<DataQuery212> yuxianData = dataQuery212ServiceImpl.selectRecentUnpushedDataByRegion();
+            // 1. 查询未推送数据
+            List<DataQuery212> allData = dataQuery212ServiceImpl.selectRecentUnpushedDataByRegion();
+            log.info("查询到 {} 条未推送数据", allData.size());
+            // 2. 过滤出蔚县鹏辉未来城和蔚县五馆五中心建设项目的数据
+            List<DataQuery212> filteredData = allData.stream()
+                    .filter(data -> data.getDeviceId() != null) // 确保不为null
+                    .filter(data -> "1470".equals(data.getDeviceId()) || "1620".equals(data.getDeviceId()))
+                    .collect(Collectors.toList());
+            log.info("查询到 {} 条过滤后数据", filteredData.size());
 
-            if (yuxianData == null || yuxianData.isEmpty()) {
+
+            if (filteredData == null || filteredData.isEmpty()) {
                 log.warn("未查询到需要推送的数据");
                 return;
             }
 
             RegionDataPushService pushService = pushFactory.getService("130726");
             if (pushService != null) {
-                boolean result = pushService.pushAirQualityData("130726", yuxianData);
+                boolean result = pushService.pushAirQualityData("130726", filteredData);
                 log.info("大气数据推送任务执行完成，推送{}条记录，结果: {}",
-                        yuxianData.size(), result ? "成功" : "失败");
+                        filteredData.size(), result ? "成功" : "失败");
             } else {
                 log.error("未找到区域[130726]的推送服务实现");
             }
@@ -67,4 +61,41 @@ public class DataPushTask {
             log.error("大气数据推送任务执行异常", e);
         }
     }
+
+    // 定时任务方法
+//    @Scheduled(cron = "0 0/5 * * * ?") // 每5分钟执行一次
+    //每5秒执行一次
+//    @Scheduled(fixedRate = 5000)
+    public void pushDevicesTask() {
+        String regionCode = "130726"; // 可以配置化或从数据库获取
+
+        try {
+            // 获取设备列表，并确保不为 null
+            List<Device> devices = Optional.ofNullable(deviceMapper.selectByRegion(Integer.parseInt(regionCode)))
+                    .orElse(Collections.emptyList());
+            log.info("查询到 {} 条设备数据", devices.size());
+            // 过滤设备时，确保 deviceId 不为 null
+            devices = devices.stream()
+                    .filter(device -> {
+                        Long deviceId = device.getId();
+                        return deviceId != null && (deviceId == 1470 || deviceId == 1620);
+                    })
+                    .collect(Collectors.toList());
+            log.info("过滤后查询到 {} 条设备数据", devices.size());
+            RegionDataPushService pushService = pushFactory.getService("130726");
+            // 调用服务方法推送数据
+            Boolean result = pushService.pushDeviceData(regionCode, devices);
+
+            if (result != null && result) {
+                log.info("定时任务成功推送 {} 条设备数据到区域 {}", devices.size(), regionCode);
+            } else {
+                log.warn("定时任务推送设备数据失败或无数据推送，区域代码: {}", regionCode);
+            }
+        } catch (NumberFormatException e) {
+            log.error("定时任务区域代码解析失败: {}", regionCode, e);
+        } catch (Exception e) {
+            log.error("定时任务推送设备数据时发生异常", e);
+        }
+    }
+
 }

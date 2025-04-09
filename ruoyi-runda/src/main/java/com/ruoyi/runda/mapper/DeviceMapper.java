@@ -67,4 +67,7 @@ public interface DeviceMapper
     Long getIsYunwei(String id);
    @Select("select * from device where county=#{county}")
     List<Device> selectByRegion(Integer county);
+    // 直接查询目标设备（1470和1620）
+    @Select("select * from device where id in (#{targetDeviceIds})")
+    List<Device> selectByTargetId(List<Long> targetDeviceIds);
 }

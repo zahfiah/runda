@@ -41,8 +41,10 @@ public class YuxianDataPushServiceImpl implements RegionDataPushService {
         String pushUrl = "http://60.8.195.86:9001/admin-api/pm/device-air-quality-record/create";
         int successCount = 0;
         int failureCount = 0;
-
+        log.info("开始推送 {} 条数据", dataList.size());
         for (DataQuery212 data : dataList) {
+            //打印data数据信息
+            log.info("设备[{}]", data.getSn());
             Map<String, Object> requestData = createRequestData(data);
             try {
                 Map<String, Object> response = httpClient.post(
@@ -68,7 +70,10 @@ public class YuxianDataPushServiceImpl implements RegionDataPushService {
                 log.error("⚠️ 设备[{}]数据推送异常: {}", data.getSn(), e.getMessage());
             }
         }
-
+//        打印每条数据的sn号
+        for (DataQuery212 data : dataList) {
+            log.info("设备[{}]", data.getSn());
+        }
         log.info("推送结果统计: 成功 {} 条, 失败 {} 条, 总计 {} 条",
                 successCount, failureCount, dataList.size());
 
@@ -136,6 +141,7 @@ public class YuxianDataPushServiceImpl implements RegionDataPushService {
 
         try {
             for (Device device : devices) {
+                log.info("设备[{}]", device.getSn());
                 Map<String, Object> requestData = createDeviceRequestData(device);
 
                 try {

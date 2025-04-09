@@ -32,7 +32,7 @@ public class PushDataController {
     @Autowired
     private DeviceMapper deviceMapper;
 
-    @PostMapping("/pending")
+//    @PostMapping("/pending")
     public ResponseEntity<ApiResponse<List<DataQuery212>>> getPendingPushData(
             @RequestParam String regionCode) {
 
@@ -69,7 +69,7 @@ public class PushDataController {
         }
     }
 
-    @PostMapping("/devices")
+//    @PostMapping("/devices")
     public ResponseEntity<ApiResponse<List<Device>>> pushDevices(
             @RequestParam String regionCode) {
 
