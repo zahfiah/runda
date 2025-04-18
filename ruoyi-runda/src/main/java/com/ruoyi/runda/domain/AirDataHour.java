@@ -14,7 +14,7 @@ import java.util.Date;
 /**
  * 大气环境监测数据实体类
  */
-@Document(collection = "deviceairdata")
+@Document(collection = "devicedata")
 public class AirDataHour implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -126,10 +126,10 @@ public class AirDataHour implements Serializable {
     @Field("deptId")
     private String deptId;
     /** 温度 */
-    @Field("wd")
+    @Field("temperature")
     private String wd;
     /** 湿度 */
-    @Field("sd")
+    @Field("humidity")
     private String sd;
 
     /** 日期 */
@@ -156,8 +156,54 @@ public class AirDataHour implements Serializable {
     @Field("ranking")
     private Integer ranking;
 
-    /** 小时 */
-    private int hour;
+    /** 告警类型 */
+    private int type;
+    /** 压力 */
+    @Field("pressure")
+    private Double pressure;
+
+    /** 风速 */
+    @Field("windSpeed")
+    private Double windSpeed;//风向
+
+    /** 风向 */
+    @Field("windDirection")
+    private Double windDirection;//风向
+
+    /** 风向 */
+    @Field("windDirectionString")
+    private String windDirectionString;
+
+    /** 噪音 */
+    @Field("noise")
+    private Double noise;
+
+
+    public Double getPressure() {
+        return pressure;
+    }
+    public void setPressure(Double pressure) {
+        this.pressure = pressure;
+    }
+
+    public Double getNoise() {
+        return noise;
+    }
+    public void setNoise(Double noise) {
+        this.noise = noise;
+    }
+    public Double getWindSpeed(){
+        return this.windSpeed;
+    }
+    public void setWindSpeed(Double windSpeed){
+        this.windSpeed=windSpeed;
+    }
+    public Double getWindDirection(){
+        return this.windDirection;
+    }
+    public void setWindDirection(Double windDirection){
+        this.windDirection=windDirection;
+    }
 
     public ObjectId getId() {
         return id;
@@ -422,12 +468,12 @@ public class AirDataHour implements Serializable {
         this.ranking = ranking;
     }
 
-    public int getHour() {
-        return hour;
+    public int getType() {
+        return type;
     }
 
-    public void setHour(int hour) {
-        this.hour = hour;
+    public void setType(int type) {
+        this.type = type;
     }
 
     public String getDeviceName() {
@@ -481,9 +527,37 @@ public class AirDataHour implements Serializable {
                 .append("level", getLevel())
                 .append("color", getColor())
                 .append("ranking", getRanking())
-                .append("hour", getHour())
+                .append("type", getType())
                 .append("deviceName", getDeviceName())
                 .append("stationName", getStationName())
                 .toString();
+    }
+
+    public String getWindDirectionString() {
+        Double data=this.windDirection;
+        if (data == null){
+            return "";
+        }
+        if (data >= 348.76 || data <= 11.25) {
+            this.windDirectionString = "北";
+        } else if (data >= 11.26 && data <= 78.75) {
+            this.windDirectionString = "东北";
+        } else if (data >= 78.76 && data <= 101.25) {
+            this.windDirectionString = "东";
+        } else if (data >= 101.26 && data <= 168.75) {
+            this.windDirectionString = "东南";
+        } else if (data >= 168.76 && data <= 191.25) {
+            this.windDirectionString = "南";
+        } else if (data >= 191.26 &&  data <= 258.75) {
+            this.windDirectionString = "西南";
+        } else if (data >= 258.76 && data <= 281.25) {
+            this.windDirectionString = "西";
+        } else if (data >= 281.26 &&  data <= 348.75) {
+            this.windDirectionString = "西北";
+        }
+        return windDirectionString;
+    }
+    public void setWindDirectionString(String windDirectionString) {
+        this.windDirectionString = windDirectionString;
     }
 }

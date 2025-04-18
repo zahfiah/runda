@@ -5,6 +5,7 @@ import com.ruoyi.runda.domain.*;
 import com.ruoyi.runda.mapper.*;
 import com.ruoyi.runda.repository.AirDataHourRepository;
 import com.ruoyi.runda.repository.DataQuery212OVRepository;
+import com.ruoyi.runda.repository.DeviceDataRepository;
 import com.ruoyi.runda.repository.HourlyAverageAirDataRepository;
 import com.ruoyi.runda.service.AirDataHourService;
 import org.apache.poi.ss.usermodel.Cell;
@@ -114,11 +115,14 @@ public class AirDataHourServiceImpl implements AirDataHourService {
 
 
 
+
     // 在方法开头增加时间参数转换
 
     //调用calculateAverageForSpecificDateTime方法
-    @Scheduled(cron = "0 1 * * * ?")
-    public  void  getData() throws Exception {
+    @Scheduled(cron = "0 2 * * * ?")
+    //每5分钟执行
+//    @Scheduled(cron = "0 0/5 * * * ?")
+    public  void  getAirData() throws Exception {
         LocalDateTime nowDate = LocalDateTime.now();
         // 提取年、月、日和小时
         int year = nowDate.getYear();
@@ -167,7 +171,6 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         // 添加 Pageable 参数
         PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE); // 使用默认分页参数，可以根据需求调整
         Page<DataQuery212> dataPage = dataQuery212OVRepository.findByCreateDateBetween(startDateMillis, endDateMillis, pageable);
-
         // 合并 DataQuery212 和 AirDataHour 数据
         List<AirDataHour> combinedData = new ArrayList<>();
         combinedData.addAll(dataPage.getContent().stream().map(dataQuery212 -> {

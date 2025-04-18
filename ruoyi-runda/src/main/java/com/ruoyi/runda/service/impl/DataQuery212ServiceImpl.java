@@ -1,11 +1,13 @@
 package com.ruoyi.runda.service.impl;
 
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.runda.domain.AirDataHour;
 import com.ruoyi.runda.domain.DataQuery212;
 import com.ruoyi.runda.domain.Device;
 import com.ruoyi.runda.mapper.DeviceMapper;
 import com.ruoyi.runda.repository.DataQuery212OVRepository;
 import com.ruoyi.runda.repository.DataQuery212Repository;
+import com.ruoyi.runda.repository.DeviceDataRepository;
 import com.ruoyi.runda.service.DataQuery212Service;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -34,6 +36,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class DataQuery212ServiceImpl implements DataQuery212Service {
@@ -48,7 +51,8 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
     @Autowired
     private DataQuery212OVRepository dataQuery212OVRepository;
 
-
+    @Autowired
+    private DeviceDataRepository deviceDataRepository;
     @Override
     public TableDataInfo selectDataQuery212ListByDeviceId(String deviceId, int page, int size) {
         try {
@@ -130,10 +134,11 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
             Page<DataQuery212> dataQuery212Page = dataQuery212OVRepository.findByCreateDateBetween(startTimestamp, endTimestamp, pageable);
             logger.debug("Total number of records found: {}", dataQuery212Page.getTotalElements());
 
+
             // 过滤未来数据
             List<DataQuery212> filteredData = dataQuery212Page.getContent().stream()
                     .filter(data -> {
-                        long dataTimestamp = data.getDate().getTime(); // 假设 createDate 是时间戳字段
+                        long dataTimestamp = data.getDate().getTime(); // 假设 Date 是时间戳字段
                         return dataTimestamp <= currentTimestamp; // 只保留小于等于当前时间的数据
                     })
                     .collect(Collectors.toList());
@@ -141,7 +146,7 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
             logger.debug("Number of records after filtering future data: {}", filteredData.size());
 
             // 重新封装分页数据
-            // 注意：这里使用 dataQuery212Page.getTotalElements() 作为总条数，而不是 filteredData.size()
+
             Page<DataQuery212> filteredPage = new PageImpl<>(
                     filteredData, // 过滤后的数据
                     pageable, // 分页参数
@@ -170,6 +175,30 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
         }
     }
 
+    //转换方法提取为独立方法
+    private DataQuery212 convertAirDataHour(AirDataHour airDataHour) {
+        DataQuery212 dataQuery212 = new DataQuery212();
+        // 字段映射
+        dataQuery212.setAqi(airDataHour.getAqi());
+        dataQuery212.setDeviceId(airDataHour.getDeviceId());
+        dataQuery212.setStationId(Long.valueOf(airDataHour.getStationId()));
+        dataQuery212.setDeviceName(airDataHour.getDeviceName());
+        dataQuery212.setStationName(airDataHour.getStationName());
+        dataQuery212.setSo2Thickness(airDataHour.getSo2Thickness());
+        dataQuery212.setNo2Thickness(airDataHour.getNo2Thickness());
+        dataQuery212.setCo3Thickness(airDataHour.getCo3Thickness());
+        dataQuery212.setPm2_5(airDataHour.getPm25());
+        dataQuery212.setPm10(airDataHour.getPm10());
+        dataQuery212.setNoise(airDataHour.getNoise());
+        dataQuery212.setTemperature(Double.valueOf(airDataHour.getWd()));
+        dataQuery212.setHumidity(Double.valueOf(airDataHour.getSd()));
+        dataQuery212.setWindSpeed(Double.valueOf(airDataHour.getWindSpeed()));
+        dataQuery212.setWindDirectionString(airDataHour.getWindDirectionString());
+        dataQuery212.setPressure(airDataHour.getPressure());
+        // 如果有时间字段需要设置
+        dataQuery212.setDate(airDataHour.getCreateDate());
+        return dataQuery212;
+    }
     public void exportToExcel(HttpServletResponse response, List<DataQuery212> dataList) throws IOException {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Data");
@@ -247,22 +276,26 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
             logger.debug("deviceId: {}, startTimestamp: {}, endTimestamp: {}", deviceId, startTimestamp, endTimestamp);
 
             Page<DataQuery212> dataQuery212Page = dataQuery212OVRepository.findByDeviceIdAndCreateDateBetween(deviceId, startTimestamp, endTimestamp, pageable);
+            List<AirDataHour> airDataHours = deviceDataRepository.findByDeviceIdAndCreateDateBetween(deviceId, startTimestamp, endTimestamp,pageable);
+            //对查询到的数据进行转换
+            List<DataQuery212> dataQuery212List = airDataHours.stream()
+                    .map(airDataHour -> convertAirDataHour(airDataHour))
+                    .collect(Collectors.toList());
+            // 合并两个数据源的结果
+            List<DataQuery212> combinedList = new ArrayList<>();
+            combinedList.addAll(dataQuery212Page.getContent());  // 第一个查询结果
+            combinedList.addAll(dataQuery212List);              // 第二个查询结果
 
-            // 打印查询到的数据条数
-            logger.debug("Total number of records found: {}", dataQuery212Page.getTotalElements());
-
-            // 打印查询到的数据
-            if (logger.isDebugEnabled()) {
-                for (DataQuery212 data : dataQuery212Page.getContent()) {
-                    logger.debug("DataQuery212: {}", data);
-                }
-            }
+            //  计算总记录数（假设两个查询不重复）
+            long totalElements = dataQuery212Page.getTotalElements() + dataQuery212List.size();
+            // 5. 返回合并后的分页数据
+            Page<DataQuery212> combinedPage = new PageImpl<>(combinedList, pageable, totalElements);
 
             TableDataInfo result = new TableDataInfo();
             result.setCode(0);
             result.setMsg("ok");
-            result.setTotal(dataQuery212Page.getTotalElements());
-            result.setRows(dataQuery212Page.getContent());
+            result.setTotal(combinedPage.getTotalElements());
+            result.setRows(combinedPage.getContent());
 
             return result;
         } catch (DateTimeParseException e) {
@@ -400,21 +433,30 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
 
             Page<DataQuery212> dataQuery212Page = dataQuery212OVRepository.findByDeviceIdAndCreateDateBetween(deviceId, startTimestamp, endTimestamp, pageable);
 
+            List<AirDataHour> airDataHours = deviceDataRepository.findByDeviceIdAndCreateDateBetween(deviceId, startTimestamp, endTimestamp,pageable);
+            //对查询到的数据进行转换
+            List<DataQuery212> dataQuery212List = airDataHours.stream()
+                    .map(airDataHour -> convertAirDataHour(airDataHour))
+                    .collect(Collectors.toList());
+            // 合并两个数据源的结果
+            List<DataQuery212> combinedList = new ArrayList<>();
+            combinedList.addAll(dataQuery212Page.getContent());  // 第一个查询结果
+            combinedList.addAll(dataQuery212List);              // 第二个查询结果
+
+            //  计算总记录数（假设两个查询不重复）
+            long totalElements = dataQuery212Page.getTotalElements() + dataQuery212List.size();
+            // 5. 返回合并后的分页数据
+            Page<DataQuery212> combinedPage = new PageImpl<>(combinedList, pageable, totalElements);
             // 打印查询到的数据条数
             logger.debug("Total number of records found: {}", dataQuery212Page.getTotalElements());
 
-            // 打印查询到的数据
-            if (logger.isDebugEnabled()) {
-                for (DataQuery212 data : dataQuery212Page.getContent()) {
-                    logger.debug("DataQuery212: {}", data);
-                }
-            }
+
 
             TableDataInfo result = new TableDataInfo();
             result.setCode(0);
             result.setMsg("ok");
-            result.setTotal(dataQuery212Page.getTotalElements());
-            result.setRows(dataQuery212Page.getContent());
+            result.setTotal(combinedPage.getTotalElements());
+            result.setRows(combinedPage.getContent());
 
             return result;
         } catch (ParseException e) {

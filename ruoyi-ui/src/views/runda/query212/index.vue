@@ -532,7 +532,7 @@ export default {
         return;
       }
       // 处理设备ID和日期共同查询的情况
-      if (this.queryParams.deviceId && this.queryParams.startDate) {
+      if (this.queryParams.deviceId && this.queryParams.startDate && !this.queryParams.startHour && !this.queryParams.endHour) {
         const date = `${this.queryParams.startDate}`;
 
         request({

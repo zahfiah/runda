@@ -32,5 +32,6 @@ public interface HourlyAverageAirDataRepository extends JpaRepository<HourlyAver
         @Query("SELECT h FROM HourlyAverageAirData h WHERE h.updatedAt BETWEEN :beginTime AND :endTime ORDER BY h.updatedAt DESC")
         List<HourlyAverageAirData> findByDate(@Param("beginTime") Date beginTime, @Param("endTime") Date endTime);
 
+
 }
 

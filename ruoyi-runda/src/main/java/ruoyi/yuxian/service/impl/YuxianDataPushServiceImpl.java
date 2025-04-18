@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -27,6 +28,11 @@ public class YuxianDataPushServiceImpl implements RegionDataPushService {
 
     @Override
     public Boolean pushAirQualityData(String regionCode, List<DataQuery212> dataList) {
+        List<DataQuery212> filteredData = dataList.stream()
+                .filter(data -> data.getDeviceId() != null) // 确保不为null
+                .filter(data -> "1470".equals(data.getDeviceId()) || "1620".equals(data.getDeviceId()))
+                .collect(Collectors.toList());
+        log.info("查询到 {} 条过滤后数据", filteredData.size());
         if (!REGION_CODE.equals(regionCode)) {
             log.error("区域代码不匹配");
             return false;
@@ -42,7 +48,7 @@ public class YuxianDataPushServiceImpl implements RegionDataPushService {
         int successCount = 0;
         int failureCount = 0;
         log.info("开始推送 {} 条数据", dataList.size());
-        for (DataQuery212 data : dataList) {
+        for (DataQuery212 data : filteredData) {
             //打印data数据信息
             log.info("设备[{}]", data.getSn());
             Map<String, Object> requestData = createRequestData(data);

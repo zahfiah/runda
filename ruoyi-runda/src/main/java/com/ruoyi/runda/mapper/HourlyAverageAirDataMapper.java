@@ -43,10 +43,23 @@ public interface HourlyAverageAirDataMapper
 
     //计算24小时平均值
 
-    List<Map<String, Object>> calculateDailyHourlyAverage(
+    /**
+     * 获取设备在指定时间前最近的24条有效记录（不要求连续时间）
+     * @param deviceId 设备ID
+     * @param endTime 结束时间
+     * @return 包含PM2.5和PM10数据的记录列表
+     */
+    @Select("SELECT average_pm2_5 as averagePm25, average_pm10 as averagePm10 " +
+            "FROM hourly_average_air_data " +
+            "WHERE device_id = #{deviceId} AND created_at <= #{endTime} " +
+            "AND (average_pm2_5 IS NOT NULL OR average_pm10 IS NOT NULL) " +
+            "ORDER BY created_at DESC " +
+            "LIMIT 24")
+    List<Map<String, Object>> getLatest24ValidRecords(
             @Param("deviceId") String deviceId,
-            @Param("startDate") Date startDate,
-            @Param("endDate") Date endDate
-    );
+            @Param("endTime") Date endTime);
 
+    List<Map<String, Object>> calculateDailyHourlyAverage(@Param("deviceId")String deviceId,
+                                                          @Param("startDate")  Date startDate,
+                                                          @Param("endDate")Date endDate);
 }

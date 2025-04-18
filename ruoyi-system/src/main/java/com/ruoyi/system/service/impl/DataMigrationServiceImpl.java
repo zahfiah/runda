@@ -383,7 +383,7 @@ public class DataMigrationServiceImpl implements DataMigrationService {
         }
 
         // 定义插入 SQL 模板
-        String insertSql = "INSERT INTO " + targetTable + " (JCZDBH, XGRQSJ, REPORT_TIME, EEMP_FLAG, SGXKZBH, PM2_5, PM10, WD, SD,SO2) " +
+        String insertSql = "INSERT INTO " + targetTable + " (JCZDBH, XGRQSJ, REPORT_TIME, EEMP_FLAG, SGXKZBH, PM2_5, PM10,SO2, WD, SD) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         // 遍历数据列表，逐条插入

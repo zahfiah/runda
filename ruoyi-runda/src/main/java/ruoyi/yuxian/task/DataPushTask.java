@@ -29,6 +29,7 @@ public class DataPushTask {
 
     // 每10分钟推送一次大气数据
     @Scheduled(cron = "0 */10 * * * ?")
+//    @Scheduled(fixedRate = 5000)
     public void pushAirQualityData() {
         log.info("开始执行大气数据推送任务...");
 
