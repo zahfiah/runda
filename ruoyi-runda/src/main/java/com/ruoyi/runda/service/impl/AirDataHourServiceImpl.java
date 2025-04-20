@@ -119,7 +119,7 @@ public class AirDataHourServiceImpl implements AirDataHourService {
     // 在方法开头增加时间参数转换
 
     //调用calculateAverageForSpecificDateTime方法
-    @Scheduled(cron = "0 2 * * * ?")
+    @Scheduled(cron = "0 5 * * * ?")
     //每5分钟执行
 //    @Scheduled(cron = "0 0/5 * * * ?")
     public  void  getAirData() throws Exception {
@@ -851,13 +851,6 @@ public class AirDataHourServiceImpl implements AirDataHourService {
 
         Double pm10Country = queryCountry.getPm10();
 
-        //pm_25 比pmCount 大于80时设置type为1
-        if(pm2_5>pmCountry+80){
-            data.setType(1);
-        } else if (pm2_5<pmCountry-60) {
-            data.setType(0);
-        }
-
 
         // Calculate differences
         Double countPm = pm2_5 - pmCountry;
@@ -897,6 +890,12 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             data.setAveragePm10(pm10Country);
         }
 
+        // 将设置type的逻辑移到校准之后，使用校准后的pm2_5值进行比较
+        if(pm2_5 > pmCountry + 60){
+            data.setType(1);
+        } else if (pm2_5 < pmCountry - 60) {
+            data.setType(0);
+        }
 
         return data;
     }

@@ -62,4 +62,6 @@ public interface HourlyAverageAirDataMapper
     List<Map<String, Object>> calculateDailyHourlyAverage(@Param("deviceId")String deviceId,
                                                           @Param("startDate")  Date startDate,
                                                           @Param("endDate")Date endDate);
+
+    List<HourlyAverageAirData> selectHourlyAverageAirDataByDate(String dateTimeStr);
 }

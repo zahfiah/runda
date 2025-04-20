@@ -60,6 +60,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             </if>
         </where>
     </select>
+    <select id="selectHourlyAverageAirDataByDate" resultType="com.ruoyi.runda.domain.HourlyAverageAirData"
+            parameterType="java.lang.String">
+        select * from hourly_average_air_data where created_at = #{dateTimeStr}
+    </select>
 
 
     <insert id="insertHourlyAverageAirData" parameterType="HourlyAverageAirData" useGeneratedKeys="true" keyProperty="id">

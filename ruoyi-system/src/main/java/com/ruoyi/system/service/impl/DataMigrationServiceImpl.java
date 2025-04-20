@@ -347,8 +347,8 @@ public class DataMigrationServiceImpl implements DataMigrationService {
                 "h.created_at, " +
                 "h.updated_at " +
                 "FROM device d " +
-                "LEFT JOIN station s ON d.name LIKE CONCAT(s.station_name, '%') " +
-                "LEFT JOIN hourly_average_air_data h ON d.name = h.device_name " +
+                "LEFT JOIN station s ON d.station_id =s.id " +
+                "LEFT JOIN hourly_average_air_data h ON h.device_name LIKE CONCAT(d.name, '%') " +
                 "WHERE h.created_at >= ? " +
                 "AND h.created_at < ?";
 
