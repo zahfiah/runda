@@ -178,6 +178,14 @@ public class AirDataHour implements Serializable {
     @Field("noise")
     private Double noise;
 
+    @Field("sn")
+    private String sn;
+    public String getSn() {
+        return sn;
+    }
+    public void setSn(String sn) {
+        this.sn = sn;
+    }
 
     public Double getPressure() {
         return pressure;

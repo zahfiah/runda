@@ -34,9 +34,8 @@
         <el-input v-model="queryParams.sn" placeholder="请输入设备号" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
 
-      <el-form-item label="站点名称" prop="stationId">
+      <el-form-item label="站点名称" prop="stationId" clearable filterable allow-create @change="handleStationChange">
         <el-select v-model="queryParams.stationId" placeholder="请选择站点">
-          <!-- <el-select v-model="form.stationId" placeholder="请选择站点"> -->
           <el-option v-for="station in stationList" :key="station.id" :label="station.stationName"
             :value="station.id"></el-option>
         </el-select>
@@ -79,8 +78,7 @@
       </el-table-column>
       <el-table-column label="状态" align="center" prop="status">
         <template slot-scope="scope">
-          <dict-tag :options="dict.type.device_status" :value="scope.row.status" v-if="scope.row.status !== 7" />
-          <span v-else>未知</span>
+          <dict-tag :options="dict.type.device_status" :value="scope.row.status" />
         </template>
       </el-table-column>
       <!-- <el-table-column label="是否运维" align="center" prop="isYunwei">
@@ -140,7 +138,8 @@
 
         <el-form-item label="站点名称" prop="stationId">
           <!-- <el-select v-model="queryParams.stationId" placeholder="请选择站点"> -->
-          <el-select v-model="deviceForm.stationId" placeholder="请选择站点">
+          <el-select v-model="deviceForm.stationId" placeholder="请选择站点" clearable filterable allow-create
+            @change="handleStationChange">
             <el-option v-for="station in stationList" :key="station.id" :label="station.stationName"
               :value="station.id"></el-option>
           </el-select>
@@ -284,6 +283,7 @@ export default {
         pageSize: 10,
         name: null,
         sn: null,
+        stationId: null,
         provinceCn: null,
         countyCn: null,
         townCn: null,
@@ -718,9 +718,11 @@ export default {
                 `Looking for station with ID ${stationIdString}:`,
                 station
               ); // 调试输出
+              const status = [1, 2, 3].includes(device.status) ? device.status : "未知";
               return {
                 ...device,
                 stationName: station ? station.stationName : "未命名站点",
+                status: status,
               };
             });
             this.deviceList = devicesWithStationNames;
@@ -749,7 +751,10 @@ export default {
       })
         .then((response) => {
           if (response.code === 200 && Array.isArray(response.rows)) {
-            this.stationList = response.rows;
+            this.stationList = response.rows.map(station => ({
+              id: station.id,
+              stationName: station.stationName || "未知站点",
+            }));
             console.log("Current stationList:", this.stationList); // 调试输出
           } else {
             console.error("Invalid stations data structure:", response);
@@ -810,6 +815,11 @@ export default {
         log: null,
       };
       this.resetForm("yunweiForm");
+    },
+    handleStationChange(stationId) {
+      // 仅更新选中的站点ID
+      this.queryParams.stationId = stationId;
+      console.log("已选择设备ID：", stationId);
     },
     /** 搜索按钮操作 */
     handleQuery() {

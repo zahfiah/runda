@@ -78,7 +78,7 @@ public class DeviceDataServiceImpl implements DeviceDataService {
         deptIdToDeptNameMap.put("18114 ", "世纪豪园");//阳原县-阳原人民政府
 
     }
-    @Scheduled(cron = "0 1 * * * ?")
+    @Scheduled(cron = "0 2 * * * ?")
 //@Scheduled(cron = "0 0/5 * * * ?")
     public  void  getDeviceData() throws Exception {
         LocalDateTime nowDate = LocalDateTime.now();

@@ -1,22 +1,22 @@
 package com.ruoyi.runda.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.ruoyi.runda.domain.HourlyAverageAirData;
+import com.ruoyi.runda.domain.FilteredAirDataDTO;
+import com.ruoyi.runda.domain.HourlyAverageAirDataCopy;
 import com.ruoyi.runda.mapper.HourlyAverageAirDataMapper;
 import com.ruoyi.runda.service.DataPushService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
-
+@Slf4j
 @Service
 public class DataPushServiceImpl implements DataPushService {
 
@@ -24,54 +24,75 @@ public class DataPushServiceImpl implements DataPushService {
     private HourlyAverageAirDataMapper hourlyAverageAirDataMapper;
 
     @Value("${api.push.url}")
-    private String apiPushUrl;
-    @Override
-    public List<HourlyAverageAirData> getHourlyAverageAirData() {
-        LocalDateTime nowDate = LocalDateTime.now();
-        // 提取年、月、日和小时
-        int year = nowDate.getYear();
-        int month = nowDate.getMonthValue();
-        int day = nowDate.getDayOfMonth();
-        int hour = nowDate.getHour()-1;
+    private String apiPushUrl; // 配置示例: http://zjk.dust.zjkyjhb.com/zjk/data/hours
 
-        //拼接成字符串形式
-        String dateTimeStr = String.format("%d-%02d-%02d %02d:00", year, month, day, hour);
-        // 使用MyBatis查询数据
+    private static final SimpleDateFormat TIME_FORMATTER =
+            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    @Override
+    public List<HourlyAverageAirDataCopy> getHourlyAverageAirData(String dateTimeStr) {
         return hourlyAverageAirDataMapper.selectHourlyAverageAirDataByDate(dateTimeStr);
     }
 
     @Override
-    public boolean batchPushAirData(List<HourlyAverageAirData> dataList) {
+    public boolean batchPushAirData(List<FilteredAirDataDTO> dataList) {
         if (CollectionUtils.isEmpty(dataList)) {
+            log.warn("推送数据为空");
             return false;
         }
 
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
         try {
-            // 分批推送，每批100条
-            int batchSize = 100;
-            for (int i = 0; i < dataList.size(); i += batchSize) {
-                int end = Math.min(i + batchSize, dataList.size());
-                List<HourlyAverageAirData> batchList = dataList.subList(i, end);
+            // 1. 转换数据结构
+            List<Map<String, Object>> apiDataList = dataList.stream()
+                    .map(data -> {
+                        Map<String, Object> item = new HashMap<>();
+                        item.put("mn", data.getSn());       // 字段名映射
+                        item.put("pm10", data.getAveragePm10());
+                        return item;
+                    })
+                    .collect(Collectors.toList());
 
-                HttpEntity<List<HourlyAverageAirData>> request =
-                        new HttpEntity<>(batchList, headers);
+            // 2. 构建请求体（完全匹配文档格式）
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("time", formatDate(dataList.get(0).getCreatedAt()));
+            requestBody.put("data", apiDataList);
 
-                ResponseEntity<String> response = restTemplate.postForEntity(
-                        apiPushUrl,
-                        request,
-                        String.class);
+            log.debug("推送请求体: {}", requestBody);
 
-                if (!response.getStatusCode().is2xxSuccessful()) {
-                    throw new RuntimeException("API返回非成功状态码: " + response.getStatusCodeValue());
-                }
+            // 3. 发送HTTP请求
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                    apiPushUrl,
+                    request,
+                    Map.class);
+
+            // 4. 处理响应
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("HTTP状态码异常: " + response.getStatusCode());
             }
+
+            Map<String, Object> responseBody = response.getBody();
+            if (responseBody == null || !Boolean.TRUE.equals(responseBody.get("result"))) {
+                throw new RuntimeException("接口返回失败: " + responseBody);
+            }
+
+            log.info("推送成功，影响数据量: {}", dataList.size());
             return true;
+
         } catch (Exception e) {
-            throw new RuntimeException("推送数据失败", e);
+            log.error("推送数据到{}失败: {}", apiPushUrl, e.getMessage());
+            throw new RuntimeException("数据推送失败: " + e.getMessage(), e);
+        }
+    }
+
+    // 线程安全的时间格式化
+    private String formatDate(Date date) {
+        synchronized (TIME_FORMATTER) {
+            return TIME_FORMATTER.format(date);
         }
     }
 }

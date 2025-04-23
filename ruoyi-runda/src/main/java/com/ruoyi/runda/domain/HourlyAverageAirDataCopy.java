@@ -1,5 +1,6 @@
 package com.ruoyi.runda.domain;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -10,13 +11,13 @@ import com.ruoyi.common.core.domain.BaseEntity;
 import javax.persistence.*;
 
 /**
- * 监测小时报表对象 hourly_average_air_data
- * 
+ * 监测小时报表对象 hourly_average_air_data_copy
+ *
  * @author runda
  * @date 2025-02-08
  */
 @Entity
-public class HourlyAverageAirData extends BaseEntity
+public class HourlyAverageAirDataCopy extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
@@ -140,7 +141,17 @@ public class HourlyAverageAirData extends BaseEntity
     @Column(name = "type")
     private Integer type;
 
+    private String sn;
 
+    public String getSn()
+    {
+        return sn;
+    }
+
+    public void setSn(String sn)
+    {
+        this.sn = sn;
+    }
     public  void setType(Integer type)
     {
         this.type = type;
@@ -149,7 +160,7 @@ public class HourlyAverageAirData extends BaseEntity
     {
         return type;
     }
-    public void setId(Long id) 
+    public void setId(Long id)
     {
         this.id = id;
     }
@@ -158,12 +169,12 @@ public class HourlyAverageAirData extends BaseEntity
     {
         return id;
     }
-    public void setDeviceId(String deviceId) 
+    public void setDeviceId(String deviceId)
     {
         this.deviceId = deviceId;
     }
 
-    public String getDeviceId() 
+    public String getDeviceId()
     {
         return deviceId;
     }
@@ -178,7 +189,7 @@ public class HourlyAverageAirData extends BaseEntity
         return deptId;
     }
 
-    public void setAverageAqi(Long averageAqi) 
+    public void setAverageAqi(Long averageAqi)
     {
         this.averageAqi = averageAqi;
     }
@@ -187,30 +198,30 @@ public class HourlyAverageAirData extends BaseEntity
     {
         return averageAqi;
     }
-    public void setAverageSo2(Long averageSo2) 
+    public void setAverageSo2(Long averageSo2)
     {
         this.averageSo2 = averageSo2;
     }
 
-    public Long getAverageSo2() 
+    public Long getAverageSo2()
     {
         return averageSo2;
     }
-    public void setAverageNo2(Long averageNo2) 
+    public void setAverageNo2(Long averageNo2)
     {
         this.averageNo2 = averageNo2;
     }
 
-    public Long getAverageNo2() 
+    public Long getAverageNo2()
     {
         return averageNo2;
     }
-    public void setAverageO3(Long averageO3) 
+    public void setAverageO3(Long averageO3)
     {
         this.averageO3 = averageO3;
     }
 
-    public Long getAverageO3() 
+    public Long getAverageO3()
     {
         return averageO3;
     }
@@ -252,30 +263,30 @@ public class HourlyAverageAirData extends BaseEntity
     {
         return averagePm10_24;
     }
-    public void setAqiLevel(String aqiLevel) 
+    public void setAqiLevel(String aqiLevel)
     {
         this.aqiLevel = aqiLevel;
     }
 
-    public String getAqiLevel() 
+    public String getAqiLevel()
     {
         return aqiLevel;
     }
-    public void setAqiQuality(String aqiQuality) 
+    public void setAqiQuality(String aqiQuality)
     {
         this.aqiQuality = aqiQuality;
     }
 
-    public String getAqiQuality() 
+    public String getAqiQuality()
     {
         return aqiQuality;
     }
-    public void setAqiColor(String aqiColor) 
+    public void setAqiColor(String aqiColor)
     {
         this.aqiColor = aqiColor;
     }
 
-    public String getAqiColor() 
+    public String getAqiColor()
     {
         return aqiColor;
     }
@@ -299,12 +310,12 @@ public class HourlyAverageAirData extends BaseEntity
     {
         return sd;
     }
-    public void setPrimaryPollutant(String primaryPollutant) 
+    public void setPrimaryPollutant(String primaryPollutant)
     {
         this.primaryPollutant = primaryPollutant;
     }
 
-    public String getPrimaryPollutant() 
+    public String getPrimaryPollutant()
     {
         return primaryPollutant;
     }
@@ -319,21 +330,21 @@ public class HourlyAverageAirData extends BaseEntity
         return stationId;
     }
 
-    public void setCreatedAt(Date createdAt) 
+    public void setCreatedAt(Date createdAt)
     {
         this.createdAt = createdAt;
     }
 
-    public Date getCreatedAt() 
+    public Date getCreatedAt()
     {
         return createdAt;
     }
-    public void setUpdatedAt(Date updatedAt) 
+    public void setUpdatedAt(Date updatedAt)
     {
         this.updatedAt = updatedAt;
     }
 
-    public Date getUpdatedAt() 
+    public Date getUpdatedAt()
     {
         return updatedAt;
     }
@@ -361,22 +372,22 @@ public class HourlyAverageAirData extends BaseEntity
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("id", getId())
-            .append("deviceId", getDeviceId())
+                .append("id", getId())
+                .append("deviceId", getDeviceId())
                 .append("stationId", getStationId())
 //            .append("queryTime", getQueryTime())
-            .append("averageAqi", getAverageAqi())
-            .append("averageSo2", getAverageSo2())
-            .append("averageNo2", getAverageNo2())
-            .append("averageO3", getAverageO3())
-            .append("averagePm25", getAveragePm25())
-            .append("averagePm10", getAveragePm10())
-            .append("aqiLevel", getAqiLevel())
-            .append("aqiQuality", getAqiQuality())
-            .append("aqiColor", getAqiColor())
-            .append("primaryPollutant", getPrimaryPollutant())
-            .append("createdAt", getCreatedAt())
-            .append("updatedAt", getUpdatedAt())
-            .toString();
+                .append("averageAqi", getAverageAqi())
+                .append("averageSo2", getAverageSo2())
+                .append("averageNo2", getAverageNo2())
+                .append("averageO3", getAverageO3())
+                .append("averagePm25", getAveragePm25())
+                .append("averagePm10", getAveragePm10())
+                .append("aqiLevel", getAqiLevel())
+                .append("aqiQuality", getAqiQuality())
+                .append("aqiColor", getAqiColor())
+                .append("primaryPollutant", getPrimaryPollutant())
+                .append("createdAt", getCreatedAt())
+                .append("updatedAt", getUpdatedAt())
+                .toString();
     }
 }

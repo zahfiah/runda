@@ -5,6 +5,7 @@ import org.locationtech.jts.math.DD;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -345,10 +346,11 @@ public class DataMigrationServiceImpl implements DataMigrationService {
                 "h.wd, " +
                 "h.sd, " +
                 "h.created_at, " +
-                "h.updated_at " +
+                "h.updated_at, " +
+                "h.dept_id " +
                 "FROM device d " +
                 "LEFT JOIN station s ON d.station_id =s.id " +
-                "LEFT JOIN hourly_average_air_data h ON h.device_name LIKE CONCAT(d.name, '%') " +
+                "LEFT JOIN hourly_average_air_data h ON h.device_id =d.id " +
                 "WHERE h.created_at >= ? " +
                 "AND h.created_at < ?";
 
@@ -370,7 +372,6 @@ public class DataMigrationServiceImpl implements DataMigrationService {
             return Collections.emptyList();
         }
     }
-
     /**
      * 将数据插入到目标表
      *
@@ -381,6 +382,14 @@ public class DataMigrationServiceImpl implements DataMigrationService {
         if (dataList.isEmpty()) {
             return;
         }
+        // 定义需要过滤的搅拌站dept_id列表
+        Set<String> excludedDeptIds = new HashSet<>(Arrays.asList(
+                "18011","18012","18013","18069","18070","18071","18072","18074",
+                "18075","18076","18077","18078","18079","18080","18081","18082",
+                "18083","18084","18085","18086","18087","18088","18111","18112"
+        ));
+        //对dataList根据deptId进行过滤
+        dataList.removeIf(row -> excludedDeptIds.contains(row.get("dept_id")));
 
         // 定义插入 SQL 模板
         String insertSql = "INSERT INTO " + targetTable + " (JCZDBH, XGRQSJ, REPORT_TIME, EEMP_FLAG, SGXKZBH, PM2_5, PM10,SO2, WD, SD) " +

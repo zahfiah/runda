@@ -191,7 +191,7 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             airDataHour.setSd(String.valueOf(dataQuery212.getHumidity()));
             return airDataHour;
         }).collect(Collectors.toList()));
-
+        logger.info("Combined data size: {}", combinedData.size());
         if (combinedData.isEmpty()) {
             logger.info("No data found for the specified date and time.");
             // 如果没有数据，则通过hourlyAverageAirDataRepository.findByDateTime 方法查询数据库本身是否有存在信息如果有增返回数据并能正常展示
@@ -253,7 +253,8 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                 .entrySet().stream()
                 .map(entry -> calculateMetrics(entry, dateTime))  // 传入endTime参数
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
+            //打印出 有多少个设备
+        logger.info("Number of devices: {}", averages.size());
 
 
         // 根据AQI平均值进行排名（AQI值越低，排名越高）
@@ -265,9 +266,9 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                 })
                 .collect(Collectors.toList());
 
-        for (int i = 0; i < rankedList.size(); i++) {
-            rankedList.get(i).getValue().put("rank", i + 1);
-        }
+//        for (int i = 0; i < rankedList.size(); i++) {
+//            rankedList.get(i).getValue().put("rank", i + 1);
+//        }
 
         // 将结果转换为TableDataInfo类型
         List<Map<String, Object>> data = rankedList.stream()
@@ -278,11 +279,11 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                     return map;
                 })
                 .collect(Collectors.toList());
-        // 添加日志信息以确认 stationId 是否存在
+        logger.info("Number of data1: {}", data.size());
 
         // 将平均数据保存到MySQL数据库中
         saveToMysql(data);
-
+        //打印data的条数 及对应的deviceId
         // 使用校准后的数据来构建返回的 TableDataInfo 对象
         List<Map<String, Object>> calibratedData = data.stream()
                 .map(row -> {
@@ -563,28 +564,6 @@ public class AirDataHourServiceImpl implements AirDataHourService {
     }
 
 
-    // 安全获取Double值的方法
-    private Double safeGetDouble(Map<String, Object> map, String key) {
-        try {
-            Object value = map.get(key);
-            if (value instanceof Number) {
-                return ((Number) value).doubleValue();
-            }
-            return null;
-        } catch (Exception e) {
-            logger.warn("字段 {} 转换异常: {}", key, e.getMessage());
-            return null;
-        }
-    }
-
-
-
-
-
-
-
-
-
 
 
 //    public Map<String, Double> calculate24HourSlidingAverage(String deviceId, Date endTime) {
@@ -686,19 +665,34 @@ public class AirDataHourServiceImpl implements AirDataHourService {
     public void saveToMysql(List<Map<String, Object>> data) throws ParseException {
         SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         dateTimeFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai")); // 明确指定时区
+        logger.info("Saving {} records to MySQL...", data.size());
+
+        // 用于统计跳过的记录
+        Set<String> skippedDeviceIds = new HashSet<>();
+        Set<String> skippedStationIds = new HashSet<>();
+        int skippedDueToDeviceId = 0;
+        int skippedDueToStationId = 0;
+        int skippedDueToExists = 0;
+        int skippedDueToDeviceNotExist = 0;
+
 
         for (Map<String, Object> row : data) {
             String deviceId = (String) row.get("deviceId");
-            Double pm2_5 = (Double) row.get("averagePm2_5");
+
             if (deviceId == null || deviceId.isEmpty()) {
                 logger.error("Device ID is null or empty: {}", row);
+                skippedDeviceIds.add("null_or_empty");
+                skippedDueToDeviceId++;
                 continue;
             }
 
             // 确认 stationId 是否存在
             String stationId = (String) row.get("stationId");
             if (stationId == null || stationId.isEmpty()) {
-                logger.warn("stationId is missing or null for deviceId: {}", deviceId);
+                logger.warn("stationId is missing or null for stationId: {}", stationId);
+                skippedStationIds.add("null_or_empty");
+                skippedDeviceIds.add(deviceId);
+                skippedDueToStationId++;
                 continue; // 如果 stationId 缺失或为空，则跳过当前记录
             }
             //计算createAt 时间，应该与data中的dateTimeStr一样
@@ -708,6 +702,9 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             boolean exists = hourlyAverageAirDataRepository.existsByDeviceIdAndCreatedAtCustom(deviceId, createAt);
             if (exists) {
                 logger.info("Record with deviceId {} and createdAt {} already exists. Skipping insertion.", deviceId, createAt);
+                skippedDeviceIds.add(deviceId);
+                skippedStationIds.add(stationId);
+                skippedDueToExists++;
                 continue;
             }
 
@@ -745,6 +742,9 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             Device existingDevice = deviceMapper.selectDeviceById(Long.valueOf(deviceId));
             if (existingDevice == null) {
                 logger.error("Device with ID {} does not exist", deviceId);
+                skippedDeviceIds.add(deviceId);
+                skippedStationIds.add(stationId);
+                skippedDueToDeviceNotExist++;
                 continue; // 跳过当前记录
             }
 
@@ -826,6 +826,18 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             }
             hourlyAverageAirDataRepository.save(hourlyAverageAirData);
         }
+        // 记录跳过的统计信息
+        logger.info("Skipped records summary:");
+        logger.info("Total skipped records: {}",
+                skippedDueToDeviceId + skippedDueToStationId + skippedDueToExists + skippedDueToDeviceNotExist);
+        logger.info("Skipped due to missing/empty deviceId: {} (deviceIds: {})",
+                skippedDueToDeviceId, skippedDeviceIds);
+        logger.info("Skipped due to missing/empty stationId: {} (stationIds: {})",
+                skippedDueToStationId, skippedStationIds);
+        logger.info("Skipped due to existing records: {} (deviceIds: {})",
+                skippedDueToExists, skippedDeviceIds);
+        logger.info("Skipped due to device not exist: {} (deviceIds: {})",
+                skippedDueToDeviceNotExist, skippedDeviceIds);
     }
     private HourlyAverageAirData calibrateData(HourlyAverageAirData data, String controlStation) {
 

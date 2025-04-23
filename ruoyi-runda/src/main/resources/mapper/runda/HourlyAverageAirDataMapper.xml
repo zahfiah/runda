@@ -60,9 +60,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             </if>
         </where>
     </select>
-    <select id="selectHourlyAverageAirDataByDate" resultType="com.ruoyi.runda.domain.HourlyAverageAirData"
-            parameterType="java.lang.String">
-        select * from hourly_average_air_data where created_at = #{dateTimeStr}
+    <select id="selectHourlyAverageAirDataByDate" resultType="com.ruoyi.runda.domain.HourlyAverageAirDataCopy">
+        select
+            h.average_pm10 as "averagePm10",
+            h.created_at as "createdAt",
+            h.device_id as "deviceId",
+            d.sn as "sn"
+        from hourly_average_air_data h
+                 left join device d on d.id = h.device_id
+        where h.created_at = STR_TO_DATE(#{dateTimeStr}, '%Y-%m-%d %H:%i:%s')
     </select>
 
 

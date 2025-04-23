@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.runda.domain.HourlyAverageAirData;
+import com.ruoyi.runda.domain.HourlyAverageAirDataCopy;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -63,5 +64,5 @@ public interface HourlyAverageAirDataMapper
                                                           @Param("startDate")  Date startDate,
                                                           @Param("endDate")Date endDate);
 
-    List<HourlyAverageAirData> selectHourlyAverageAirDataByDate(String dateTimeStr);
+    List<HourlyAverageAirDataCopy> selectHourlyAverageAirDataByDate(@Param("dateTimeStr")String dateTimeStr);
 }
