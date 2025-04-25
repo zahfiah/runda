@@ -48,7 +48,7 @@ public class DataMigrationController {
 
     @GetMapping("/monitor-hour")
 //    @Scheduled(cron = "0 5 * * * ?")
-    @Scheduled(cron = "0 15 * * * ?")
+    @Scheduled(cron = "0 20 * * * ?")
     public String monitorHour() {
         return dataMigrationService.migrateMonitorHourData();
     }

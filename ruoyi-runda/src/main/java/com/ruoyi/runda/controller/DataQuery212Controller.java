@@ -105,11 +105,11 @@ public class DataQuery212Controller extends BaseController {
         // 导出为Excel
         dataQuery212Service.exportToExcel(response, dataList);
     }
-    @GetMapping("/list")
-    public List<DataQuery212> listCurrentDayData() {
-        logger.debug("Fetching current day data...");
-        return dataQuery212Service.fetchLatestData();
-    }
+//    @GetMapping("/list")
+//    public List<DataQuery212> listCurrentDayData() {
+//        logger.debug("Fetching current day data...");
+//        return dataQuery212Service.fetchLatestData();
+//    }
 
     @GetMapping("/listByDateTimeRangeAndDeviceId")
     public TableDataInfo listByDateTimeRangeAndDeviceId(

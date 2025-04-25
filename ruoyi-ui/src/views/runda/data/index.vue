@@ -35,10 +35,10 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd"
           v-hasPermi="['runda:data:add']">新增</el-button>
-      </el-col>
+      </el-col> -->
       <el-col :span="1.5">
         <el-button type="warning" plain icon="el-icon-download" size="mini" @click="handleExport"
           v-hasPermi="['runda:data:export']">导出</el-button>
@@ -303,35 +303,35 @@ export default {
 
 
     async getList() {
-    this.loading = true;
-    
-    if (!this.validateHourParams()) {
-      this.loading = false;
-      return;
-    }
+      this.loading = true;
 
-    try {
-      if (this.queryParams.deviceId) {
-        // 有设备选择时：按小时多次调用特定设备接口
-        const hours = this.generateHourRange(
-          this.queryParams.startHour,
-          this.queryParams.endHour
-        );
-        const responses = await Promise.all(
-          hours.map(hour => this.fetchHourDataWithDeviceId(hour))
-        );
-        this.processData(responses);
-      } else {
-        // 无设备选择时：单次调用范围接口
-        const response = await this.fetchHourDataWithoutDeviceId();
-        this.processData([response]);
+      if (!this.validateHourParams()) {
+        this.loading = false;
+        return;
       }
-    } catch (error) {
-      this.handleDataError(error);
-    } finally {
-      this.loading = false;
-    }
-  },
+
+      try {
+        if (this.queryParams.deviceId) {
+          // 有设备选择时：按小时多次调用特定设备接口
+          const hours = this.generateHourRange(
+            this.queryParams.startHour,
+            this.queryParams.endHour
+          );
+          const responses = await Promise.all(
+            hours.map(hour => this.fetchHourDataWithDeviceId(hour))
+          );
+          this.processData(responses);
+        } else {
+          // 无设备选择时：单次调用范围接口
+          const response = await this.fetchHourDataWithoutDeviceId();
+          this.processData([response]);
+        }
+      } catch (error) {
+        this.handleDataError(error);
+      } finally {
+        this.loading = false;
+      }
+    },
 
     validateHourParams() {
       if (!this.queryParams.selectedDate) {
@@ -348,6 +348,7 @@ export default {
 
     async fetchHourDataWithoutDeviceId(hour) {
       try {
+        this.queryParams.pageSize = 10;
         const response = await request({
           url: "/runda/air/list-hour-data",
           params: {
@@ -389,6 +390,8 @@ export default {
 
     async fetchHourDataWithDeviceId(hour) {
       try {
+        const originalPageSize = this.queryParams.pageSize;
+        this.queryParams.pageSize = 30;
         const response = await request({
           url: "/runda/air/hourly-average-for-specific-time",
           params: {
@@ -396,7 +399,8 @@ export default {
             deviceId: this.queryParams.deviceId
           }
         });
-
+        // 恢复 pageSize
+        this.queryParams.pageSize = originalPageSize;
         if (response.code === 0 && Array.isArray(response.rows)) {
           return {
             code: 0,

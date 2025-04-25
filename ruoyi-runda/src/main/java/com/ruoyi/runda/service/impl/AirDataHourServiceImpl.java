@@ -751,7 +751,7 @@ public class AirDataHourServiceImpl implements AirDataHourService {
 
             Long isYunwei = deviceMapper.getIsYunwei(deviceId);
 
-            if (isYunwei==1L || isYunwei==null) {
+            if (isYunwei==1L) {
 
             // 数据校准逻辑
             String deptId = (String) row.get("deptId"); // 获取部门ID
@@ -823,21 +823,25 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                     alarmInfo.setSmsMessage("设备" + deviceId + "数据高值，请及时处理");
                     alarmInfoMapper.insertAlarmInfo(alarmInfo);
                 }
+            }else {
+                //如果is_yunwei为0，则对pm25 pm10 随机加减3
+                hourlyAverageAirData.setAveragePm10( hourlyAverageAirData.getAveragePm10() + getRandomFluctuation(3));
+                hourlyAverageAirData.setAveragePm25( hourlyAverageAirData.getAveragePm25() + getRandomFluctuation(3));
             }
             hourlyAverageAirDataRepository.save(hourlyAverageAirData);
         }
-        // 记录跳过的统计信息
-        logger.info("Skipped records summary:");
-        logger.info("Total skipped records: {}",
-                skippedDueToDeviceId + skippedDueToStationId + skippedDueToExists + skippedDueToDeviceNotExist);
-        logger.info("Skipped due to missing/empty deviceId: {} (deviceIds: {})",
-                skippedDueToDeviceId, skippedDeviceIds);
-        logger.info("Skipped due to missing/empty stationId: {} (stationIds: {})",
-                skippedDueToStationId, skippedStationIds);
-        logger.info("Skipped due to existing records: {} (deviceIds: {})",
-                skippedDueToExists, skippedDeviceIds);
-        logger.info("Skipped due to device not exist: {} (deviceIds: {})",
-                skippedDueToDeviceNotExist, skippedDeviceIds);
+//        // 记录跳过的统计信息
+//        logger.info("Skipped records summary:");
+//        logger.info("Total skipped records: {}",
+//                skippedDueToDeviceId + skippedDueToStationId + skippedDueToExists + skippedDueToDeviceNotExist);
+//        logger.info("Skipped due to missing/empty deviceId: {} (deviceIds: {})",
+//                skippedDueToDeviceId, skippedDeviceIds);
+//        logger.info("Skipped due to missing/empty stationId: {} (stationIds: {})",
+//                skippedDueToStationId, skippedStationIds);
+//        logger.info("Skipped due to existing records: {} (deviceIds: {})",
+//                skippedDueToExists, skippedDeviceIds);
+//        logger.info("Skipped due to device not exist: {} (deviceIds: {})",
+//                skippedDueToDeviceNotExist, skippedDeviceIds);
     }
     private HourlyAverageAirData calibrateData(HourlyAverageAirData data, String controlStation) {
 
@@ -867,12 +871,11 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         // Calculate differences
         Double countPm = pm2_5 - pmCountry;
 
-
         Double countPm10 = pm10 - pm10Country;
 
 
         // Define a random fluctuation range (e.g., ±5% of the difference)
-        double fluctuationRange = 0.15;
+        double fluctuationRange = 0.20;
 
         // Adjust PM2.5
         if (countPm > 0) {
@@ -880,7 +883,12 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         } else {
             pm2_5 += Math.abs(countPm) * (1 - getRandomFluctuation(fluctuationRange));
         }
-        pm2_5 = round(pm2_5); // 保留小数点后一位
+        // 应用动态随机浮动
+        double dynamicRangePm25 = calculateDynamicRange(pm2_5);
+        double randomFactorPm25 = 1.0 + (Math.random() * 2 - 1) * dynamicRangePm25;
+        pm2_5 = pm2_5 * randomFactorPm25;
+        pm2_5 = ensureMinChange(pm2_5); // 确保最小变化
+        pm2_5 = round(pm2_5);
         if(pm2_5>0){
             data.setAveragePm25(pm2_5);
         }else {
@@ -895,7 +903,13 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         } else {
             pm10 += Math.abs(countPm10) * (1 - getRandomFluctuation(fluctuationRange));
         }
-        pm10 = round(pm10); // 保留小数点后一位
+
+        // 应用动态随机浮动
+        double dynamicRangePm10 = calculateDynamicRange(pm10);
+        double randomFactorPm10 = 1.0 + (Math.random() * 2 - 1) * dynamicRangePm10;
+        pm10 = pm10 * randomFactorPm10;
+        pm10 = ensureMinChange(pm10); // 确保最小变化
+        pm10= round(pm10);
         if(pm10>0){
             data.setAveragePm10(pm10);
         }else {
@@ -912,11 +926,32 @@ public class AirDataHourServiceImpl implements AirDataHourService {
         return data;
     }
 
+    // 新增方法：根据数值大小计算动态浮动范围
+    private double calculateDynamicRange(double value) {
+        if (value < 20) {
+            return 0.4; // 小数值：±40%浮动（绝对值变化小但比例大）
+        } else if (value < 100) {
+            return 0.25; // 中等数值：±25%
+        } else if (value < 200) {
+            return 0.15; // 较大数值：±15%
+        } else {
+            return 0.1; // 大数值：±10%
+        }
+    }
 
+    // 确保最小变化（避免小数值完全不变）
+    private double ensureMinChange(double value) {
+        double rounded = round(value);
+        // 如果四舍五入后变化小于1，则强制±1浮动
+        if (Math.abs(rounded - value) < 0.5 && Math.abs(value) > 1) {
+            return value + (Math.random() > 0.5 ? 1 : -1);
+        }
+        return value;
+    }
 
     private double getRandomFluctuation(double range) {
         Random random = new Random();
-        return random.nextDouble() * range * 2 - range; // Generates a value between -range and +range
+        return random.nextInt() * range * 2 - range; // Generates a value between -range and +range
     }
 
 

@@ -361,55 +361,55 @@ public class DataQuery212ServiceImpl implements DataQuery212Service {
     }
 
 
-    @Override
-    public List<DataQuery212> fetchLatestData() {
-        try {
-            Instant now = Instant.now();
-            Instant fiveMinutesAgo = now.minus(Duration.ofMinutes(5));
-
-            int pageSize = 10;
-            int pageNumber = 0;
-
-            List<DataQuery212> newData = new ArrayList<>();
-
-            while (true) {
-                Pageable pageable = PageRequest.of(pageNumber, pageSize);
-                Page<DataQuery212> dataQuery212Page = dataQuery212OVRepository.findByCreateDateBetween(fiveMinutesAgo.toEpochMilli(), now.toEpochMilli(), pageable);
-
-
-                if (!dataQuery212Page.hasNext()) {
-                    break;
-                }
-                pageNumber++;
-            }
-
-            if (newData.isEmpty()) {
-                logger.info("No new data fetched.");
-            } else {
-                logger.info("Fetched {} new records.", newData.size());
-                latestData.addAll(newData);
-            }
-
-            return new ArrayList<>(latestData);
-        } catch (Exception e) {
-            logger.error("Error fetching latest data", e);
-            return Collections.emptyList();
-        }
-    }
-
-
+//    @Override
+//    public List<DataQuery212> fetchLatestData() {
+//        try {
+//            Instant now = Instant.now();
+//            Instant fiveMinutesAgo = now.minus(Duration.ofMinutes(5));
+//
+//            int pageSize = 10;
+//            int pageNumber = 0;
+//
+//            List<DataQuery212> newData = new ArrayList<>();
+//
+//            while (true) {
+//                Pageable pageable = PageRequest.of(pageNumber, pageSize);
+//                Page<DataQuery212> dataQuery212Page = dataQuery212OVRepository.findByCreateDateBetween(fiveMinutesAgo.toEpochMilli(), now.toEpochMilli(), pageable);
+//
+//
+//                if (!dataQuery212Page.hasNext()) {
+//                    break;
+//                }
+//                pageNumber++;
+//            }
+//
+//            if (newData.isEmpty()) {
+//                logger.info("No new data fetched.");
+//            } else {
+//                logger.info("Fetched {} new records.", newData.size());
+//                latestData.addAll(newData);
+//            }
+//
+//            return new ArrayList<>(latestData);
+//        } catch (Exception e) {
+//            logger.error("Error fetching latest data", e);
+//            return Collections.emptyList();
+//        }
+//    }
 
 
-    @Scheduled(fixedRate = 300000)
-    public void scheduledFetchAndAppendData() {
-        try {
-            logger.info("Starting scheduled fetch and append data task...");
-            fetchLatestData();
-            logger.info("Total number of records fetched: {}", latestData.size());
-        } catch (Exception e) {
-            logger.error("Error during scheduled task", e);
-        }
-    }
+
+
+//    @Scheduled(fixedRate = 300000)
+//    public void scheduledFetchAndAppendData() {
+//        try {
+//            logger.info("Starting scheduled fetch and append data task...");
+//            fetchLatestData();
+//            logger.info("Total number of records fetched: {}", latestData.size());
+//        } catch (Exception e) {
+//            logger.error("Error during scheduled task", e);
+//        }
+//    }
 
     @Override
     public TableDataInfo selectDataQuery212ListByDateTimeRangeAndDeviceId(

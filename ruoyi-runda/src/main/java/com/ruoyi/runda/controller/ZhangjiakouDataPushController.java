@@ -26,7 +26,7 @@ public class ZhangjiakouDataPushController {
     private DataPushService dataPushService;
 
     @PostMapping("/pushData")
-//    @Scheduled(cron = "0 20 * * * ?")
+    @Scheduled(cron = "0 15 * * * ?")
     public AjaxResult pushData() {
         try {
             LocalDateTime nowDate = LocalDateTime.now();

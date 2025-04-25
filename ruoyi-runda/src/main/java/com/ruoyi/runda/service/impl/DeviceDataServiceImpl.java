@@ -124,11 +124,11 @@ public class DeviceDataServiceImpl implements DeviceDataService {
         // 按设备ID分组
         Map<String, List<AirDataHour>> groupedByDevice = rawData.stream()
                 .collect(Collectors.groupingBy(AirDataHour::getDeviceId));
-            //打印设备信息的deptId
-            groupedByDevice.forEach((deviceId, deviceDataList) -> {
-                System.out.println("设备ID：" + deviceId);
-                System.out.println("设备数据列表：" + deviceDataList);
-            });
+//            //打印设备信息的deptId
+//            groupedByDevice.forEach((deviceId, deviceDataList) -> {
+//                System.out.println("设备ID：" + deviceId);
+//                System.out.println("设备数据列表：" + deviceDataList);
+//            });
         List<AirDataHour> result = new ArrayList<>();
 
         // 计算每个设备的平均值
@@ -388,8 +388,8 @@ public class DeviceDataServiceImpl implements DeviceDataService {
                 result.put("pm10_24h", roundDouble(pm10Sum / validPm10Count));
             }
 
-            log.debug("设备{}在{}的24小时滑动平均计算完成: PM2.5={}, PM10={} (基于{}条数据)",
-                    deviceId, endTime, result.get("pm25_24h"), result.get("pm10_24h"), hourlyData.size());
+//            log.debug("设备{}在{}的24小时滑动平均计算完成: PM2.5={}, PM10={} (基于{}条数据)",
+//                    deviceId, endTime, result.get("pm25_24h"), result.get("pm10_24h"), hourlyData.size());
 
         } catch (Exception e) {
             log.error("计算设备{}的24小时滑动平均值时出错", deviceId, e);
