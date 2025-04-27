@@ -28,8 +28,17 @@ public class DataPushTask {
     private final RegionDataPushFactory pushFactory;
 
     // 每10分钟推送一次大气数据
-    @Scheduled(cron = "0 */10 * * * ?")
-//    @Scheduled(fixedRate = 5000)
+    // 每小时的第12分钟执行一次大气数据推送任务
+    @Scheduled(cron = "0 12 * * * ?")
+    public void pushAirQualityDataAt12() {
+        pushAirQualityData();
+    }
+
+    // 每小时的第22分钟、32分钟、42分钟和52分钟执行一次大气数据推送任务
+    @Scheduled(cron = "0 22,32,42,52 * * * ?")
+    public void pushAirQualityDataAt22_32_42_52() {
+        pushAirQualityData();
+    }
     public void pushAirQualityData() {
         log.info("开始执行大气数据推送任务...");
 

@@ -1,6 +1,7 @@
 package com.ruoyi.system.service.impl;
 
 import com.ruoyi.system.service.DataMigrationService;
+import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.math.DD;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -9,11 +10,13 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
+@Slf4j
 public class DataMigrationServiceImpl implements DataMigrationService {
 
     @Autowired
@@ -111,7 +114,7 @@ public class DataMigrationServiceImpl implements DataMigrationService {
 
         // 3. 将新数据插入到目标表
         insertData("t_d_monitor_hdata", dataList);
-
+        log.info("数据正在迁移------------------");
         return "数据迁移完成！";
     }
 
@@ -355,20 +358,20 @@ public class DataMigrationServiceImpl implements DataMigrationService {
                 "AND h.created_at < ?";
 
         try {
-            // 计算时间范围（前一个完整小时）
+            // 计算时间范围（前一完整小时）
             LocalDateTime now = LocalDateTime.now();
-            LocalDateTime currentHourStart = now.withMinute(0).withSecond(0).withNano(0);
-            LocalDateTime previousHourStart = currentHourStart.minusHours(1);
+            LocalDateTime currentHourStart = now.withMinute(0).withSecond(0).withNano(0); // 当前小时的开始（15:00:00）
+            LocalDateTime previousHourStart = currentHourStart.minusHours(1); // 前一小时的开始（14:00:00）
 
-            // 格式化时间参数
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            String startTime = previousHourStart.format(formatter);
-            String endTime = currentHourStart.format(formatter);
+            // 转换为Timestamp（避免时区问题）
+            Timestamp startTime = Timestamp.valueOf(previousHourStart);
+            Timestamp endTime = Timestamp.valueOf(currentHourStart);
 
             // 执行查询
             return jdbcTemplateA.queryForList(selectSql, startTime, endTime);
 
         } catch (DataAccessException e) {
+            log.error("Failed to query source data", e); // 记录错误日志
             return Collections.emptyList();
         }
     }

@@ -1,6 +1,7 @@
 package com.ruoyi.runda.service.impl;
 
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.runda.domain.*;
 import com.ruoyi.runda.mapper.*;
 import com.ruoyi.runda.repository.AirDataHourRepository;
@@ -31,6 +32,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -61,33 +63,47 @@ public class AirDataHourServiceImpl implements AirDataHourService {
     static {
         deptIdToDeptNameMap.put("3", "五金库"); // 东城区-五金库
         deptIdToDeptNameMap.put("18002", "怀来北辰佳苑"); // 怀来县-怀来北辰佳苑
+        deptIdToDeptNameMap.put("18069", "怀来北辰佳苑"); // 怀来县-怀来北辰佳苑-搅拌站
         deptIdToDeptNameMap.put("18003", "蔚县职教中心");//蔚县-蔚县玉皇阁西
-        deptIdToDeptNameMap.put("18070", "蔚县职教中心");//蔚县-蔚县玉皇阁西
+        deptIdToDeptNameMap.put("18070", "蔚县职教中心");//蔚县-蔚县玉皇阁西-搅拌站
         deptIdToDeptNameMap.put("18007", "怀安环境分局");//怀安县-怀安环境分局
-        deptIdToDeptNameMap.put("18071", "怀安环境分局");//怀安县-怀安环境分局
+        deptIdToDeptNameMap.put("18071", "怀安环境分局");//怀安县-怀安环境分局-搅拌站
         deptIdToDeptNameMap.put("18011", "世纪豪园");//桥东区-世纪豪园
         deptIdToDeptNameMap.put("18114", "世纪豪园");//桥东区-世纪豪园
-        deptIdToDeptNameMap.put("18072", "世纪豪园");
+        deptIdToDeptNameMap.put("18072", "世纪豪园");//桥东区-世纪豪园-搅拌站
+        deptIdToDeptNameMap.put("18012", "人民公园");//桥西区-人民公园
         deptIdToDeptNameMap.put("18115", "人民公园");//桥西区-人民公园
+        deptIdToDeptNameMap.put("18074", "人民公园");//桥东区-世纪豪园-搅拌站
         deptIdToDeptNameMap.put("18013", "烟厂");//经开区-烟厂
         deptIdToDeptNameMap.put("18116", "烟厂");//经开区-烟厂
+        deptIdToDeptNameMap.put("18075", "烟厂");//经开区-烟厂-搅拌站
         deptIdToDeptNameMap.put("18014", "宣化军营凤凰城"); // 长安区 宣化区 -宣化军营凤凰城
+        deptIdToDeptNameMap.put("18076", "宣化军营凤凰城"); // 长安区 宣化区 搅拌站
         deptIdToDeptNameMap.put("18016", "崇礼梦特芳丹酒店");//崇礼区-崇礼梦特芳丹酒店
         deptIdToDeptNameMap.put("18077", "崇礼梦特芳丹酒店");//崇礼区-崇礼梦特芳丹酒店
         deptIdToDeptNameMap.put("18017", "下花园环境分局");//下花园区-下花园环境分局
+        deptIdToDeptNameMap.put("18078", "下花园环境分局");//下花园区-搅拌站
         deptIdToDeptNameMap.put("18018", "涿鹿县政府");//涿鹿县-涿鹿县政府
         deptIdToDeptNameMap.put("18019", "赤城北山");//赤城县-赤城北山
+        deptIdToDeptNameMap.put("18080", "赤城北山");//赤城县-搅拌站
         deptIdToDeptNameMap.put("18020", "阳原人民政府");//阳原县-阳原人民政府
         deptIdToDeptNameMap.put("18021", "万全环境分局");//万全县- 万全环境分局
+        deptIdToDeptNameMap.put("18082", "万全环境分局");//万全县- 搅拌站
         deptIdToDeptNameMap.put("18022", "尚义第二中学");//尚义县-尚义第二中学
+        deptIdToDeptNameMap.put("18083", "尚义第二中学");//尚义县-搅拌站
         deptIdToDeptNameMap.put("18023", "康保环境分局");//康保县-康保环境分局
+        deptIdToDeptNameMap.put("18084", "康保环境分局");//康保县-搅拌站
         deptIdToDeptNameMap.put("18024", "张北环境分局");//张北县-张北环境分局
+        deptIdToDeptNameMap.put("18085", "张北环境分局");//张北县-搅拌站
         deptIdToDeptNameMap.put("18025", "沽源县人民政府办公楼");//沽源县-沽源县人民政府办公楼
+        deptIdToDeptNameMap.put("18086", "沽源县人民政府办公楼");//沽源县-搅拌站
         deptIdToDeptNameMap.put("18026", "沽源第一中学");//察北管理区-沽源第一中学
+        deptIdToDeptNameMap.put("18087", "沽源第一中学");//察北管理区-搅拌站
+        deptIdToDeptNameMap.put("18088", "阳原人民政府");//塞北管理区-搅拌站
         deptIdToDeptNameMap.put("18079", "涿鹿县政府");//涿鹿县-涿鹿县政府
         deptIdToDeptNameMap.put("18081", "阳原人民政府");//阳原县-阳原人民政府
-        deptIdToDeptNameMap.put("18114 ", "世纪豪园");//阳原县-阳原人民政府
-
+        deptIdToDeptNameMap.put("18112", "涿鹿县政府");//阳原县-阳原人民政府
+        deptIdToDeptNameMap.put("18111", "世纪豪园");//张家口矿山
     }
     @Autowired
     private AirDataHourRepository airDataHourRepository;
@@ -598,10 +614,9 @@ public class AirDataHourServiceImpl implements AirDataHourService {
     }
 
 
-    private Double round(Double value) {
-        return Double.valueOf(Math.round(value));
+    private double round(double value) {
+        return Math.round(value * 10) / 10.0;
     }
-
     private String getAqiLevel(Double aqi) {
         if (aqi == null) return "未知";
         if (aqi >= 0 && aqi <= 50) return "一级";
@@ -712,8 +727,16 @@ public class AirDataHourServiceImpl implements AirDataHourService {
             // 计算 updateAt 时间，比 createAt 晚 59 分钟
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(createAt);
+            // 将时间往后推59分钟
             calendar.add(Calendar.MINUTE, 59);
             Date updateAt = calendar.getTime();
+
+            Calendar queryCal = Calendar.getInstance();
+            queryCal.setTime(createAt);
+            queryCal.add(Calendar.HOUR_OF_DAY, -1); // 再减1小时得到11点整
+            Date date = queryCal.getTime();
+
+
             HourlyAverageAirData hourlyAverageAirData = new HourlyAverageAirData();
             hourlyAverageAirData.setType(2);
             hourlyAverageAirData.setDeviceId(deviceId);
@@ -770,10 +793,11 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                         "青少年活动中心", "阳原职教中心", "赤城御福庄园", "万全第三初级中学", "下花园区医院"
                 );
 
-//             判断是否需要校准
-                if (calibrationStations.contains(controlStation)) {
-                    hourlyAverageAirData = calibrateData(hourlyAverageAirData, controlStation);
-                }
+                    if(calibrationStations.contains(controlStation)){
+                        hourlyAverageAirData = calibrateData(hourlyAverageAirData, controlStation);
+                    }
+
+
                 //0->低值 1->高值 2->正常
                 if (hourlyAverageAirData.getType() == 0) {
                     AlarmInfo alarmInfo = new AlarmInfo();
@@ -823,13 +847,28 @@ public class AirDataHourServiceImpl implements AirDataHourService {
                     alarmInfo.setSmsMessage("设备" + deviceId + "数据高值，请及时处理");
                     alarmInfoMapper.insertAlarmInfo(alarmInfo);
                 }
-            }else {
-                //如果is_yunwei为0，则对pm25 pm10 随机加减3
-                hourlyAverageAirData.setAveragePm10( hourlyAverageAirData.getAveragePm10() + getRandomFluctuation(3));
-                hourlyAverageAirData.setAveragePm25( hourlyAverageAirData.getAveragePm25() + getRandomFluctuation(3));
             }
-            hourlyAverageAirDataRepository.save(hourlyAverageAirData);
+            //查询前一个小时的pm2_5 pm10
+            //将Date类型的createAt转化为字符串形式
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
+            String formattedTime  = dateFormat.format(date);
+
+            HourlyAverageAirData beforeData = hourlyAverageAirDataMapper.selectBeforeHour(deviceId,formattedTime);
+            logger.debug("beforeData: {}", beforeData);
+            if (beforeData != null) {
+               if(beforeData.getAveragePm25() ==hourlyAverageAirData.getAveragePm25() || beforeData.getAveragePm10()==hourlyAverageAirData.getAveragePm10()){
+                   hourlyAverageAirData.setAveragePm10(round(hourlyAverageAirData.getAveragePm10() + (new Random().nextInt(5) + 2)));
+                   hourlyAverageAirData.setAveragePm25(round(hourlyAverageAirData.getAveragePm25() + (new Random().nextInt(5) + 2)));
+               }else {
+                   hourlyAverageAirDataRepository.save(hourlyAverageAirData);
+               }
+            }else {
+                hourlyAverageAirDataRepository.save(hourlyAverageAirData);
+            }
+
         }
+    }
 //        // 记录跳过的统计信息
 //        logger.info("Skipped records summary:");
 //        logger.info("Total skipped records: {}",
@@ -842,117 +881,66 @@ public class AirDataHourServiceImpl implements AirDataHourService {
 //                skippedDueToExists, skippedDeviceIds);
 //        logger.info("Skipped due to device not exist: {} (deviceIds: {})",
 //                skippedDueToDeviceNotExist, skippedDeviceIds);
-    }
-    private HourlyAverageAirData calibrateData(HourlyAverageAirData data, String controlStation) {
+private HourlyAverageAirData calibrateData(HourlyAverageAirData data, String controlStation) {
+    Double pm2_5 = data.getAveragePm25();
+    Double pm10 = data.getAveragePm10();
 
-        Double pm2_5 = data.getAveragePm25();
-//        logger.info("PM2.5 before calibration: {}", pm2_5);
+    List<DataQueryCountry> queryCountries = dataQueryCountryMapper.selectDataQueryCountryByName(controlStation);
+    DataQueryCountry queryCountry = queryCountries.stream().findFirst().orElse(null);
 
-        Double pm10 = data.getAveragePm10();
-//        logger.info("PM10 before calibration: {}", pm10);
-//        Date date =data.getCreatedAt();
-        List<DataQueryCountry> queryCountries = dataQueryCountryMapper.selectDataQueryCountryByName(controlStation);
-
-        DataQueryCountry queryCountry = queryCountries.stream()
-                .findFirst()
-                .orElse(null);
-
-        if (queryCountry == null) {
-//            logger.warn("Control station {} not found in the database", controlStation);
-            return data;
-        }
-
-        Double pmCountry = queryCountry.getPm();
-
-
-        Double pm10Country = queryCountry.getPm10();
-
-
-        // Calculate differences
-        Double countPm = pm2_5 - pmCountry;
-
-        Double countPm10 = pm10 - pm10Country;
-
-
-        // Define a random fluctuation range (e.g., ±5% of the difference)
-        double fluctuationRange = 0.20;
-
-        // Adjust PM2.5
-        if (countPm > 0) {
-            pm2_5 -= countPm * (1 - getRandomFluctuation(fluctuationRange));
-        } else {
-            pm2_5 += Math.abs(countPm) * (1 - getRandomFluctuation(fluctuationRange));
-        }
-        // 应用动态随机浮动
-        double dynamicRangePm25 = calculateDynamicRange(pm2_5);
-        double randomFactorPm25 = 1.0 + (Math.random() * 2 - 1) * dynamicRangePm25;
-        pm2_5 = pm2_5 * randomFactorPm25;
-        pm2_5 = ensureMinChange(pm2_5); // 确保最小变化
-        pm2_5 = round(pm2_5);
-        if(pm2_5>0){
-            data.setAveragePm25(pm2_5);
-        }else {
-            data.setAveragePm25(pmCountry);
-        }
-
-//        logger.info("PM2.5 after calibration: {}", pm2_5);
-
-        // Adjust PM10
-        if (countPm10 > 0) {
-            pm10 -= countPm10 * (1 - getRandomFluctuation(fluctuationRange));
-        } else {
-            pm10 += Math.abs(countPm10) * (1 - getRandomFluctuation(fluctuationRange));
-        }
-
-        // 应用动态随机浮动
-        double dynamicRangePm10 = calculateDynamicRange(pm10);
-        double randomFactorPm10 = 1.0 + (Math.random() * 2 - 1) * dynamicRangePm10;
-        pm10 = pm10 * randomFactorPm10;
-        pm10 = ensureMinChange(pm10); // 确保最小变化
-        pm10= round(pm10);
-        if(pm10>0){
-            data.setAveragePm10(pm10);
-        }else {
-            data.setAveragePm10(pm10Country);
-        }
-
-        // 将设置type的逻辑移到校准之后，使用校准后的pm2_5值进行比较
-        if(pm2_5 > pmCountry + 60){
-            data.setType(1);
-        } else if (pm2_5 < pmCountry - 60) {
-            data.setType(0);
-        }
-
+    if (queryCountry == null) {
         return data;
     }
 
-    // 新增方法：根据数值大小计算动态浮动范围
-    private double calculateDynamicRange(double value) {
-        if (value < 20) {
-            return 0.4; // 小数值：±40%浮动（绝对值变化小但比例大）
-        } else if (value < 100) {
-            return 0.25; // 中等数值：±25%
-        } else if (value < 200) {
-            return 0.15; // 较大数值：±15%
-        } else {
-            return 0.1; // 大数值：±10%
+    Double pmCountry = queryCountry.getPm();
+    Double pm10Country = queryCountry.getPm10();
+
+    // 1. 使用更温和的校准系数
+    double calibrationFactor = 0.3;
+    // 2. 减小随机波动范围
+    double fluctuationRange = 0.05;
+
+    // PM2.5校准
+    if (pm2_5 != null && pmCountry != null) {
+        double difference = pm2_5 - pmCountry;
+        // 应用校准系数和随机波动
+        double adjustment = difference * calibrationFactor * (1 - getRandomFluctuation(fluctuationRange));
+        pm2_5 -= adjustment;
+
+        // 确保值不为负，且与基准值差异不会过大
+        pm2_5 = Math.max(0, pm2_5);
+        // 使用平滑过渡，避免突然变化
+        pm2_5 = 0.4 * pm2_5 + 0.6 * pmCountry +(new Random().nextInt(5) + 2);
+        data.setAveragePm25((double) Math.round(pm2_5));
+    }
+
+    // PM10校准
+    if (pm10 != null && pm10Country != null) {
+        double difference = pm10 - pm10Country;
+        double adjustment = difference * calibrationFactor * (1 - getRandomFluctuation(fluctuationRange));
+        pm10 -= adjustment;
+
+        pm10 = Math.max(0, pm10);
+        pm10 = 0.4 * pm10 + 0.6 * pm10Country +(new Random().nextInt(5) + 2);
+        data.setAveragePm10((double) Math.round(pm10));
+    }
+
+    // 调整类型判断阈值
+    if (pm2_5 != null && pmCountry != null) {
+        if (pm2_5 > pmCountry + 60&& pm10 > pm10Country + 60) {
+            data.setType(1);
+        } else if (pm2_5 < pmCountry - 60 && pm10<pm10Country - 60) {
+            data.setType(0);
         }
     }
 
-    // 确保最小变化（避免小数值完全不变）
-    private double ensureMinChange(double value) {
-        double rounded = round(value);
-        // 如果四舍五入后变化小于1，则强制±1浮动
-        if (Math.abs(rounded - value) < 0.5 && Math.abs(value) > 1) {
-            return value + (Math.random() > 0.5 ? 1 : -1);
-        }
-        return value;
-    }
+    return data;
+}
 
     private double getRandomFluctuation(double range) {
-        Random random = new Random();
-        return random.nextInt() * range * 2 - range; // Generates a value between -range and +range
+        return ThreadLocalRandom.current().nextDouble(-range, range);
     }
+
 
 
 

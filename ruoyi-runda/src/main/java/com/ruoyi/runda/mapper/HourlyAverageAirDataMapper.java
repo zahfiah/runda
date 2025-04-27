@@ -7,8 +7,7 @@ import java.util.Map;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.runda.domain.HourlyAverageAirData;
 import com.ruoyi.runda.domain.HourlyAverageAirDataCopy;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 /**
  * 监测小时报表Mapper接口
@@ -16,6 +15,7 @@ import org.apache.ibatis.annotations.Select;
  * @author runda
  * @date 2025-02-08
  */
+@Mapper
 public interface HourlyAverageAirDataMapper 
 {
     /**
@@ -59,10 +59,19 @@ public interface HourlyAverageAirDataMapper
     List<Map<String, Object>> getLatest24ValidRecords(
             @Param("deviceId") String deviceId,
             @Param("endTime") Date endTime);
-
+    @MapKey("hour")
     List<Map<String, Object>> calculateDailyHourlyAverage(@Param("deviceId")String deviceId,
                                                           @Param("startDate")  Date startDate,
                                                           @Param("endDate")Date endDate);
 
     List<HourlyAverageAirDataCopy> selectHourlyAverageAirDataByDate(@Param("dateTimeStr")String dateTimeStr);
+
+//    HourlyAverageAirData selectBeforeHour(@Param("deviceId")String deviceId,@Param("formattedTime")String formattedTime );
+@Results({
+        @Result(column = "average_pm2_5", property = "averagePm25"),
+        @Result(column = "average_pm10", property = "averagePm10")
+})
+@Select("SELECT * FROM hourly_average_air_data WHERE device_id = #{deviceId} AND created_at = #{formattedTime}")
+HourlyAverageAirData selectBeforeHour(@Param("deviceId") String deviceId,
+                                      @Param("formattedTime") String formattedTime);
 }

@@ -557,7 +557,14 @@ public class DeviceDataServiceImpl implements DeviceDataService {
                     alarmInfo.setSmsMessage("设备" + deviceId + "数据高值，请及时处理");
                     alarmInfoMapper.insertAlarmInfo(alarmInfo);
                 }
+            }else {
+                //如果is_yunwei为0，则对pm25 pm10 随机加减3
+                hourlyAverageAirData.setAveragePm10( round(hourlyAverageAirData.getAveragePm10() + getRandomFluctuation(3) ));
+                hourlyAverageAirData.setAveragePm25( round(hourlyAverageAirData.getAveragePm25() + getRandomFluctuation(3)) );
             }
+            hourlyAverageAirData.setAveragePm25(round(hourlyAverageAirData.getAveragePm25() + new Random().nextInt(4) +1));
+            hourlyAverageAirData.setAveragePm10(round(hourlyAverageAirData.getAveragePm10() + new Random().nextInt(4)+1));
+
             hourlyAverageAirDataRepository.save(hourlyAverageAirData);
         }
     }
@@ -585,12 +592,6 @@ public class DeviceDataServiceImpl implements DeviceDataService {
 
         Double pm10Country = queryCountry.getPm10();
 
-        //pm_25 比pmCount 大于80时设置type为1
-        if(pm2_5>pmCountry+80){
-            data.setType(1);
-        } else if (pm2_5<pmCountry-60) {
-            data.setType(0);
-        }
 
 
         // Calculate differences
@@ -631,6 +632,13 @@ public class DeviceDataServiceImpl implements DeviceDataService {
             data.setAveragePm10(pm10Country);
         }
 
+
+        //pm_25 比pmCount 大于80时设置type为1
+        if(pm2_5>pmCountry+60){
+            data.setType(1);
+        } else if (pm2_5<pmCountry-60) {
+            data.setType(0);
+        }
 
         return data;
     }
